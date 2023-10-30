@@ -1,6 +1,6 @@
 import '@/app/styles/globals.css'
 
-import AppWrapper from '@/components/appWrapper';
+import AppWrapper from '@/app/(web)/components/appWrapper';
 
 export const metadata = {
   title: 'Patreon Clone',

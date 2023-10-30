@@ -44,37 +44,22 @@ function HeaderCreator(props) {
 
   const itemListDrawer = [
     {
-      href: "/creator",
-      title: "Insights",
+      href: "/admin",
+      title: "Dashboard",
       icon: <InsightsIcon />
     },
     {
-      href: "/creator/master-content",
-      title: "Master Konten",
-      icon: <SourceIcon />
-    },
-    {
-      href: "/creator/membership",
-      title: "Master Membership",
+      href: "/admin/master-user",
+      title: "Master User",
       icon: <PeopleIcon />
     },
     {
-      href: "/creator/request-content",
-      title: "Request Konten",
-      icon: <RestorePageIcon />
-    },
-    {
-      href: "/creator/history-transaction",
-      title: "Histori Transaksi",
+      href: "/admin/transaction",
+      title: "Transaction",
       icon: <AccountBalanceWalletIcon />
     },
     {
-      href: "/creator/withdraw",
-      title: "Withdraw",
-      icon: <AccountBalanceIcon />
-    },
-    {
-      href: "/creator/notification",
+      href: "/admin/notification",
       title: "Notifikasi",
       icon: <NotificationsIcon />
     }
@@ -143,7 +128,7 @@ function HeaderCreator(props) {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{flexGrow: 1}}>
-            Responsive drawer
+            Admin
           </Typography>
           <PopupState variant="popover" popupId="demo-popup-menu">
             {(popupState) => (

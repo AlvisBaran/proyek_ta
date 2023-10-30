@@ -1,7 +1,7 @@
 // "use client"
 
 import { Typography, Box } from "@mui/material";
-import Header from "@/components/Header";
+import Header from "@/app/(web)/components/Header";
 // import { useEffect } from "react";
 
 export default function Home() {
