@@ -2,7 +2,7 @@
 import { Model, DataTypes, literal } from 'sequelize';
 import sqlz from '@/backend/configs/db';
 
-export default class Content extends Model {
+export default class AccountUpgradeRequests extends Model {
   /**
    * Helper method for defining associations.
    * This method is not a part of Sequelize lifecycle.
@@ -13,67 +13,50 @@ export default class Content extends Model {
   }
 }
 
-Content.init({
+AccountUpgradeRequests.init({
   id: {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER
   },
-  creatorRef: {
+  applicantRef: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: { model: 'users', key: 'id' },
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   },
-  type: {
-    type: DataTypes.ENUM,
-    values: ['public', 'private'],
-    defaultValue: 'public',
-    allowNull: false,
-  },
-  title: {
-    type: DataTypes.TEXT('tiny'),
-    allowNull: false,
-  },
-  body: {
-    type: DataTypes.TEXT,
-    allowNull: false,
-  },
   status: {
     type: DataTypes.ENUM,
-    values: ['draft', 'published'],
-    defaultValue: 'draft',
+    values: ['requested', 'approved', 'declined'],
+    defaultValue: 'requested',
     allowNull: false,
   },
-  likeCounter: {
+  newUsername: {
+    type: DataTypes.STRING
+  },
+  adminRef: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 0,
+    references: { model: 'users', key: 'id' },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   },
-  shareCounter: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 0,
+  adminNote: {
+    type: DataTypes.TEXT
   },
-  publishedAt: {
-    type: DataTypes.DATE
-  },
-  deletedAt: {
-    type: DataTypes.DATE
-  },
-  createdAt: {
-    allowNull: false,
+  requestedAt: {
     type: DataTypes.DATE,
+    allowNull: false,
     defaultValue: literal('CURRENT_TIMESTAMP'),
   },
-  updatedAt: {
-    type: DataTypes.DATE
+  modifiedAt: {
+    type: DataTypes.DATE,
   }
 }, {
   sequelize: sqlz,
-  modelName: 'Content',
-  tableName: 'contents',
-  paranoid: true,
+  modelName: 'AccountUpgradeRequests',
+  tableName: 'account_upgrade_requests',
+  createdAt: 'requestedAt',
+  updatedAt: 'modifiedAt',
 });

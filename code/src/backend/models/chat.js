@@ -2,7 +2,7 @@
 import { Model, DataTypes, literal } from 'sequelize';
 import sqlz from '@/backend/configs/db';
 
-export default class Membership extends Model {
+export default class Chat extends Model {
   /**
    * Helper method for defining associations.
    * This method is not a part of Sequelize lifecycle.
@@ -13,46 +13,40 @@ export default class Membership extends Model {
   }
 }
 
-Membership.init({
+Chat.init({
   id: {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER
   },
-  userRef: {
-    type: DataTypes.INTEGER,allowNull: false,
+  messagesRef: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'users_messages', key: 'id' },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  },
+  authorRef: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
     references: { model: 'users', key: 'id' },
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   },
-  name: {
-    type: DataTypes.STRING
-  },
-  banner: {
-    // Sementara
-    type: DataTypes.TEXT('tiny'),
-  },
-  description: {
+  content: {
     type: DataTypes.TEXT,
     allowNull: false,
     defaultValue: "",
-  },
-  price: {
-    type: DataTypes.BIGINT,
-    allowNull: false,
-    defaultValue: 1000,
   },
   createdAt: {
     allowNull: false,
     type: DataTypes.DATE,
     defaultValue: literal('CURRENT_TIMESTAMP'),
   },
-  updatedAt: {
-    type: DataTypes.DATE
-  }
 }, {
   sequelize: sqlz,
-  modelName: 'Membership',
-  tableName: 'users_memberships',
+  modelName: 'Chat',
+  tableName: 'users_messages_chats',
+  updatedAt: false,
 });

@@ -2,18 +2,18 @@
 import { Model, DataTypes, literal } from 'sequelize';
 import sqlz from '@/backend/configs/db';
 
-export default class Membership extends Model {
+export default class Notification extends Model {
   /**
    * Helper method for defining associations.
    * This method is not a part of Sequelize lifecycle.
    * The `models/index` file will call this method automatically.
    */
-  static associate(models) {
-    // define association here
+  static associate({ User }) {
+    this.hasOne(User, { foreignKey: "userRef" });
   }
 }
 
-Membership.init({
+Notification.init({
   id: {
     allowNull: false,
     autoIncrement: true,
@@ -21,38 +21,32 @@ Membership.init({
     type: DataTypes.INTEGER
   },
   userRef: {
-    type: DataTypes.INTEGER,allowNull: false,
+    type: DataTypes.INTEGER,
+    allowNull: false,
     references: { model: 'users', key: 'id' },
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   },
-  name: {
+  icon_id: {
     type: DataTypes.STRING
   },
-  banner: {
-    // Sementara
-    type: DataTypes.TEXT('tiny'),
+  title: {
+    type: DataTypes.STRING
   },
-  description: {
-    type: DataTypes.TEXT,
-    allowNull: false,
-    defaultValue: "",
+  body: {
+    type: DataTypes.TEXT
   },
-  price: {
-    type: DataTypes.BIGINT,
-    allowNull: false,
-    defaultValue: 1000,
+  readStatus: {
+    type: DataTypes.TINYINT
   },
   createdAt: {
     allowNull: false,
     type: DataTypes.DATE,
     defaultValue: literal('CURRENT_TIMESTAMP'),
   },
-  updatedAt: {
-    type: DataTypes.DATE
-  }
 }, {
   sequelize: sqlz,
-  modelName: 'Membership',
-  tableName: 'users_memberships',
+  modelName: 'Notification',
+  tableName: "users_notifications",
+  updatedAt: false,
 });

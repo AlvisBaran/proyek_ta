@@ -2,7 +2,7 @@
 import { Model, DataTypes, literal } from 'sequelize';
 import sqlz from '@/backend/configs/db';
 
-export default class Content extends Model {
+export default class Comment extends Model {
   /**
    * Helper method for defining associations.
    * This method is not a part of Sequelize lifecycle.
@@ -13,55 +13,30 @@ export default class Content extends Model {
   }
 }
 
-Content.init({
+Comment.init({
   id: {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER
   },
-  creatorRef: {
+  contentRef: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'contents', key: 'id' },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  },
+  authorRef: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: { model: 'users', key: 'id' },
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   },
-  type: {
-    type: DataTypes.ENUM,
-    values: ['public', 'private'],
-    defaultValue: 'public',
-    allowNull: false,
-  },
-  title: {
-    type: DataTypes.TEXT('tiny'),
-    allowNull: false,
-  },
-  body: {
+  content: {
     type: DataTypes.TEXT,
     allowNull: false,
-  },
-  status: {
-    type: DataTypes.ENUM,
-    values: ['draft', 'published'],
-    defaultValue: 'draft',
-    allowNull: false,
-  },
-  likeCounter: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 0,
-  },
-  shareCounter: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 0,
-  },
-  publishedAt: {
-    type: DataTypes.DATE
-  },
-  deletedAt: {
-    type: DataTypes.DATE
   },
   createdAt: {
     allowNull: false,
@@ -73,7 +48,6 @@ Content.init({
   }
 }, {
   sequelize: sqlz,
-  modelName: 'Content',
-  tableName: 'contents',
-  paranoid: true,
+  modelName: 'Comment',
+  tableName: 'contents_comments',
 });

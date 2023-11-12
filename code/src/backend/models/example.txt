@@ -1,0 +1,58 @@
+import { DataTypes } from "sequelize";
+import sqlz from "@/backend/configs/db";
+
+const ExampleTable = sqlz.define(
+  'ExampleTable',
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    cUsername: DataTypes.STRING,
+    role: {
+      type: DataTypes.ENUM,
+      values: ['normal', 'admin', 'creator'],
+      defaultValue: 'normal',
+      allowNull: false,
+    },
+    password: {
+      // INFO: Ini encryption
+      type: DataTypes.TEXT('tiny'),
+    },
+    saldo: {
+      // INFO: Ini encryption
+      type: DataTypes.TEXT('tiny'),
+    },
+    banStatus: {
+      type: DataTypes.ENUM,
+      values: ['clean', 'banned', 'unbanned'],
+      defaultValue: 'clean',
+      allowNull: false,
+    },
+    bannedDate: DataTypes.DATE,
+    joinDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: literal('CURRENT_TIMESTAMP'),
+    },
+    displayName: DataTypes.STRING,
+    email: DataTypes.STRING,
+    
+    profilePicture: DataTypes.TEXT('tiny'),
+    socials: DataTypes.TEXT,
+    bio: DataTypes.TEXT,
+    about: DataTypes.TEXT,
+    banner: DataTypes.TEXT('tiny'),
+    themeColor: {
+      type: DataTypes.STRING,
+      defaultValue: "#eee",
+      allowNull: false,
+    },
+  },
+  {
+    tableName: 'users',
+  },
+);
+
+export default ExampleTable;
