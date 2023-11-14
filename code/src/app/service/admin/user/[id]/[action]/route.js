@@ -1,11 +1,8 @@
 import Joi from "joi";
-import { FieldValue } from "firebase-admin/firestore";
 
-import User from "@/backend/models/User";
-import { configName, convertPath } from "@/backend/models/tableNames";
-import { removeUndefined } from "@/backend/helpers/modelHelper";
 import { responseString } from "@/backend/helpers/serverResponseString";
-import { adminDB } from "@/configs/firebase-admin/adminApp";
+import User from "@/backend/models/user";
+import { literal } from "sequelize";
 
 // Admin > User > Action
 export async function PUT(request, { params }) {
@@ -33,18 +30,20 @@ export async function PUT(request, { params }) {
 async function handleBanStatus(id, req) {
   let res = { message: "handleBanStatus", id, req };
 
-  let currUser = await adminDB.collection(convertPath(configName.USER)).doc(id).get();
-  if (!currUser.exists) {
+  let currUser = await User.findByPk(id);
+  if (!currUser) {
     res = { message: responseString.USER.NOT_FOUND };
     return Response.json(res, { status: 404 });
   }
-  let tempUser = new User({ ...currUser.data() });
+
+  let changingAttributes = [];
   
   if (!!req.type) {
     if (req.type === 'ban') {
-      if (tempUser.ban_status === 'clean' || tempUser.ban_status === 'unbanned') {
-        tempUser.ban_status = 'banned';
-        tempUser.last_banned = FieldValue.serverTimestamp();
+      if (currUser.banStatus === 'clean' || currUser.banStatus === 'unbanned') {
+        currUser.banStatus = 'banned';
+        currUser.bannedDate = literal('CURRENT_TIMESTAMP');
+        changingAttributes = ['banStatus', 'bannedDate'];
       }
       else {
         res = { warning: "Tidak dapat ban user yang sudah di ban!" };
@@ -52,8 +51,9 @@ async function handleBanStatus(id, req) {
       }
     }
     else if (req.type === 'unban') {
-      if (tempUser.ban_status === 'banned') {
-        tempUser.ban_status = 'unbanned';
+      if (currUser.banStatus === 'banned') {
+        currUser.banStatus = 'unbanned';
+        changingAttributes = ['banStatus'];
       }
       else {
         res = { warning: "Tidak dapat unban user yang tidak di ban!" };
@@ -61,22 +61,27 @@ async function handleBanStatus(id, req) {
       }
     }
 
-    return await adminDB.collection(convertPath(configName.USER)).doc(id)
-    .set(removeUndefined({
-      ban_status: tempUser.ban_status,
-      last_banned: tempUser.last_banned ?? null,
-    }), { merge: true })
-    .then(() => {
+    return await currUser.save({ fields: [...changingAttributes] })
+    .then(async (resp) => {
+      await currUser.reload();
       res = {
         message: responseString.GLOBAL.SUCCESS,
         method: req.type,
+        newValues: {
+          ...currUser.dataValues,
+          saldo: undefined,
+          socials: undefined,
+          bio: undefined,
+          about: undefined,
+          banner: undefined,
+          password: undefined,
+        },
       };
 
       return Response.json(res, { status: 200 });
     })
     .catch(error => {
       res = { error: { message: responseString.USER.UPDATE_FAILED }, details: error };
-      // throw new Error(res)
       return Response.json(res, { status: 400 });
     });
   }
@@ -92,35 +97,51 @@ async function handleBanStatus(id, req) {
 async function handleChangeRole(id, req) {
   let res = { message: "handleChangeRole", id, req };
 
-  let currUser = await adminDB.collection(convertPath(configName.USER)).doc(id).get();
-  if (!currUser.exists) {
+  let currUser = await User.findByPk(id);
+  if (!currUser) {
     res = { message: responseString.USER.NOT_FOUND };
     return Response.json(res, { status: 404 });
   }
-  let tempUser = new User({ ...currUser.data() });
   
   if (!!req.to && (req.to === 'normal' || req.to === 'creator' || req.to === 'admin')) {
-    if (req.to === tempUser.role) {
+    if (req.to === currUser.role) {
       res = { warning: "Role sudah dimiliki oleh user tersebut!"};
       return Response.json(res, { status: 400 });
     }
 
-    return await adminDB.collection(convertPath(configName.USER)).doc(id)
-    .set(removeUndefined({
-      role: req.to,
-    }), { merge: true })
-    .then(() => {
+    let oldRole = currUser.role;
+    currUser.role = req.to;
+
+    return await currUser.save({ fields: ['role'] })
+    .then((resp) => {
       res = {
         message: responseString.GLOBAL.SUCCESS,
-        from: tempUser.role,
-        changed_to: req.to,
+        oldRole,
+        newValues: {
+          ...currUser.dataValues,
+          saldo: undefined,
+          socials: undefined,
+          bio: undefined,
+          about: undefined,
+          banner: undefined,
+          password: undefined,
+        },
+        // previcous nya ngebug dari sequelize
+        // previousValues: {
+        //   ...resp._previousDataValues,
+        //   saldo: undefined,
+        //   socials: undefined,
+        //   bio: undefined,
+        //   about: undefined,
+        //   banner: undefined,
+        //   password: undefined,
+        // }
       };
 
       return Response.json(res, { status: 200 });
     })
     .catch(error => {
       res = { error: { message: responseString.USER.UPDATE_FAILED }, details: error };
-      // throw new Error(res)
       return Response.json(res, { status: 400 });
     });
   }
@@ -137,44 +158,51 @@ async function handleChangeEmail(id, req) {
   let res = { message: "handleChangeEmail", id, req };
 
   const joiValidate = Joi.object({
-    new_email: Joi.string().email().required(),
+    newEmail: Joi.string().email().required(),
   }).validate(req, {abortEarly: false});
 
   if (!joiValidate.error) {
-    // return Response.json({
-    //   res: convertPath(configName.MEMBERSHIP, ["6brP1isg4xMsuw28nuqUeShTIgL2"]),
-    // });
-    // await adminDB.collection("users/6brP1isg4xMsuw28nuqUeShTIgL2/memberships").add({test: true});
-    return Response.json({ error: responseString.GLOBAL.UNFINISHED_SERVICE }, { status: 403 });
-    // let currUser = await adminDB.collection(convertPath(configName.USER)).doc(id).get();
-    // if (!currUser.exists) {
-    //   res = { message: responseString.USER.NOT_FOUND };
-    //   return Response.json(res, { status: 404 });
-    // }
-    // let tempUser = new User({ ...currUser.data() });
+    let currUser = await User.findByPk(id);
+    if (!currUser) {
+      res = { message: responseString.USER.NOT_FOUND };
+      return Response.json(res, { status: 404 });
+    }
 
-    // return await adminDB.collection(convertPath(configName.USER)).doc(id)
-    // .set(removeUndefined({
-    //   role: req.to,
-    // }), { merge: true })
-    // .then(() => {
-    //   res = {
-    //     message: responseString.GLOBAL.SUCCESS,
-    //     from: tempUser.role,
-    //     changed_to: req.to,
-    //   };
+    let userWithSameEmail = await User.findOne({ where: { email: req.newEmail }});
+    if (!!userWithSameEmail) {
+      res = { message: responseString.USER.EMAIL_USED };
+      return Response.json(res, { status: 400 });
+    }
 
-    //   return Response.json(res, { status: 200 });
-    // })
-    // .catch(error => {
-    //   res = { error: { message: responseString.USER.UPDATE_FAILED }, details: error };
-    //   // throw new Error(res)
-    //   return Response.json(res, { status: 400 });
-    // });
+    let oldEmail = currUser.email;
+    currUser.email = req.newEmail;
+
+    return await currUser.save({ fields: ['email'] })
+    .then((resp) => {
+      res = {
+        message: responseString.GLOBAL.SUCCESS,
+        oldEmail,
+        newValues: {
+          ...currUser.dataValues,
+          saldo: undefined,
+          socials: undefined,
+          bio: undefined,
+          about: undefined,
+          banner: undefined,
+          password: undefined,
+        },
+      };
+
+      return Response.json(res, { status: 200 });
+    })
+    .catch(error => {
+      res = { error: { message: responseString.USER.UPDATE_FAILED }, details: error };
+      return Response.json(res, { status: 400 });
+    });
   }
   else {
     res = {
-      error: { new_email: "Terdapat kesalahan pada field \"new_email\"!" },
+      error: { newEmail: "Terdapat kesalahan pada field \"newEmail\"!" },
     };
     return Response.json(res, { status: 400 });
   }
