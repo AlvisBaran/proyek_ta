@@ -1,49 +1,22 @@
-// import {
-//   addDoc,
-//   deleteDoc,
-//   getDoc,
-//   getDocs,
-//   doc,
-//   updateDoc,
-//   query,
-//   where,
-//   OrderByDirection,
-//   Timestamp,
-//   QueryConstraint,
-//   orderBy,
-//   serverTimestamp,
-//   DocumentReference,
-//   collection,
-//   limit,
-//   QueryDocumentSnapshot,
-//   DocumentData,
-// } from "firebase/firestore"
-// import DB from "@/configs/firebase/backendService.js"
-// const collectionRef = DB.createCollection("users")
-
 import Joi from "joi"
-import { FieldValue } from "firebase-admin/firestore"
 
-import User from "@/backend/models/User"
-import { configName, convertPath } from "@/backend/models/tableNames"
-import { adminAuth, adminDB } from "@/configs/firebase-admin/adminApp"
 import { responseString } from "@/backend/helpers/serverResponseString"
-import { removeUndefined } from "@/backend/helpers/modelHelper"
-import { getMessageByCode } from "@/backend/helpers/firebaseErrorHelper"
+import User from "@/backend/models/user";
 
 // Admin > User > Read All
 export async function GET() {
   let users = [];
-  return await adminDB.collection(convertPath(configName.USER))
-  .orderBy("join_date", "desc").get()
-  .then((snapshot) => {
-    snapshot.forEach((user) => {
-      users.push(new User({
-        ...user.data(),
-        _id: user.id,
-        // saldo: undefined,
-      }));
-    })
+  return await User.findAll({order: [['joinDate', 'DESC']]})
+  .then((res = []) => {
+    res?.map((datum) => users.push({
+      ...datum?.dataValues,
+      saldo: undefined,
+      socials: undefined,
+      bio: undefined,
+      about: undefined,
+      banner: undefined,
+      password: undefined,
+    }));
 
     return Response.json(users, { status: 200 });
   })
@@ -63,9 +36,9 @@ export async function POST(request) {
     role: Joi.valid("normal", "creator", "admin").optional(),
     email: Joi.string().email().required(),
     password: Joi.string().min(3).max(15).required(),
-    confirm_password: Joi.any().equal(Joi.ref('password')).required(),
-      // .label('confirm_password').message({ 'any.only': '{{#label}} does not match' }),
-    display_name: Joi.string().required(),
+    confirmPassword: Joi.any().equal(Joi.ref('password')).required(),
+      // .label('confirmPassword').message({ 'any.only': '{{#label}} does not match' }),
+    displayName: Joi.string().required(),
     // static_time_start: Joi.any().optional(),
     // id : Joi.string().optional(),
     // dynamic_start: Joi.date().timestamp("javascript").optional(),
@@ -73,67 +46,40 @@ export async function POST(request) {
   }).validate(req, {abortEarly: false});
 
   if (!joiValidate.error) {
-    let newUser = new User({...req});
+    let newUser = User.build({...req});
 
-    // TODO:: Cek user terdaftar di firebase auth
-    let userAuth = await adminAuth.getUserByEmail(newUser.email)
-      .then((userRecord) => userRecord ).catch(err => null);
-    // TODO:: Cek user terdaftar di firebase firestore
-    let userSnapshot = await adminDB.collection(convertPath(configName.USER))
-    .where('email', "==", newUser.email).get();
+    // TODO:: Cek user terdaftar di database
+    let userSnapshot = await User.findOne({where: { email: newUser.email }});
   
-    if (!!userAuth || !userSnapshot.empty) {
+    if (!!userSnapshot) {
       res = { error: { "email": responseString.USER.EMAIL_USED } };
       return Response.json(res, { status: 400 })
     }
     
-    // TODO:: Daftarkan user ke firebase auth
-    return await adminAuth.createUser({
-      email: newUser.email,
-      emailVerified: true,
-      displayName: newUser.display_name,
-      password: newUser.password,
-    })
-    .then(async (userRecord) => {
-      // TODO:: Daftarkan user ke firebase firestore
-      // newUser._id = userRecord.uid;
-      // console.info("userRecord", userRecord);
-      // return Response.json(userRecord);
-      let insertingUser = removeUndefined({ ...newUser, password: undefined, });
-      insertingUser.join_date = FieldValue.serverTimestamp();
-      return await adminDB.collection(convertPath(configName.USER))
-      .doc(userRecord.uid)
-      .set(insertingUser, { merge: true })
-      .then(() => {
-        res = {
-          message: responseString.GLOBAL.SUCCESS,
-          created: {
-            ...insertingUser,
-            _id: userRecord.uid,
-          },
-        }
-        return Response.json(res, { status: 200 });
-      })
-      .catch(error => {
-        res = { error: { message: responseString.USER.ADD_FAILED }, details: error };
-        // throw new Error(res)
-        return Response.json(res, { status: 400 });
-      })
-    })
-    .catch((error) => {
+    // TODO:: Daftarkan user ke database
+    return await newUser.save()
+    .then(async (resp) => {
+      await newUser.reload();
       res = {
-        error: { "auth": responseString.SERVER.AUTH_ERROR },
-        details: { ...error },
+        message: responseString.GLOBAL.SUCCESS,
+        created: {
+          ...newUser.dataValues,
+          // joinDate: undefined,
+        },
       }
-      return Response.json(res, { status: 500})
-    });
+      return Response.json(res, { status: 200 });
+    })
+    .catch(error => {
+      res = { error: { message: responseString.USER.ADD_FAILED }, details: error };
+      // throw new Error(res)
+      return Response.json(res, { status: 400 });
+    })
 
   }
   else {
     res = { message: responseString.VALIDATION.ERROR, error: joiValidate.error.details };
     return Response.json(res, { status: 400 });
   }
-  return Response.json({ message: responseString.SERVER.SERVER_ERROR }, { status: 500 });
 }
 
 // export async function GET(request) {
