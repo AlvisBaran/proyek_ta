@@ -12,6 +12,10 @@ export const responseString = {
     ERROR: "Input yang diberi tidak lolos validasi!",
     NOTHING_CHANGE_ON_UPDATE: "Tidak ada atribut yang berubah!",
   },
+  SERVER: {
+    AUTH_ERROR: "Terjadi kesalahan pada server bagian firebase authentication!",
+    SERVER_ERROR: "Terjadi kesalahan pada server!",
+  },
   USER: {
     NOT_FOUND: "User tidak ditemukan!",
     EMAIL_USED: "Email sudah pernah terdaftar sebelumnya!",
@@ -19,8 +23,11 @@ export const responseString = {
     UPDATE_FAILED: "Gagal membarui user!",
     DELETE_FAILED: "Gagal menghapus user!",
   },
-  SERVER: {
-    AUTH_ERROR: "Terjadi kesalahan pada server bagian firebase authentication!",
-    SERVER_ERROR: "Terjadi kesalahan pada server!",
+  MESSAGING: {
+    ROOM_NOT_FOUND: "Chat room tidak ditemukan!",
+    ROOM_ALREADY_EXISTS: "Chat room yang ingin anda tambahkan sudah pernah ada!",
+    ROOM_ADD_FAILED: "Gagal menambah chat room!",
+    ROOM_DELETE_FAILED: "Gagal menghapus chat room!",
+    CHAT_ADD_FAILED: "Gagal menghapus chat pada room tersebut!",
   }
 }
