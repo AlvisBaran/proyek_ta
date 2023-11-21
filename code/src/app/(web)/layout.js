@@ -1,6 +1,9 @@
-import '@/app/styles/globals.css'
 
+import { getServerSession } from 'next-auth';
+import '@/styles/globals.css'
+import SessionProvider from '@/app/(web)/components/SessionProvider'
 import AppWrapper from '@/app/(web)/components/appWrapper';
+import NextAuthClientSessionProvider from '@/components/NextAuthClientSessionProvider';
 
 export const metadata = {
   title: 'Patreon Clone',
@@ -8,7 +11,8 @@ export const metadata = {
   
 }
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // const session = await getServerSession()
   return (
     <html lang="en">
       <head>
@@ -22,11 +26,16 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
           href="https://fonts.googleapis.com/icon?family=Material+Icons"
         />
+        <link rel='icon' href="favicon.ico" />
       </head>
       <body style={{ minHeight: "100vh" }}>
-        <AppWrapper>
-          {children}
-        </AppWrapper>
+        {/* <SessionProvider session={session}> */}
+          <NextAuthClientSessionProvider>
+            <AppWrapper>
+              {children}
+            </AppWrapper>
+          </NextAuthClientSessionProvider>
+        {/* </SessionProvider> */}
       </body>
     </html>
   )

@@ -13,13 +13,14 @@ export default function Breadcrumb({data}) {
     <Box sx={{marginBottom:2}}>
       <div role="presentation" sx={{marginBottom: 4}}>
         <Breadcrumbs aria-label="breadcrumb">
-          {data.map(d => (
+          {data.map((d, key) => (
             <Link
-            underline="hover"
-            sx={{ display: 'flex', alignItems: 'center' }}
-            color="inherit"
-            href={d.url}
-          >
+              key={key}
+              underline="hover"
+              sx={{ display: 'flex', alignItems: 'center' }}
+              color="inherit"
+              href={d.url}
+            >
             <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
             {d.title}
           </Link>

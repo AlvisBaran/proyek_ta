@@ -23,6 +23,7 @@
     "material-ui-popup-state": "^5.0.9",
     "mysql2": "^3.6.2",
     "next": "13.5.4",
+    "next-auth": "^4.24.5",
     "pg-hstore": "^2.3.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",

@@ -24,6 +24,11 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import RestorePageIcon from '@mui/icons-material/RestorePage';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
+import RedeemIcon from '@mui/icons-material/Redeem';
+import CategoryIcon from '@mui/icons-material/Category';
 
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -54,16 +59,35 @@ function HeaderCreator(props) {
       icon: <PeopleIcon />
     },
     {
+      href: "/admin/master-category",
+      title: "Master Category",
+      icon: <CategoryIcon />
+    },
+    {
       href: "/admin/transaction",
       title: "Transaction",
       icon: <AccountBalanceWalletIcon />
+    },
+    {
+      href: "/admin/request-creator-role",
+      title: "Request Creator Role",
+      icon: <AssignmentIndIcon />
+    },
+    {
+      href: "/admin/request-refund",
+      title: "Request Refund",
+      icon: <RedeemIcon />
+    },
+    {
+      href: "/admin/request-withdraw",
+      title: "Request Withdraw",
+      icon: <RequestQuoteIcon />
     },
     {
       href: "/admin/notification",
       title: "Notifikasi",
       icon: <NotificationsIcon />
     }
-
   ]
 
   const drawer = (
@@ -170,21 +194,21 @@ function HeaderCreator(props) {
                 >
                   <Paper sx={{ width: '50ch', maxHeight: 45 * 4.5 }} elevation={0}>
                     <MenuList>
-                      <MenuItem onClick={handleClose}> 
+                      <MenuItem key={1} onClick={handleClose}> 
                       <Box></Box>
                       <MenuIcon sx={{marginRight: 2}} />
                       <Typography variant="inherit" noWrap>
                       Item 1 Lorem ipsum dolor sit, amet consectetur adipisicing elit. Obcaecati perferendis libero architecto voluptates et veritatis repellendus reiciendis labore officia quo culpa hic, porro asperiores quae doloremque alias minus minima autem quidem magni, quasi numquam quisquam! Neque rem ex aperiam, commodi accusamus explicabo blanditiis atque expedita deleniti, ipsa, in quos consectetur.s
                       </Typography>
                       </MenuItem>
-                      <MenuItem onClick={handleClose}>Item 2</MenuItem>
-                      <MenuItem onClick={handleClose}>Item 3</MenuItem>
-                      <MenuItem onClick={handleClose}>Item 3</MenuItem>
-                      <MenuItem onClick={handleClose}>Item 3</MenuItem>
-                      <MenuItem onClick={handleClose}>Item 3</MenuItem>
-                      <MenuItem onClick={handleClose}>Item 3</MenuItem>
-                      <MenuItem onClick={handleClose}>Item 3</MenuItem>
-                      <MenuItem onClick={handleClose}>Item 3</MenuItem>
+                      <MenuItem key={2} onClick={handleClose}>Item 2</MenuItem>
+                      <MenuItem key={3} onClick={handleClose}>Item 3</MenuItem>
+                      <MenuItem key={4} onClick={handleClose}>Item 3</MenuItem>
+                      <MenuItem key={5} onClick={handleClose}>Item 3</MenuItem>
+                      <MenuItem key={6} onClick={handleClose}>Item 3</MenuItem>
+                      <MenuItem key={7} onClick={handleClose}>Item 3</MenuItem>
+                      <MenuItem key={8} onClick={handleClose}>Item 3</MenuItem>
+                      <MenuItem key={9} onClick={handleClose}>Item 3</MenuItem>
                     </MenuList>
                   </Paper>
                 </Menu>
@@ -211,8 +235,8 @@ function HeaderCreator(props) {
                 <Menu
                   {...bindMenu(popupState)}
                 >
-                  <MenuItem onClick={handleClose}>Profile</MenuItem>
-                  <MenuItem onClick={handleClose}>Logout</MenuItem>
+                  <MenuItem key={1} onClick={handleClose}>Profile</MenuItem>
+                  <MenuItem key={2} onClick={handleClose}>Logout</MenuItem>
                 </Menu>
               </>
             )}

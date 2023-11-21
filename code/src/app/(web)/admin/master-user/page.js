@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Box, Chip, Typography } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridToolbar } from "@mui/x-data-grid";
@@ -10,9 +10,21 @@ import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
-import Breadcrumb from "../../components/Breadcrumb";
+import Breadcrumb from "@/app/(web)/components/Breadcrumb";
+import MyAxios from "@/hooks/MyAxios"
+import axios from "axios";
 
 const page = () => {
+  const [dataUser, setDataUser] = useState([])
+  
+  useEffect(() => {
+    const fetchData = async() => {
+      const response = await axios.get("http://localhost:3000/service/admin/user")
+      setDataUser(response.data)
+    }
+    fetchData()
+      // console.log(dataUser)
+  }, [])
 
   const dataContent = [
     {
@@ -48,11 +60,28 @@ const page = () => {
       type: 'actions',
       headerName: 'Actions', 
       width: 75,
-      getActions: (params) => [
-        <GridActionsCellItem icon={params.row.ban_status==="clean" || params.row.ban_status==="unbanned" ? <NotInterestedIcon /> : <CheckCircleOutlineIcon />} onClick={params.row.ban_status==="clean" || params.row.ban_status==="unbanned" ? () => handleBanUser(params.id) : () => handleUnbanUser(params.id)} label={params.row.ban_status==="clean" || params.row.ban_status==="unbanned" ? "Ban User" : "Unban User"} showInMenu/>,
-        <GridActionsCellItem icon={<SupervisorAccountIcon />} onClick={() => handleChangeRoleUser(params.id)} label="Change Role User" showInMenu />,
-        <GridActionsCellItem icon={<AlternateEmailIcon />} onClick={() => handleChangeEmailUser(params.id)} label="Change Email User" showInMenu />,
-      ]
+      getActions: (params) => { 
+        return [
+          <GridActionsCellItem 
+            sx={params.row.role == "admin" ? {display: "none"} : {}} 
+            icon={params.row.ban_status==="clean" || params.row.ban_status==="unbanned" ? <NotInterestedIcon /> : <CheckCircleOutlineIcon />} 
+            onClick={params.row.ban_status==="clean" || params.row.ban_status==="unbanned" ? () => handleBanUser(params.id) : () => handleUnbanUser(params.id)} 
+            label={params.row.ban_status==="clean" || params.row.ban_status==="unbanned" ? "Ban User" : "Unban User"} showInMenu
+          />,
+          <GridActionsCellItem 
+            sx={params.row.role == "admin" ? {display: "none"} : {}} 
+            icon={<SupervisorAccountIcon />} onClick={() => handleChangeRoleUser(params.id)} 
+            label="Change Role User" 
+            showInMenu 
+          />,
+          <GridActionsCellItem 
+            sx={params.row.role == "admin" ? {display: "none"} : {}} 
+            icon={<AlternateEmailIcon />} onClick={() => handleChangeEmailUser(params.id)} 
+            label="Change Email User" 
+            showInMenu 
+          />,
+        ]
+      }
     },
     { 
       field: 'id', 
