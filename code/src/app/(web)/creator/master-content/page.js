@@ -3,8 +3,8 @@
 import { Box, Chip, Typography } from '@mui/material'
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { getRowIdFromRowModel } from '@mui/x-data-grid/internals';
-import Breadcrumb from '../../components/Breadcrumb';
-import ChipGroup from '../../components/ChipGroup';
+import Breadcrumb from '@/app/(web)/components/Breadcrumb';
+import ChipGroup from '@/app/(web)/components/ChipGroup';
 
 const page = () => {
   const dataContent = [
