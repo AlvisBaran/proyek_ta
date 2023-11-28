@@ -19,7 +19,16 @@ module.exports = {
         onUpdate: 'CASCADE',
       },
       name: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      slug: {
+        type: DataTypes.TEXT,
+        // unique: true,
+        allowNull: false,
+        // set(value) {
+        //   this.setDataValue('slug', slugify(this.name))
+        // }
       },
       banner: {
         // Sementara

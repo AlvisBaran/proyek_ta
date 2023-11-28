@@ -8,6 +8,7 @@ module.exports = {
         role: 'creator',
         displayName: "Creator 1",
         email: "creator1@example.com",
+        cUsername: "creator1",
         password: "creator123",
         bio: "I am an artist of abstraction and creativity. Follow me if you like my artwork!",
         about: "<h1>It's me melowmelow-chan!</h1><p>Follow if you like my arts!</p>",

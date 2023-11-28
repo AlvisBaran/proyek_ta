@@ -1,6 +1,7 @@
 'use strict';
 import { Model, DataTypes, literal } from 'sequelize';
 import sqlz from '@/backend/configs/db';
+import { slugify } from '@/utils/textHelper.mjs';
 
 export default class Membership extends Model {
   /**
@@ -27,7 +28,16 @@ Membership.init({
     onUpdate: 'CASCADE',
   },
   name: {
-    type: DataTypes.STRING
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  slug: {
+    type: DataTypes.TEXT,
+    // unique: true,
+    allowNull: false,
+    // set(value) {
+    //   this.setDataValue('slug', slugify(this.name))
+    // }
   },
   banner: {
     // Sementara

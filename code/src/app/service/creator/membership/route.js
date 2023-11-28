@@ -2,21 +2,17 @@ import Joi from "joi"
 
 import { responseString } from "@/backend/helpers/serverResponseString"
 import User from "@/backend/models/user";
-import Content from "@/backend/models/content";
+import Membership from "@/backend/models/membership";
 
 const FILTERS = {
-  order: ["create-date", "title", "most-like", "most-share"],
+  order: ["create-date", "name"],
   orderType: ["DESC", "ASC"],
-  publishStatus: ["draft-only", "published-only"],
-  type: ["public-only", "private-only"],
 }
 
-// Creator > Content > Read All
+// Creator > Membership > Read All
 export async function GET(request) {
   const searchParams = request.nextUrl.searchParams
   const creatorId = searchParams.get('creatorId')
-  const filterPublishStatus = searchParams.get('filterPublishStatus')
-  const filterType = searchParams.get('filterType')
   const search = searchParams.get('search')
   let order = searchParams.get('order') ?? FILTERS.order[0];
   order = (order+"").toLowerCase();
@@ -26,15 +22,11 @@ export async function GET(request) {
 
   const joiValidate = Joi.object({
     creatorId: Joi.number().required(),
-    filterPublishStatus: Joi.valid(...FILTERS.publishStatus).allow(null).optional(),
-    filterType: Joi.valid(...FILTERS.type).allow(null).optional(),
     search: Joi.string().allow(null).optional(),
     order: Joi.valid(...FILTERS.order).required(),
     orderType: Joi.valid(...FILTERS.orderType).required(),
   }).validate({
     creatorId,
-    filterPublishStatus,
-    filterType,
     search,
     order,
     orderType,
@@ -47,57 +39,26 @@ export async function GET(request) {
       return Response.json(res, { status: 404 });
     }
 
-    let whereAttributes = {creatorRef: creatorId};
-    let contents = [];
-
-    if (!!filterPublishStatus) {
-      if (filterPublishStatus === 'draft-only') {
-        whereAttributes = {
-          ...whereAttributes,
-          status: 'draft',
-        }
-      }
-      else if (filterPublishStatus === 'published-only') {
-        whereAttributes = {
-          ...whereAttributes,
-          status: 'published',
-        }
-      }
-    }
-    if (!!filterType) {
-      if (filterType === 'public-only') {
-        whereAttributes = {
-          ...whereAttributes,
-          type: 'public',
-        }
-      }
-      else if (filterType === 'private-only') {
-        whereAttributes = {
-          ...whereAttributes,
-          type: 'private',
-        }
-      }
-    }
-
     // This is a function that instantly called and gets the result
     const orderFilter = function() {
       if (order === "create-date") return "createdAt";
-      else if (order === "title") return "title";
-      else if (order === "most-like") return "likeCounter";
-      else if (order === "most-share") return "shareCounter";
+      else if (order === "name") return "name";
       else return "createdAt";
     }();
 
-    return await Content.findAll({
+    let whereAttributes = {userRef: creatorId};
+    let memberships = [];
+
+    return await Membership.findAll({
       where: {...whereAttributes},
       order: [[orderFilter, orderType]]
     })
     .then((res = []) => {
-      res?.map((datum) => contents.push({
+      res?.map((datum) => memberships.push({
         ...datum?.dataValues,
       }));
 
-      return Response.json(contents, { status: 200 });
+      return Response.json(memberships, { status: 200 });
     })
     .catch(err => {
       return Response.json({ message: responseString.SERVER.SERVER_ERROR }, { status: 500 })
@@ -109,7 +70,7 @@ export async function GET(request) {
   }
 }
 
-// Creator > Content > Create
+// Creator > Membership > Create
 export async function POST(request) {
   let req = {};
   try { req = await request.json(); } catch (e) {}
@@ -117,13 +78,14 @@ export async function POST(request) {
 
   const joiValidate = Joi.object({
     creatorId: Joi.number().required(),
-    type: Joi.valid("public", "private").optional(),
-    title: Joi.string().required(),
-    body: Joi.string().required(),
+    name: Joi.string().required(),
+    slug: Joi.string().required(),
+    description: Joi.string().required(),
+    price: Joi.number().required(),
   }).validate(req, {abortEarly: false});
 
   if (!joiValidate.error) {
-    const { creatorId, type, title, body } = req;
+    const { creatorId, name, slug, description, price } = req;
 
     // Cek user ada
     let currCreator = await User.findByPk(creatorId);
@@ -138,19 +100,19 @@ export async function POST(request) {
       return Response.json(res, { status: 403 });
     }
 
-    let newContent = Content.build({
-      creatorRef: creatorId,
-      type, title, body,
+    let newMembership = Membership.build({
+      userRef: creatorId,
+      name, slug, description, price,
     });
     
-    // Daftarkan content ke database
-    return await newContent.save()
+    // Daftarkan Membership ke database
+    return await newMembership.save()
     .then(async (resp) => {
-      await newContent.reload();
+      await newMembership.reload();
       res = {
         message: responseString.GLOBAL.SUCCESS,
         created: {
-          ...newContent.dataValues,
+          ...newMembership.dataValues,
         },
       }
       return Response.json(res, { status: 200 });
