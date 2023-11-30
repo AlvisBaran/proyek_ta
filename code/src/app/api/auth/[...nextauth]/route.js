@@ -1,5 +1,6 @@
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials"
+import bcrypt from "bcrypt"
 
 import User from "@/backend/models/user"
 
@@ -17,19 +18,32 @@ const handler = NextAuth({
 
         //get the jwt token
         let user = await User.findOne({
-          where: { email, password }, // TODO: ini kurang mainan di encryption nya aja
+          where: { email },
         });
 
         if (!!user) {
-          return {
-            id: user.id,
-            cUsername: user.cUsername,
-            email: user.email,
-            name: user.displayName,
-            image: user.profilePicture,
+          let passMatch = false;
+
+          await bcrypt.compare(password, user.password)
+          .then(res => {
+            if (res) passMatch = true;
+          })
+          .catch(err => {
+            passMatch = false;
+          })
+
+          if (passMatch) {
+            return {
+              id: user.id,
+              cUsername: user.cUsername,
+              email: user.email,
+              name: user.displayName,
+              image: user.profilePicture,
+            }
           }
         }
-        else return null;
+        
+        return null;
       }
     })
   ],
