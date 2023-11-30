@@ -7,8 +7,8 @@ import User from "@/backend/models/user";
 export async function GET() {
   let users = [];
   return await User.findAll({order: [['joinDate', 'DESC']]})
-  .then((res = []) => {
-    res?.map((datum) => users.push({
+  .then((resp = []) => {
+    resp?.map((datum) => users.push({
       ...datum?.dataValues,
       saldo: undefined,
       socials: undefined,

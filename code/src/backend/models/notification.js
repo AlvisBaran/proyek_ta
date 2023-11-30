@@ -27,17 +27,23 @@ Notification.init({
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   },
-  icon_id: {
-    type: DataTypes.STRING
+  iconId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: "notifications",
   },
   title: {
-    type: DataTypes.STRING
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   body: {
-    type: DataTypes.TEXT
+    type: DataTypes.TEXT,
+    allowNull: false,
   },
   readStatus: {
-    type: DataTypes.TINYINT
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
   },
   createdAt: {
     allowNull: false,
