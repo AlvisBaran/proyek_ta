@@ -23,3 +23,11 @@ sequelize model:generate --name ContentLikes --attributes contentRef:integer,per
 sequelize model:generate --name ContentShares --attributes contentRef:integer,sharerRef:integer,openerRef:integer
 
 sequelize model:generate --name AccountUpgradeRequests --attributes applicantRef:integer,status:enum,newUsername:string,adminRef:integer,adminNote:text,requestedAt:date,modifiedAt:date
+
+sequelize model:generate --name UsersWalletHistory --attributes userRef:integer,nominal:text,type:enum,title:string,description:text
+
+sequelize model:generate --name TransTopup --attributes userRef:integer,invoice:string,nominal:bigint,status:enum,mt_token:text,mt_payment_link:text
+
+sequelize model:generate --name TransWithdraw --attributes userRef:integer,invoice:string,nominal:bigint,status:enum,note:text,requestedAt:date,repliedAt:date
+
+sequelize model:generate --name UsersFollows --attributes followerRef:integer,followerRef:integer

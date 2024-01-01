@@ -1,6 +1,7 @@
 export const responseString = {
   GLOBAL: {
     SUCCESS: "Aktivitas berhasil!",
+    FAILED: "Aktivitas gagal!",
     UNFINISHED_SERVICE: "Mohon maaf, service ini belum dapat dipakai.",
     NOT_FOUND: "Item yang anda cari tidak ditemukan!",
     ADD_FAILED: "Gagal menambah item ke database!",
@@ -29,5 +30,11 @@ export const responseString = {
     ROOM_ADD_FAILED: "Gagal menambah chat room!",
     ROOM_DELETE_FAILED: "Gagal menghapus chat room!",
     CHAT_ADD_FAILED: "Gagal menghapus chat pada room tersebut!",
-  }
+  },
+  CONTENT: {
+    NOT_FOUND: "Content tidak ditemukan atau dilarang!",
+    ADD_FAILED: "Gagal menambahkan content!",
+    UPDATE_FAILED: "Gagal membarui content!",
+    DELETE_FAILED: "Gagal menghapus content!",
+  },
 }
