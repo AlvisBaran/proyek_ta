@@ -39,3 +39,4 @@ next-env.d.ts
 
 # private files
 /src/configs/firebase-admin/private-key-dev.json
+middleware.txt

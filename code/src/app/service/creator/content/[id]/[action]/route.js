@@ -21,7 +21,7 @@ export async function PUT(request, { params }) {
   }
 }
 
-// Creator > Content > Ban or Unban
+// Creator > Content > Publish or Unpublish
 async function handlePublishStatus(id, req) {
   let res = { message: "handlePublishStatus", id, req };
   const { creatorId, type } = req;
