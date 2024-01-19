@@ -2,16 +2,7 @@
 import { Model, DataTypes, literal } from 'sequelize';
 import sqlz from '@/backend/configs/db';
 
-export default class TransWithdraw extends Model {
-  /**
-   * Helper method for defining associations.
-   * This method is not a part of Sequelize lifecycle.
-   * The `models/index` file will call this method automatically.
-   */
-  static associate(models) {
-    // define association here
-  }
-}
+class TransWithdraw extends Model {}
 
 TransWithdraw.init({
   id: {
@@ -69,3 +60,5 @@ TransWithdraw.init({
   tableName: 'trans_withdraw',
   paranoid: true,
 });
+
+export default TransWithdraw

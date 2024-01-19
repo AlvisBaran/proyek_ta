@@ -1,17 +1,8 @@
 'use strict';
 import { Model, DataTypes, literal } from 'sequelize';
-import sqlz from '@/backend/configs/db';
+import sqlz from '../configs/db';
 
-export default class Reply extends Model {
-  /**
-   * Helper method for defining associations.
-   * This method is not a part of Sequelize lifecycle.
-   * The `models/index` file will call this method automatically.
-   */
-  static associate(models) {
-    // define association here
-  }
-}
+class Reply extends Model {}
 
 Reply.init({
   id: {
@@ -50,3 +41,5 @@ Reply.init({
   modelName: 'Reply',
   tableName: 'contents_comments_replies',
 });
+
+export default Reply

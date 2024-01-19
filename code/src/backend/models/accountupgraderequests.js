@@ -1,17 +1,8 @@
 'use strict';
 import { Model, DataTypes, literal } from 'sequelize';
-import sqlz from '@/backend/configs/db';
+import sqlz from '../configs/db';
 
-export default class AccountUpgradeRequests extends Model {
-  /**
-   * Helper method for defining associations.
-   * This method is not a part of Sequelize lifecycle.
-   * The `models/index` file will call this method automatically.
-   */
-  static associate(models) {
-    // define association here
-  }
-}
+class AccountUpgradeRequests extends Model {}
 
 AccountUpgradeRequests.init({
   id: {
@@ -60,3 +51,5 @@ AccountUpgradeRequests.init({
   createdAt: 'requestedAt',
   updatedAt: 'modifiedAt',
 });
+
+export default AccountUpgradeRequests

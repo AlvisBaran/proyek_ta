@@ -31,7 +31,7 @@ export async function PUT(request, { params }) {
       return Response.json(res, { status: 404 });
     }
 
-    // TODO: Cek segala macem syarat untuk like
+    // TODO: Cek segala macem syarat untuk like (jika perlu)
 
 
     // Cek User Sudah Pernah Like

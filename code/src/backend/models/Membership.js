@@ -3,16 +3,7 @@ import { Model, DataTypes, literal } from 'sequelize';
 import sqlz from '@/backend/configs/db';
 import { slugify } from '@/utils/textHelper.mjs';
 
-export default class Membership extends Model {
-  /**
-   * Helper method for defining associations.
-   * This method is not a part of Sequelize lifecycle.
-   * The `models/index` file will call this method automatically.
-   */
-  static associate(models) {
-    // define association here
-  }
-}
+class Membership extends Model {}
 
 Membership.init({
   id: {
@@ -66,3 +57,5 @@ Membership.init({
   modelName: 'Membership',
   tableName: 'users_memberships',
 });
+
+export default Membership

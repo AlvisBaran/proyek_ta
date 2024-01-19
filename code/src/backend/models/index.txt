@@ -2,14 +2,8 @@
 
 import { readdirSync } from 'fs';
 import { basename as _basename, join } from 'path';
-const basename = _basename(__filename);
-import { DataTypes } from 'sequelize';
-
-
 import sqlz from '../configs/db';
-// const { development } = require('../configs/config');
-// let sequelize = new Sequelize({...development});
-
+const basename = _basename(__filename);
 const db = {};
 
 readdirSync(__dirname)
@@ -22,7 +16,7 @@ readdirSync(__dirname)
     );
   })
   .forEach(file => {
-    const model = require(join(__dirname, file))(sqlz, DataTypes);
+    const model = require(join(__dirname, file))(sqlz);
     db[model.name] = model;
   });
 
@@ -31,7 +25,5 @@ Object.keys(db).forEach(modelName => {
     db[modelName].associate(db);
   }
 });
-
-db.sequelize = sqlz;
 
 export default db;

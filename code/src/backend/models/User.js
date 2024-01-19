@@ -1,17 +1,8 @@
 'use strict';
 import { Model, DataTypes, literal } from 'sequelize';
-import sqlz from '@/backend/configs/db';
+import sqlz from '../configs/db';
 
-export default class User extends Model {
-  /**
-   * Helper method for defining associations.
-   * This method is not a part of Sequelize lifecycle.
-   * The `models/index` file will call this method automatically.
-   */
-  static associate({ Notification }) {
-    this.hasMany(Notification);
-  }
-}
+class User extends Model {}
 
 function hash(obj) {
   return obj + "_hashed";
@@ -95,3 +86,5 @@ User.init({
   updatedAt: false,
   paranoid: true,
 });
+
+export default User
