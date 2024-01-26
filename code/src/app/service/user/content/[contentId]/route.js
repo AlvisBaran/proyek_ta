@@ -5,6 +5,8 @@ import User from "@/backend/models/user";
 import Comment from "@/backend/models/comment";
 import Reply from "@/backend/models/reply";
 import '@/backend/models/association'
+import ContentShares from "@/backend/models/contentshares";
+import sqlz from "@/backend/configs/db";
 
 // User > Content > Get One Content
 export async function GET(request, { params }) {
@@ -14,13 +16,15 @@ export async function GET(request, { params }) {
   const withComments = searchParams.get('noComments') ? false : true
   const withReplies = searchParams.get('noReplies') ? false : true
   let userId = searchParams.get('userId') ?? null
+  let sharerUserId = searchParams.get('sharerUserId') ?? null
   const { contentId } = params;
   let res = {};
 
   const joiValidate = Joi.object({
     contentId: Joi.number().required(),
     userId: Joi.number().allow(null),
-  }).validate({...params, userId}, {abortEarly: false});
+    sharerUserId: Joi.number().allow(null),
+  }).validate({...params, userId, sharerUserId}, {abortEarly: false});
 
   if (!joiValidate.error) {
     // TODO: Cek user ada (klo ga ada gpp)
@@ -87,6 +91,38 @@ export async function GET(request, { params }) {
       }
     }
     // TODO(DONE): -> kalo public ya udah next
+
+    // ** Ini kalo ada sharer dan opener
+    if (!!sharerUserId) {
+      let currSharer = await User.findByPk(sharerUserId);
+      if (!!currSharer && !!currUser) {
+        try {
+          await sqlz.transaction(async (t) => {
+            // * Masukan ke db
+            let newContentShares = ContentShares.build({
+              contentRef: currContent.id,
+              sharerRef: currSharer.id,
+              openerRef: currUser.id
+            })
+            await newContentShares.save()
+            .catch((error) => { 
+              throw new Error({ message: responseString.GLOBAL.FAILED, details: error })
+            });
+            // * Tambah counter sharer di content
+            await currContent.increment('shareCounter', { by: 1 })
+            .catch((error) => { 
+              throw new Error({ message: responseString.GLOBAL.FAILED, details: error })
+            });
+          })
+        }
+        catch (error) {
+          // * Kalo ada mau tambahan error handler bisa taruh sini
+          console.info(error)
+          // res = { error: { message: responseString.GLOBAL.FAILED }, details: error };
+          // return Response.json(res, { status: 400 });
+        }
+      }
+    }
 
     return Response.json({
       ...currContent.dataValues,
