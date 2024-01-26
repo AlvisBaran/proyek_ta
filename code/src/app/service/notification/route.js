@@ -2,9 +2,8 @@ import Joi from "joi"
 
 import { responseString } from "@/backend/helpers/serverResponseString"
 import User from "@/backend/models/user";
-import Message from "@/backend/models/message";
-import sqlz from "@/backend/configs/db";
 import Notification from "@/backend/models/notification";
+import sqlz from "@/backend/configs/db";
 
 // Notification > Load All
 export async function GET(request) {
@@ -38,13 +37,13 @@ export async function GET(request) {
       where: whereAttributes,
       order: [['createdAt', 'DESC']]
     })
-  .then((resp = []) => {
-    resp?.map((datum) => notifications.push({
-      ...datum?.dataValues,
-    }));
+    .then((resp = []) => {
+      resp?.map((datum) => notifications.push({
+        ...datum?.dataValues,
+      }));
 
-    return Response.json(notifications, { status: 200 });
-  })
+      return Response.json(notifications, { status: 200 });
+    })
     .catch(err => {
       return Response.json({ message: responseString.SERVER.SERVER_ERROR, err }, { status: 500 })
     });
@@ -57,81 +56,44 @@ export async function GET(request) {
 
 // Notification > Read All
 export async function PUT(request) {
+  const searchParams = request.nextUrl.searchParams
+  const userId = searchParams.get('userId')
   let req = {};
   try { req = await request.json(); } catch (e) {}
   let res = {};
 
   const joiValidate = Joi.object({
     userId: Joi.number().required(),
-    user2Id: Joi.number().required(),
-  }).validate(req, {abortEarly: false});
+    notificationIds: Joi.array().items(Joi.number()),
+  }).validate({...req, userId}, {abortEarly: false});
 
   if (!joiValidate.error) {
-    const { userId, user2Id } = req;
-    // Cek user 1 ada
+    const { notificationIds = [] } = req;
+    // Cek user ada
     let currUser = await User.findByPk(userId);
     if (!currUser) {
       res = { message: responseString.USER.NOT_FOUND };
       return Response.json(res, { status: 404 });
     }
 
-    // Cek user 2 ada
-    let currUser2 = await User.findByPk(user2Id);
-    if (!currUser2) {
-      res = { message: responseString.USER.NOT_FOUND };
-      return Response.json(res, { status: 404 });
-    }
+    // * Strategi 1: update smua satu satu
+    // const allUpdate = []
+    // for (let i = 0; i < notificationIds.length; i++) {
+    //   const currId = notificationIds[i];
+    //   allUpdate.push(Notification.update({readStatus: true}, { where: { id: currId }}))
+    // }
+    // await Promise.all(allUpdate)
 
-    // Cek ke 2 user tersebut sudah pernah chat atau belum
-    let roomExist = false;
-    let currMessageRoom = await Message.findOne({ where: {
-      user1Ref: userId,
-      user2Ref: user2Id,
-    } });
-    if (!!currMessageRoom) {
-      roomExist = true;
-    }
-    else {
-      currMessageRoom = await Message.findOne({ where: {
-        user1Ref: user2Id,
-        user2Ref: userId,
-      } });
-      if (!!currMessageRoom) {
-        roomExist = true;
-      }
-    }
-
-    if (roomExist) {
-      res = {
-        message: responseString.MESSAGING.ROOM_ALREADY_EXISTS,
-        roomData: {...currMessageRoom.dataValues},
-      };
-      return Response.json(res, { status: 404 });
-    }
-    else {
-      let newMessageRoom = Message.build({
-        user1Ref: currUser.id,
-        user2Ref: currUser2.id,
-      });
-
-      // Daftarkan message room ke database
-      return await newMessageRoom.save()
-      .then(async (resp) => {
-        await newMessageRoom.reload();
-        res = {
-          message: responseString.GLOBAL.SUCCESS,
-          newValues: {
-            ...newMessageRoom.dataValues,
-          },
-        }
-        return Response.json(res, { status: 200 });
-      })
-      .catch(error => {
-        res = { error: { message: responseString.MESSAGING.ROOM_ADD_FAILED }, details: error };
-        // throw new Error(res)
-        return Response.json(res, { status: 400 });
-      })
-    }
+    // * Strategi 2: Pakai raw query
+    let whereClauses = notificationIds.join(", ")
+    return await sqlz.query(`UPDATE ${Notification.tableName} SET readStatus = 1 WHERE id IN (${whereClauses})`)
+    .then(() => {
+      res = { message: responseString.GLOBAL.SUCCESS }
+    return Response.json(res, { status: 200 })
+    })
+    .catch(err => {
+      return Response.json({ message: responseString.SERVER.SERVER_ERROR, err }, { status: 500 })
+    });
   }
   else {
     res = { message: responseString.VALIDATION.ERROR, error: joiValidate.error.details };
