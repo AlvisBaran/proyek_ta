@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { Box, Chip, Typography } from "@mui/material";
+import { Backdrop, Box, Button, Chip, Modal, Typography } from "@mui/material";
+import Fade from '@mui/material/Fade';
 import { DataGrid, GridActionsCellItem, GridToolbar } from "@mui/x-data-grid";
 
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
@@ -13,10 +14,40 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Breadcrumb from "@/app/(web)/components/Breadcrumb";
 import MyAxios from "@/hooks/MyAxios"
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 const page = () => {
   const [dataUser, setDataUser] = useState([])
-  
+  const [email, setEmail] = useState("")
+  const [idUser, setIdUser] = useState(0)
+  const [openBanModal, setOpenBanModal] = useState(false)
+  const [isBan, setIsBan] = useState(false)
+
+  const session = useSession()
+
+  const banModalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+  };
+
+  const handleOpenBanModal = (id, email) => {
+    setOpenBanModal(true)
+    setEmail(email)
+    setIdUser(id)
+  };
+  const handleCloseBanModal = () => {
+    setOpenBanModal(false)
+    setEmail("")
+    setId(0)
+  };
+
   useEffect(() => {
     const fetchData = async() => {
       const response = await axios.get("http://localhost:3000/service/admin/user")
@@ -64,9 +95,9 @@ const page = () => {
         return [
           <GridActionsCellItem 
             sx={params.row.role == "admin" ? {display: "none"} : {}} 
-            icon={params.row.ban_status==="clean" || params.row.ban_status==="unbanned" ? <NotInterestedIcon /> : <CheckCircleOutlineIcon />} 
-            onClick={params.row.ban_status==="clean" || params.row.ban_status==="unbanned" ? () => handleBanUser(params.id) : () => handleUnbanUser(params.id)} 
-            label={params.row.ban_status==="clean" || params.row.ban_status==="unbanned" ? "Ban User" : "Unban User"} showInMenu
+            icon={params.row.banStatus==="clean" || params.row.banStatus==="unbanned" ? <NotInterestedIcon /> : <CheckCircleOutlineIcon />} 
+            onClick={params.row.banStatus==="clean" || params.row.banStatus==="unbanned" ? () => handleOpenBanModal(params.id, params.row.email) : () => handleUnbanUser(params.id)} 
+            label={params.row.banStatus==="clean" || params.row.banStatus==="unbanned" ? "Ban User" : "Unban User"} showInMenu
           />,
           <GridActionsCellItem 
             sx={params.row.role == "admin" ? {display: "none"} : {}} 
@@ -89,7 +120,7 @@ const page = () => {
       width: 50 
     },
     {
-      field: 'c_username',
+      field: 'cUsername',
       headerName: 'Username',
       width: 150,
     },
@@ -99,7 +130,7 @@ const page = () => {
       width: 150,
     },
     {
-      field: 'display_name',
+      field: 'displayName',
       headerName: 'Display Name',
       width: 150,
     },
@@ -109,7 +140,7 @@ const page = () => {
       width: 150,
     },
     {
-      field: 'ban_status',
+      field: 'banStatus',
       headerName: 'Status',
       width: 150,
     },
@@ -119,7 +150,7 @@ const page = () => {
       width: 150,
     },
     {
-      field: 'join_date',
+      field: 'joinDate',
       headerName: 'Joined At',
       width: 150,
       editable: true,
@@ -152,7 +183,7 @@ const page = () => {
           '--DataGrid-overlayHeight': '300px'
         }}
         autoHeight
-        rows={dataContent}
+        rows={dataUser}
         columns={columns}
         initialState={{
           pagination: {
@@ -165,6 +196,29 @@ const page = () => {
           toolbar: GridToolbar,
          }}
       />
+      <div>
+      <Modal
+        open={openBanModal}
+        onClose={handleCloseBanModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={banModalStyle}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Ban User
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2, mb:2 }}>
+            Are you sure want to ban {email} ?
+          </Typography>
+          <Button variant="contained" color="success" sx={{mr: 2}}>
+            Success
+          </Button>
+          <Button variant="outlined" color="error">
+            Error
+          </Button>
+        </Box>
+      </Modal>
+      </div>
     </Box>
   )
 }

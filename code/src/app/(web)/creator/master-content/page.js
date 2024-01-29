@@ -1,34 +1,28 @@
 'use client';
 
-import { Box, Chip, Typography } from '@mui/material'
+import { Box, Button, Chip, Typography } from '@mui/material'
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { getRowIdFromRowModel } from '@mui/x-data-grid/internals';
 import Breadcrumb from '@/app/(web)/components/Breadcrumb';
 import ChipGroup from '@/app/(web)/components/ChipGroup';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import MyAxios from '@/hooks/MyAxios';
 
 const page = () => {
-  const dataContent = [
-    {
-      id: 1,
-      title: "title content 1",
-      body: "body content 1saffafafasfoasvojsnfovj",
-      status: 'Published',
-      // categories: <ChipGroup data={[
-      //   {
-      //     label: "lifestyle" 
-      //   },
-      //   {
-      //     label: "game" 
-      //   },
-      //   {
-      //     label: "membership 1" 
-      //   },
-      // ]} /> ,
-      likes_count: 10,
-      shares_count: 5,
-      created_at: '10-10-2023',
+  const [dataContent, setDataContent] = useState([])
+  useEffect(() => {
+    const fetch = async() => {
+      await MyAxios.get('/creator/content?creatorId=5')
+      .then(ret => {
+        setDataContent(ret.data)
+      })
+      .catch(err=> {
+        console.log(err)
+      })
     }
-  ]
+    fetch()
+  }, [])
   const columns = [
     { 
       field: 'id', 
@@ -39,21 +33,27 @@ const page = () => {
       field: 'title',
       headerName: 'Title',
       width: 150,
-      editable: true,
+      editable: false,
     },
     {
       field: 'body',
       headerName: 'Body',
       width: 150,
-      editable: true,
+      editable: false,
+    },
+    {
+      field: 'type',
+      headerName: 'Type',
+      width: 150,
+      editable: false,
     },
     {
       field: 'status',
       headerName: 'Status',
       width: 150,
-      editable: true,
+      editable: false,
       renderCell: (params) => {
-        const isDraft = params.value === "Draft";
+        const isDraft = params.value === "draft";
         return <Chip label={params.value} color={isDraft ? "error" : "success"} />;
       }
     },
@@ -67,22 +67,23 @@ const page = () => {
     //   }
     // },
     {
-      field: 'likes_count',
+      field: 'likeCounter',
       headerName: 'Likes',
       width: 150,
-      editable: true,
+      editable: false,
     },
     {
-      field: 'shares_count',
+      field: 'shareCounter',
       headerName: 'Shares',
       width: 150,
-      editable: true,
+      editable: false,
     },
     {
-      field: 'created_at',
+      field: 'createdAt',
       headerName: 'Created At',
-      width: 150,
-      editable: true,
+      width: 200,
+      editable: false,
+      valueFormatter: params => new Date(params.value).toLocaleString()
     },
   ]
   const dataBreadcrumb = [
@@ -94,6 +95,9 @@ const page = () => {
   return (
     <Box sx={{maxWidth: '100vw'}}>
       <Breadcrumb data={dataBreadcrumb}/>
+      <Link href={'/creator/master-content/create'}>
+        <Button sx={{mb:2}} variant="contained">Create</Button>
+      </Link>
       <DataGrid
         sx={{
           "& .MuiDataGrid-columnHeaderTitle": {
