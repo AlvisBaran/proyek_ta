@@ -32,9 +32,6 @@ TransTopup.init({
     defaultValue: 'pending',
     allowNull: false,
   },
-  mt_token: {
-    type: DataTypes.TEXT
-  },
   mt_payment_link: {
     type: DataTypes.TEXT
   },

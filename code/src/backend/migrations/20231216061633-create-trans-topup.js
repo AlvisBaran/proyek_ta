@@ -2,7 +2,6 @@
 
 const { DataTypes, literal } = require('sequelize');
 
-// TODO: Slesaikan attribute nya untuk midtransnya
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -33,9 +32,6 @@ module.exports = {
         values: ['pending', 'success', 'failed'],
         defaultValue: 'pending',
         allowNull: false,
-      },
-      mt_token: {
-        type: DataTypes.TEXT
       },
       mt_payment_link: {
         type: DataTypes.TEXT
