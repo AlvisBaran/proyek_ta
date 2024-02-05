@@ -1,29 +1,59 @@
 'use client';
 
 import { Box, Button, Chip, Typography } from '@mui/material'
-import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { DataGrid, GridActionsCellItem, GridToolbar } from '@mui/x-data-grid';
 import { getRowIdFromRowModel } from '@mui/x-data-grid/internals';
 import Breadcrumb from '@/app/(web)/components/Breadcrumb';
 import ChipGroup from '@/app/(web)/components/ChipGroup';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import MyAxios from '@/hooks/MyAxios';
+import PublishIcon from '@mui/icons-material/Publish';
+import UnpublishedIcon from '@mui/icons-material/Unpublished';
 
 const page = () => {
   const [dataContent, setDataContent] = useState([])
+  const fetch = async() => {
+    await MyAxios.get('/creator/content?creatorId=5')
+    .then(ret => {
+      setDataContent(ret.data)
+    })
+    .catch(err=> {
+      console.log(err)
+    })
+  }
   useEffect(() => {
-    const fetch = async() => {
-      await MyAxios.get('/creator/content?creatorId=5')
-      .then(ret => {
-        setDataContent(ret.data)
-      })
-      .catch(err=> {
-        console.log(err)
-      })
-    }
     fetch()
   }, [])
+  const handlePublishKonten = async(id, status) => {
+    await MyAxios.put(`/creator/content/${id}/publish_status`, {
+      creatorId: 5,
+      type: status == "draft" ? "publish" : "unpublish"
+    })
+    .then(async (ret) => {
+      console.log(ret.data)
+      await fetch()
+    })
+    .catch(err => {
+      console.log(err)
+    })
+  }
   const columns = [
+    { 
+      field: 'actions', 
+      type: 'actions',
+      headerName: 'Actions', 
+      width: 75,
+      getActions: (params) => { 
+        return [
+          <GridActionsCellItem
+            icon={params.row.status==="draft" ? <PublishIcon /> : <UnpublishedIcon />} 
+            onClick={() => handlePublishKonten(params.id, params.row.status)} 
+            label={params.row.status==="draft" ? "Publish Konten" : "Draft Konten"} showInMenu
+          />,
+        ]
+      }
+    },
     { 
       field: 'id', 
       headerName: 'ID', 
