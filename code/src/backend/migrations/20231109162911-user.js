@@ -22,8 +22,8 @@ module.exports = {
         allowNull: false,
       },
       saldo: {
-        // INFO: Ini encryption
-        type: DataTypes.TEXT('tiny'),
+        type: DataTypes.BIGINT,
+        defaultValue: 0
       },
       banStatus: {
         type: DataTypes.ENUM,

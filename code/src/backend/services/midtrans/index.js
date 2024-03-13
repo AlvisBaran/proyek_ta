@@ -6,7 +6,7 @@ const ENDPOINT = process.env.NEXT_PUBLIC_MIDTRANS_ENDPOINT
 const CLIENT_KEY = process.env.MIDTRANS_CLIENT_KEY
 const SERVER_KEY = process.env.MIDTRANS_SERVER_KEY
 const DEFAULT_SETTINGS = {
-  productName: "Top Up E-Money Web Alvis Patreon",
+  productName: "Top Up E-Money Web Panthreon",
   phoneNumber: "+6289616089857",
   usage_limit: 1,
   customer_required: true,
@@ -99,9 +99,9 @@ export async function createTopUpPaymentLink(
         name: DEFAULT_SETTINGS.productName,
         price: nominalTopUp,
         quantity: 1,
-        brand: "Alvis Patreon",
+        brand: "Panthreon",
         category: 'e-wallet',
-        merchant_name: "Alvis"
+        merchant_name: "Panthreon"
       }],
       // customer_details: {
       //   first_name: userFirstName,
@@ -126,6 +126,42 @@ export async function createTopUpPaymentLink(
         error: {
           code: err.response?.status,
           message: err.response?.error_messages
+        }
+      })
+    })
+  })
+}
+
+export async function getTopUpPaymentLink(orderId) {
+  return new Promise(async (resolve, reject) => {
+    return await HTTP_FETCHER.get(`/v1/payment-links//${orderId}`)
+    .then((res) => {
+      return resolve(res.data)
+    })
+    .catch((err) => {
+      console.log(err.response)
+      return reject({
+        error: err.response
+      })
+    })
+  })
+}
+
+export async function checkTopUpTransactionStatus(transactionId) {
+  return new Promise(async (resolve, reject) => {
+    return await HTTP_FETCHER.get(`/v2/${transactionId}/status`)
+    .then((res) => {
+      return resolve({
+        transaction_status: res.data.transaction_status,
+        fraud_status: res.data.fraud_status
+      })
+    })
+    .catch((err) => {
+      console.log(err.response)
+      return reject({
+        error: {
+          code: err.response?.status_code,
+          message: err.response?.status_message
         }
       })
     })

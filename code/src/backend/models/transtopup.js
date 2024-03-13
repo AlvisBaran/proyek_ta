@@ -35,6 +35,12 @@ TransTopup.init({
   mt_payment_link: {
     type: DataTypes.TEXT
   },
+  mt_transaction_id: {
+    type: DataTypes.STRING
+  },
+  mt_order_id: {
+    type: DataTypes.STRING
+  },
   createdAt: {
     type: DataTypes.DATE,
     allowNull: false,

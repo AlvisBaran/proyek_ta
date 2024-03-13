@@ -25,11 +25,8 @@ User.init({
     allowNull: false,
   },
   saldo: {
-    // INFO: Ini encryption
-    type: DataTypes.TEXT('tiny'),
-    set(value) {
-      this.setDataValue('saldo', hash(value));
-    }
+    type: DataTypes.BIGINT,
+    defaultValue: 0
   },
   banStatus: {
     type: DataTypes.ENUM,

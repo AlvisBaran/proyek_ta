@@ -5,6 +5,8 @@ import User from "@/backend/models/user";
 import TransTopup from "@/backend/models/transtopup";
 import dayjs from "dayjs";
 
+import '@/backend/models/association'
+
 const TOTAL_MIDTRANS_RETRY = 1;
 
 // Transaction > Top Up > Read All
@@ -12,9 +14,40 @@ export async function GET(request) {
   const searchParams = request.nextUrl.searchParams
   const userId = searchParams.get('userId')
   const filterStatus = searchParams.get('filterStatus') ?? 'all'
-  let res = {};
+  
+  // Cek user ada
+  let currUser = await User.findByPk(userId);
+  if (!currUser) {
+    res = { message: responseString.USER.NOT_FOUND };
+    return Response.json(res, { status: 404 });
+  }
 
-  return Response.json({message: "Transaction > Top Up > Read All", userId, filterStatus})
+  let transactions = [];
+  let whereAttributes = {};
+
+  if (filterStatus === 'success' || filterStatus === 'pending' || filterStatus === 'failed') {
+    whereAttributes = {
+      ...whereAttributes,
+      status: filterStatus
+    }
+  }
+  
+  return await TransTopup.findAll({
+    where: whereAttributes,
+    order: [['createdAt', 'DESC']],
+    // include: {
+    //   model: User,
+    //   attributes: ["id", "cUsername", "role", "banStatus", "displayName", "email", "profilePicture"]
+    // }
+  })
+  .then((resp = []) => {
+    resp?.map((datum) => transactions.push({...datum?.dataValues}));
+
+    return Response.json(transactions, { status: 200 });
+  })
+  .catch(err => {
+    return Response.json({ message: responseString.SERVER.SERVER_ERROR, error: err }, { status: 500 })
+  });
 }
 
 // Transaction > Top Up > Create
@@ -54,7 +87,7 @@ export async function POST(request) {
         `${currUser.cUsername ?? currUser.displayName}`,
         currUser.email
       )
-      console.info(tryCounter, tempMidtransResponse)
+      // console.info(tryCounter, tempMidtransResponse)
       if (!!tempMidtransResponse && tempMidtransResponse.success) {
         newMidtransData = {
           paymentUrl: tempMidtransResponse.success.paymentUrl,

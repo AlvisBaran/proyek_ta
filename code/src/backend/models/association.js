@@ -4,6 +4,7 @@ import Content from "./content"
 import Comment from "./comment"
 import Notification from "./notification"
 import ContentLikes from "./contentlikes"
+import TransTopup from "./transtopup"
 
 User.hasMany(Notification, { foreignKey: "userRef" })
 Notification.belongsTo(User, { foreignKey: "userRef" })
@@ -28,3 +29,6 @@ ContentLikes.belongsTo(Content, { foreignKey: "contentRef" })
 
 User.hasMany(ContentLikes, { foreignKey: "performerRef" })
 ContentLikes.belongsTo(User, { foreignKey: "performerRef" })
+
+User.hasMany(TransTopup, { foreignKey: "userRef" })
+TransTopup.belongsTo(User, { foreignKey: "userRef" })
