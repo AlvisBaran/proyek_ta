@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-const { DataTypes, literal } = require('sequelize');
+const { DataTypes, literal } = require('sequelize')
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -17,26 +17,26 @@ module.exports = {
         allowNull: false,
         references: { model: 'users', key: 'id' },
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       user2Ref: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: { model: 'users', key: 'id' },
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
-        defaultValue: literal('CURRENT_TIMESTAMP'),
+        defaultValue: literal('CURRENT_TIMESTAMP')
       },
       lastModified: {
         type: DataTypes.DATE
-      },
-    });
+      }
+    })
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('users_messages');
+    await queryInterface.dropTable('users_messages')
   }
-};
+}

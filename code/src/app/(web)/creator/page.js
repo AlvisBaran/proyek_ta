@@ -1,9 +1,5 @@
-
-
 const page = () => {
-  return (
-    <div>creator dashboard page</div>
-  )
+  return <div>creator dashboard page</div>
 }
 
 export default page

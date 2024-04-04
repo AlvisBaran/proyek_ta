@@ -1,5 +1,5 @@
 export const colors = {
-  black:{
+  black: {
     5: '#EEEEEE',
     10: '#E8E8E8',
     40: '#CACCCF',
@@ -8,16 +8,16 @@ export const colors = {
     100: '#25282B',
     bold: '#0D0A19',
     normal: 'rgba(8, 8, 9, 0.86)',
-    custom: 'rgba(15, 14, 15, 0.75)',
+    custom: 'rgba(15, 14, 15, 0.75)'
   },
   white: '#ffffff',
   grey: {
     20: '#F5F6F7',
     40: '#9A9A9A',
-    50: '#9A9EA7',
+    50: '#9A9EA7'
   },
   braveRed: {
-    main: "#CA0000",
+    main: '#CA0000'
   },
   gold: {
     main: '#fce8aa'
@@ -28,28 +28,28 @@ export const colors = {
   pink: {
     dark: '#b23d43',
     main: '#ff5860',
-    light: '#ff55a5',
+    light: '#ff55a5'
   },
   cutePink: {
-    main: "#E04DB0",
+    main: '#E04DB0'
   },
   bluePurple: {
-    main: "#5463FF",
+    main: '#5463FF'
   },
   primaryBlue: {
     dark: '#1565c0',
     light: '#42a5f5',
-    main: '#1976d2',
+    main: '#1976d2'
   },
   secondaryPurple: {
     dark: '#7b1fa2',
     light: '#ba68c8',
-    main: '#9c27b0',
+    main: '#9c27b0'
   },
   text: {
     primary: '#25282B',
     secondary: '#52575C',
     contrastHigh: '#ffffff',
-    contrastLow: '#535353',
-  },
+    contrastLow: '#535353'
+  }
 }

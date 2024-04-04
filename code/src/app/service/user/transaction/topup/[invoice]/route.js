@@ -1,36 +1,36 @@
-import TransTopup from "@/backend/models/transtopup";
-import User from "@/backend/models/user";
+import TransTopup from '@/backend/models/transtopup'
+import User from '@/backend/models/user'
 
-import { responseString } from "@/backend/helpers/serverResponseString";
+import { responseString } from '@/backend/helpers/serverResponseString'
 
 import '@/backend/models/association'
-import { checkTopUpTransactionStatus, getTopUpPaymentLink } from "@/backend/services/midtrans";
+import { checkTopUpTransactionStatus, getTopUpPaymentLink } from '@/backend/services/midtrans'
 
 // Transaction > Top Up > Read One
 export async function GET(request, { params }) {
-  const { invoice } = params;
+  const { invoice } = params
   const searchParams = request.nextUrl.searchParams
   const userId = searchParams.get('userId')
-  let res = {};
-  
+  let res = {}
+
   // Cek user ada
-  let currUser = await User.findByPk(userId);
+  let currUser = await User.findByPk(userId)
   if (!currUser) {
-    res = { message: responseString.USER.NOT_FOUND };
-    return Response.json(res, { status: 404 });
+    res = { message: responseString.USER.NOT_FOUND }
+    return Response.json(res, { status: 404 })
   }
-  
+
   // Cek topup by invoice ada
   let currTopup = await TransTopup.findOne({
     where: { invoice },
     include: {
       model: User,
-      attributes: ["id", "cUsername", "role", "banStatus", "displayName", "email", "profilePicture"]
+      attributes: ['id', 'cUsername', 'role', 'banStatus', 'displayName', 'email', 'profilePicture']
     }
-  });
+  })
   if (!currTopup) {
-    res = { message: responseString.GLOBAL.NOT_FOUND };
-    return Response.json(res, { status: 404 });
+    res = { message: responseString.GLOBAL.NOT_FOUND }
+    return Response.json(res, { status: 404 })
   }
 
   // ! Ga jadi dipake
@@ -52,23 +52,20 @@ export async function GET(request, { params }) {
   }
 
   // Get Status ke Midtrans dan Update database (Sama dengan webhook di bawah)
-  await checkTopUpTransactionStatus(currTopup.mt_transaction_id)
-  .then(async ({transaction_status, fraud_status}) => {
+  await checkTopUpTransactionStatus(currTopup.mt_transaction_id).then(async ({ transaction_status, fraud_status }) => {
     if (transaction_status === 'capture' || transaction_status === 'settlement') {
       if (currTopup.status === 'pending') {
         await User.increment('saldo', { by: currTopup.nominal, where: { id: currTopup.userRef } })
       }
       currTopup.status = 'success'
-    }
-    else if (transaction_status === 'pending') {
+    } else if (transaction_status === 'pending') {
       currTopup.status = 'pending'
-    }
-    else if (
-      transaction_status === 'deny'
-      || transaction_status === 'cancel'
-      || transaction_status === 'expire'
-      || transaction_status === 'refund'
-      || transaction_status === 'partial_refund'
+    } else if (
+      transaction_status === 'deny' ||
+      transaction_status === 'cancel' ||
+      transaction_status === 'expire' ||
+      transaction_status === 'refund' ||
+      transaction_status === 'partial_refund'
     ) {
       currTopup.status = 'failed'
     }
@@ -78,17 +75,19 @@ export async function GET(request, { params }) {
   // Return data topup nya yang sudah di revalidate
   await currTopup.reload()
   res = { ...currTopup.dataValues }
-  return Response.json(res, { status: 200 });
+  return Response.json(res, { status: 200 })
 }
 
 // Transaction > Top Up > Update (Payment Gateway)
 export async function PUT(request, { params }) {
-  const { invoice } = params;
-  let req = {};
-  try { req = await request.json(); } catch (e) {}
-  let res = {};
+  const { invoice } = params
+  let req = {}
+  try {
+    req = await request.json()
+  } catch (e) {}
+  let res = {}
 
-  return Response.json({message: "Transaction > Top Up > Update (Payment Gateway)", invoice, req})
+  return Response.json({ message: 'Transaction > Top Up > Update (Payment Gateway)', invoice, req })
 }
 
 // // Transaction > Top Up > Update Manual
@@ -103,31 +102,33 @@ export async function PUT(request, { params }) {
 
 // Transaction > Top Up > Cancel
 export async function DELETE(request, { params }) {
-  const { invoice } = params;
+  const { invoice } = params
   const searchParams = request.nextUrl.searchParams
   const userId = searchParams.get('userId')
-  let req = {};
-  try { req = await request.json(); } catch (e) {}
-  let res = {};
+  let req = {}
+  try {
+    req = await request.json()
+  } catch (e) {}
+  let res = {}
 
   // Cek user ada
-  let currUser = await User.findByPk(userId);
+  let currUser = await User.findByPk(userId)
   if (!currUser) {
-    res = { message: responseString.USER.NOT_FOUND };
-    return Response.json(res, { status: 404 });
+    res = { message: responseString.USER.NOT_FOUND }
+    return Response.json(res, { status: 404 })
   }
-  
+
   // Cek topup by invoice ada
-  let currTopup = await TransTopup.findOne({where: { invoice }});
+  let currTopup = await TransTopup.findOne({ where: { invoice } })
   if (!currTopup) {
-    res = { message: responseString.GLOBAL.NOT_FOUND };
-    return Response.json(res, { status: 404 });
+    res = { message: responseString.GLOBAL.NOT_FOUND }
+    return Response.json(res, { status: 404 })
   }
 
   // Cek invoice milik user nya
   if (currUser.id !== currTopup.userRef) {
-    res = { message: responseString.GLOBAL.NOT_FOUND };
-    return Response.json(res, { status: 404 });
+    res = { message: responseString.GLOBAL.NOT_FOUND }
+    return Response.json(res, { status: 404 })
   }
 
   // TODO: Cancel ke midtrans
@@ -135,18 +136,17 @@ export async function DELETE(request, { params }) {
   if (currTopup.status === 'pending') {
     // Update status database
     currTopup.status = 'failed'
-    await currTopup.save();
-    await currTopup.reload();
+    await currTopup.save()
+    await currTopup.reload()
     res = {
       message: responseString.GLOBAL.SUCCESS,
-      previousValues: {...currTopup.dataValues}
+      previousValues: { ...currTopup.dataValues }
     }
 
     return Response.json(res, { status: 200 })
-  }
-  else {
+  } else {
     res = {
-      message: "Aksi tidak valid, tidak dapat merubah status!"
+      message: 'Aksi tidak valid, tidak dapat merubah status!'
     }
     return Response.json(res, { status: 400 })
   }

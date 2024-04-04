@@ -1,96 +1,89 @@
-"use client";
+'use client'
 
 import React from 'react'
 import { Box, Typography } from '@mui/material'
 import { DataGrid, GridActionsCellItem, GridToolbar } from '@mui/x-data-grid'
 import Breadcrumb from '@/app/(web)/components/Breadcrumb'
 
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 const page = () => {
-
   const row = [
     {
       id: 1,
-      label: "Gaming"
+      label: 'Gaming'
     },
     {
       id: 2,
-      label: "Art"
+      label: 'Art'
     },
     {
       id: 3,
-      label: "Video"
+      label: 'Video'
     }
   ]
 
   const columns = [
-    { 
-      field: 'id', 
-      headerName: 'ID', 
-      width: 50 
+    {
+      field: 'id',
+      headerName: 'ID',
+      width: 50
     },
     {
       field: 'label',
       flex: 1,
       headerName: 'Label',
-      width: 150,
+      width: 150
     },
-    { 
-      field: 'actions', 
+    {
+      field: 'actions',
       type: 'actions',
-      headerName: 'Actions', 
+      headerName: 'Actions',
       width: 75,
-      getActions: (params) => { 
+      getActions: params => {
         return [
-          <GridActionsCellItem 
-            icon={<EditIcon />} 
-            onClick={() => handleEdit(params.id)} 
-            label={"Edit"}
-          />,
-          <GridActionsCellItem 
-            icon={<DeleteIcon />} 
-            onClick={() => handleDelete(params.id)} 
-            label={"Delete"} 
-          />,
+          <GridActionsCellItem icon={<EditIcon />} onClick={() => handleEdit(params.id)} label={'Edit'} />,
+          <GridActionsCellItem icon={<DeleteIcon />} onClick={() => handleDelete(params.id)} label={'Delete'} />
         ]
       }
-    },
+    }
   ]
 
-  const handleEdit = (id) => {
-    console.log("Edit "+id)
+  const handleEdit = id => {
+    console.log('Edit ' + id)
   }
 
-  const handleDelete = (id) => {
-    console.log("Delete "+id)
+  const handleDelete = id => {
+    console.log('Delete ' + id)
   }
 
   const dataBreadcrumb = [
     {
-      title: "Master Category",
-      url: "/admin/master-category",
+      title: 'Master Category',
+      url: '/admin/master-category'
     }
   ]
 
   return (
-    <Box sx={{maxWidth: '100vw'}}>
-      <Breadcrumb data={dataBreadcrumb}/>
-      <Typography sx={{marginBottom:2}} variant="h5">Master Category</Typography>
+    <Box sx={{ maxWidth: '100vw' }}>
+      <Breadcrumb data={dataBreadcrumb} />
+      <Typography sx={{ marginBottom: 2 }} variant='h5'>
+        Master Category
+      </Typography>
       <DataGrid
         sx={{
-          "& .MuiDataGrid-columnHeaderTitle": {
-            whiteSpace: "normal",
-            lineHeight: "normal"
+          '& .MuiDataGrid-columnHeaderTitle': {
+            whiteSpace: 'normal',
+            lineHeight: 'normal'
           },
-          "& .MuiDataGrid-columnHeader": {
+          '& .MuiDataGrid-columnHeader': {
             // Forced to use important since overriding inline styles
-            height: "unset !important"
+            height: 'unset !important'
           },
-          "& .MuiDataGrid-columnHeaders": {
+          '& .MuiDataGrid-columnHeaders': {
             // Forced to use important since overriding inline styles
-            maxHeight: "168px !important"
+            maxHeight: '168px !important'
           },
           '--DataGrid-overlayHeight': '300px'
         }}
@@ -99,13 +92,13 @@ const page = () => {
         columns={columns}
         initialState={{
           pagination: {
-            paginationModel: { page: 0, pageSize: 5 },
-          },
+            paginationModel: { page: 0, pageSize: 5 }
+          }
         }}
         pageSizeOptions={[5, 10]}
-        slots={{ 
-          toolbar: GridToolbar,
-         }}
+        slots={{
+          toolbar: GridToolbar
+        }}
       />
     </Box>
   )

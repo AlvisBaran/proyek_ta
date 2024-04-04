@@ -1,56 +1,61 @@
 import '@/backend/models/association'
-import Joi from "joi";
-import { responseString } from "@/backend/helpers/serverResponseString";
-import User from '@/backend/models/user';
 
-// User > Relationship > Follow / Unfollow Creator
-export async function PUT(request) {
+import Joi from 'joi'
+import { responseString } from '@/backend/helpers/serverResponseString'
+import User from '@/backend/models/user'
+import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
+
+// ** User > Relationship > Follow / Unfollow Creator
+export async function PUT(request, response) {
   // TODO: Update user profile data
-  const searchParams = request.nextUrl.searchParams
-  let userId = searchParams.get('userId') ?? null
-  let req = {};
+  let req = {}
   try {
-    const formData = await request.formData();
-    req.displayName = formData.get('displayName');
-    req.profilePicture = formData.get('profilePicture');
-    req.bio = formData.get('bio');
-    req.about = formData.get('about');
-    req.banner = formData.get('banner');
-    req.themeColor = formData.get('themeColor');
+    const formData = await request.formData()
+    req.displayName = formData.get('displayName')
+    req.profilePicture = formData.get('profilePicture')
+    req.bio = formData.get('bio')
+    req.about = formData.get('about')
+    req.banner = formData.get('banner')
+    req.themeColor = formData.get('themeColor')
   } catch (e) {}
-  let res = {};
+  let res = {}
+
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
 
   const joiValidate = Joi.object({
-    userId: Joi.number().allow(null),
     displayName: Joi.string().allow(null),
     profilePicture: Joi.object().allow(null),
     bio: Joi.string().allow(null),
     about: Joi.string().allow(null),
     banner: Joi.object().allow(null),
     themeColor: Joi.string().allow(null)
-  }).validate({...req, userId}, {abortEarly: false});
+  }).validate({ ...req }, { abortEarly: false })
 
   if (!joiValidate.error) {
     // TODO: Cek user ada
     const fetchAttributes = [
-      "id",
-      "cUsername",
-      "role",
-      "banStatus",
-      "displayName",
-      "email",
-      "profilePicture",
-      "banner",
-      "bio",
-      "about",
-      "themeColor"
+      'id',
+      'cUsername',
+      'role',
+      'banStatus',
+      'displayName',
+      'email',
+      'profilePicture',
+      'banner',
+      'bio',
+      'about',
+      'themeColor'
     ]
-    let currUser = await User.findByPk(userId, {
-      attributes: fetchAttributes,
-    });
+    let currUser = await User.findByPk(user.id, {
+      attributes: fetchAttributes
+    })
     if (!currUser) {
-      res = { message: responseString.USER.NOT_FOUND };
-      return Response.json(res, { status: 404 });
+      res = { message: responseString.USER.NOT_FOUND }
+      return Response.json(res, { status: 404 })
     }
 
     // TODO: Masukkan data yang mau diupdate
@@ -80,28 +85,28 @@ export async function PUT(request) {
     // TODO: Handle untuk profilePicture dan banner
 
     // TODO: Update ke db
-    return await currUser.save({ fields: [...changingAttributes] })
-    .then(async (resp) => {
-      await currUser.reload({
-        attributes: fetchAttributes
-      });
-      res = {
-        message: responseString.USER.UPDATE_SUCCESS,
-        oldValues,
-        newValues: {
-          ...currUser.dataValues,
-        },
-      };
+    return await currUser
+      .save({ fields: [...changingAttributes] })
+      .then(async resp => {
+        await currUser.reload({
+          attributes: fetchAttributes
+        })
+        res = {
+          message: responseString.USER.UPDATE_SUCCESS,
+          oldValues,
+          newValues: {
+            ...currUser.dataValues
+          }
+        }
 
-      return Response.json(res, { status: 200 });
-    })
-    .catch(error => {
-      res = { error: { message: responseString.GLOBAL.UPDATE_FAILED }, details: error };
-      return Response.json(res, { status: 400 });
-    });
+        return Response.json(res, { status: 200 })
+      })
+      .catch(error => {
+        res = { error: { message: responseString.GLOBAL.UPDATE_FAILED }, details: error }
+        return Response.json(res, { status: 400 })
+      })
+  } else {
+    res = { message: responseString.VALIDATION.ERROR, error: joiValidate.error.details }
+    return Response.json(res, { status: 400 })
   }
-  else {
-    res = { message: responseString.VALIDATION.ERROR, error: joiValidate.error.details };
-    return Response.json(res, { status: 400 });
-  }
-} 
+}

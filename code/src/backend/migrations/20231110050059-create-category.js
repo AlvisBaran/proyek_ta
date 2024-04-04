@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-const { DataTypes, literal } = require('sequelize');
+const { DataTypes, literal } = require('sequelize')
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -14,19 +14,19 @@ module.exports = {
       },
       label: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: false
       },
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
-        defaultValue: literal('CURRENT_TIMESTAMP'),
+        defaultValue: literal('CURRENT_TIMESTAMP')
       },
       updatedAt: {
         type: DataTypes.DATE
       }
-    });
+    })
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('categories');
+    await queryInterface.dropTable('categories')
   }
-};
+}

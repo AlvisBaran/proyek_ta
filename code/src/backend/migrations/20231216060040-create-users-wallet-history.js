@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-const { DataTypes, literal } = require('sequelize');
+const { DataTypes, literal } = require('sequelize')
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -17,33 +17,33 @@ module.exports = {
         allowNull: false,
         references: { model: 'users', key: 'id' },
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       nominal: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: false
       },
       type: {
         type: DataTypes.ENUM,
         values: ['in', 'out'],
-        allowNull: false,
+        allowNull: false
       },
       title: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: false
       },
       description: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: false
       },
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: literal('CURRENT_TIMESTAMP'),
+        defaultValue: literal('CURRENT_TIMESTAMP')
       }
-    });
+    })
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('users_wallet_history');
+    await queryInterface.dropTable('users_wallet_history')
   }
-};
+}

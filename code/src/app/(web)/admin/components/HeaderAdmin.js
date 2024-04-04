@@ -1,91 +1,91 @@
-"use client"
+'use client'
 
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import CssBaseline from '@mui/material/CssBaseline';
-import Divider from '@mui/material/Divider';
-import Drawer from '@mui/material/Drawer';
-import IconButton from '@mui/material/IconButton';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import MenuList from '@mui/material/MenuList';
-import Paper from '@mui/material/Paper';
+import * as React from 'react'
+import PropTypes from 'prop-types'
+import AppBar from '@mui/material/AppBar'
+import Box from '@mui/material/Box'
+import CssBaseline from '@mui/material/CssBaseline'
+import Divider from '@mui/material/Divider'
+import Drawer from '@mui/material/Drawer'
+import IconButton from '@mui/material/IconButton'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import ListItemText from '@mui/material/ListItemText'
+import MenuList from '@mui/material/MenuList'
+import Paper from '@mui/material/Paper'
 
-import SourceIcon from '@mui/icons-material/Source';
-import MenuIcon from '@mui/icons-material/Menu';
-import InsightsIcon from '@mui/icons-material/Insights';
-import PeopleIcon from '@mui/icons-material/People';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import RestorePageIcon from '@mui/icons-material/RestorePage';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
-import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
-import RedeemIcon from '@mui/icons-material/Redeem';
-import CategoryIcon from '@mui/icons-material/Category';
+import SourceIcon from '@mui/icons-material/Source'
+import MenuIcon from '@mui/icons-material/Menu'
+import InsightsIcon from '@mui/icons-material/Insights'
+import PeopleIcon from '@mui/icons-material/People'
+import NotificationsIcon from '@mui/icons-material/Notifications'
+import RestorePageIcon from '@mui/icons-material/RestorePage'
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
+import EditNoteIcon from '@mui/icons-material/EditNote'
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd'
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
+import RedeemIcon from '@mui/icons-material/Redeem'
+import CategoryIcon from '@mui/icons-material/Category'
 
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Link from 'next/link';
-import { Icon, Menu, MenuItem } from '@mui/material';
-import { AccountCircle } from '@mui/icons-material';
-import PopupState, { bindMenu, bindTrigger } from 'material-ui-popup-state';
+import Toolbar from '@mui/material/Toolbar'
+import Typography from '@mui/material/Typography'
+import Link from 'next/link'
+import { Icon, Menu, MenuItem } from '@mui/material'
+import { AccountCircle } from '@mui/icons-material'
+import PopupState, { bindMenu, bindTrigger } from 'material-ui-popup-state'
 
-const drawerWidth = 240;
+const drawerWidth = 240
 
 function HeaderCreator(props) {
-  const { window, children } = props;
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const { window, children } = props
+  const [mobileOpen, setMobileOpen] = React.useState(false)
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+    setMobileOpen(!mobileOpen)
+  }
 
   const itemListDrawer = [
     {
-      href: "/admin",
-      title: "Dashboard",
+      href: '/admin',
+      title: 'Dashboard',
       icon: <InsightsIcon />
     },
     {
-      href: "/admin/master-user",
-      title: "Master User",
+      href: '/admin/master-user',
+      title: 'Master User',
       icon: <PeopleIcon />
     },
     {
-      href: "/admin/master-category",
-      title: "Master Category",
+      href: '/admin/master-category',
+      title: 'Master Category',
       icon: <CategoryIcon />
     },
     {
-      href: "/admin/transaction",
-      title: "Transaction",
+      href: '/admin/transaction',
+      title: 'Transaction',
       icon: <AccountBalanceWalletIcon />
     },
     {
-      href: "/admin/request-creator-role",
-      title: "Request Creator Role",
+      href: '/admin/request-creator-role',
+      title: 'Request Creator Role',
       icon: <AssignmentIndIcon />
     },
     {
-      href: "/admin/request-refund",
-      title: "Request Refund",
+      href: '/admin/request-refund',
+      title: 'Request Refund',
       icon: <RedeemIcon />
     },
     {
-      href: "/admin/request-withdraw",
-      title: "Request Withdraw",
+      href: '/admin/request-withdraw',
+      title: 'Request Withdraw',
       icon: <RequestQuoteIcon />
     },
     {
-      href: "/admin/notification",
-      title: "Notifikasi",
+      href: '/admin/notification',
+      title: 'Notifikasi',
       icon: <NotificationsIcon />
     }
   ]
@@ -96,82 +96,80 @@ function HeaderCreator(props) {
       <Divider />
       <List>
         {itemListDrawer.map(item => (
-          <Link sx={{width: '100%'}} href={item.href}>
-          <ListItem key={item.title} disablePadding>
-              <ListItemButton sx={{width: '100%'}}>
-                <ListItemIcon>
-                  {item.icon}
-                </ListItemIcon>
+          <Link sx={{ width: '100%' }} href={item.href}>
+            <ListItem key={item.title} disablePadding>
+              <ListItemButton sx={{ width: '100%' }}>
+                <ListItemIcon>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.title} />
               </ListItemButton>
-          </ListItem>
+            </ListItem>
           </Link>
         ))}
       </List>
     </div>
-  );
+  )
 
-  const container = window !== undefined ? () => window().document.body : undefined;
-  
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [toggleMenuNotif, setToggleMenuNotif] = React.useState(null);
-  
-  const handleMenuNotif = (event) => {
-    setToggleMenuNotif(event.currentTarget);
-  };
+  const container = window !== undefined ? () => window().document.body : undefined
+
+  const [anchorEl, setAnchorEl] = React.useState(null)
+  const [toggleMenuNotif, setToggleMenuNotif] = React.useState(null)
+
+  const handleMenuNotif = event => {
+    setToggleMenuNotif(event.currentTarget)
+  }
 
   const handleCloseMenuNotif = () => {
-    setToggleMenuNotif(null);
-  };
+    setToggleMenuNotif(null)
+  }
 
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const handleMenu = event => {
+    setAnchorEl(event.currentTarget)
+  }
 
   const handleClose = () => {
-    setAnchorEl(null);
-  };
+    setAnchorEl(null)
+  }
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar
-        position="fixed"
+        position='fixed'
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
+          ml: { sm: `${drawerWidth}px` }
         }}
       >
         <Toolbar>
           <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
+            color='inherit'
+            aria-label='open drawer'
+            edge='start'
             onClick={handleDrawerToggle}
             sx={{ mr: 2, display: { sm: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{flexGrow: 1}}>
+          <Typography variant='h6' noWrap component='div' sx={{ flexGrow: 1 }}>
             Admin
           </Typography>
-          <PopupState variant="popover" popupId="demo-popup-menu">
-            {(popupState) => (
+          <PopupState variant='popover' popupId='demo-popup-menu'>
+            {popupState => (
               <>
                 <IconButton
-                  size="large"
-                  aria-label="account of current user"
-                  aria-controls="menu-notif"
-                  aria-haspopup="true"
-                  color="inherit"
+                  size='large'
+                  aria-label='account of current user'
+                  aria-controls='menu-notif'
+                  aria-haspopup='true'
+                  color='inherit'
                   sx={{
-                    justifySelf: "end"
+                    justifySelf: 'end'
                   }}
                   {...bindTrigger(popupState)}
                 >
                   <NotificationsIcon />
                 </IconButton>
                 <Menu
-                  id="menu-notif"
+                  id='menu-notif'
                   // anchorEl={toggleMenuNotif}
                   // anchorOrigin={{
                   //   vertical: 'bottom',
@@ -194,97 +192,111 @@ function HeaderCreator(props) {
                 >
                   <Paper sx={{ width: '50ch', maxHeight: 45 * 4.5 }} elevation={0}>
                     <MenuList>
-                      <MenuItem key={1} onClick={handleClose}> 
-                      <Box></Box>
-                      <MenuIcon sx={{marginRight: 2}} />
-                      <Typography variant="inherit" noWrap>
-                      Item 1 Lorem ipsum dolor sit, amet consectetur adipisicing elit. Obcaecati perferendis libero architecto voluptates et veritatis repellendus reiciendis labore officia quo culpa hic, porro asperiores quae doloremque alias minus minima autem quidem magni, quasi numquam quisquam! Neque rem ex aperiam, commodi accusamus explicabo blanditiis atque expedita deleniti, ipsa, in quos consectetur.s
-                      </Typography>
+                      <MenuItem key={1} onClick={handleClose}>
+                        <Box></Box>
+                        <MenuIcon sx={{ marginRight: 2 }} />
+                        <Typography variant='inherit' noWrap>
+                          Item 1 Lorem ipsum dolor sit, amet consectetur adipisicing elit. Obcaecati perferendis libero
+                          architecto voluptates et veritatis repellendus reiciendis labore officia quo culpa hic, porro
+                          asperiores quae doloremque alias minus minima autem quidem magni, quasi numquam quisquam!
+                          Neque rem ex aperiam, commodi accusamus explicabo blanditiis atque expedita deleniti, ipsa, in
+                          quos consectetur.s
+                        </Typography>
                       </MenuItem>
-                      <MenuItem key={2} onClick={handleClose}>Item 2</MenuItem>
-                      <MenuItem key={3} onClick={handleClose}>Item 3</MenuItem>
-                      <MenuItem key={4} onClick={handleClose}>Item 3</MenuItem>
-                      <MenuItem key={5} onClick={handleClose}>Item 3</MenuItem>
-                      <MenuItem key={6} onClick={handleClose}>Item 3</MenuItem>
-                      <MenuItem key={7} onClick={handleClose}>Item 3</MenuItem>
-                      <MenuItem key={8} onClick={handleClose}>Item 3</MenuItem>
-                      <MenuItem key={9} onClick={handleClose}>Item 3</MenuItem>
+                      <MenuItem key={2} onClick={handleClose}>
+                        Item 2
+                      </MenuItem>
+                      <MenuItem key={3} onClick={handleClose}>
+                        Item 3
+                      </MenuItem>
+                      <MenuItem key={4} onClick={handleClose}>
+                        Item 3
+                      </MenuItem>
+                      <MenuItem key={5} onClick={handleClose}>
+                        Item 3
+                      </MenuItem>
+                      <MenuItem key={6} onClick={handleClose}>
+                        Item 3
+                      </MenuItem>
+                      <MenuItem key={7} onClick={handleClose}>
+                        Item 3
+                      </MenuItem>
+                      <MenuItem key={8} onClick={handleClose}>
+                        Item 3
+                      </MenuItem>
+                      <MenuItem key={9} onClick={handleClose}>
+                        Item 3
+                      </MenuItem>
                     </MenuList>
                   </Paper>
                 </Menu>
               </>
             )}
           </PopupState>
-          <PopupState variant="popover" popupId="demo-popup-menu">
-            {(popupState) => (
+          <PopupState variant='popover' popupId='demo-popup-menu'>
+            {popupState => (
               <>
                 <IconButton
-                  size="large"
-                  aria-label="account of current user"
-                  aria-controls="menu-appbar"
-                  aria-haspopup="true"
+                  size='large'
+                  aria-label='account of current user'
+                  aria-controls='menu-appbar'
+                  aria-haspopup='true'
                   onClick={handleMenu}
-                  color="inherit"
+                  color='inherit'
                   sx={{
-                    justifySelf: "end"
+                    justifySelf: 'end'
                   }}
                   {...bindTrigger(popupState)}
                 >
                   <AccountCircle />
                 </IconButton>
-                <Menu
-                  {...bindMenu(popupState)}
-                >
-                  <MenuItem key={1} onClick={handleClose}>Profile</MenuItem>
-                  <MenuItem key={2} onClick={handleClose}>Logout</MenuItem>
+                <Menu {...bindMenu(popupState)}>
+                  <MenuItem key={1} onClick={handleClose}>
+                    Profile
+                  </MenuItem>
+                  <MenuItem key={2} onClick={handleClose}>
+                    Logout
+                  </MenuItem>
                 </Menu>
               </>
             )}
           </PopupState>
-          
         </Toolbar>
       </AppBar>
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label="mailbox folders"
-      >
+      <Box component='nav' sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }} aria-label='mailbox folders'>
         {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
         <Drawer
           container={container}
-          variant="temporary"
+          variant='temporary'
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
+            keepMounted: true // Better open performance on mobile.
           }}
           sx={{
             display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth }
           }}
         >
           {drawer}
         </Drawer>
         <Drawer
-          variant="permanent"
+          variant='permanent'
           sx={{
             display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth }
           }}
           open
         >
           {drawer}
         </Drawer>
       </Box>
-      <Box
-        component="main"
-        sx={{ p: 3, width: { sm: `calc(100% - ${drawerWidth}px)`, xs: '100%' } }}
-      >
+      <Box component='main' sx={{ p: 3, width: { sm: `calc(100% - ${drawerWidth}px)`, xs: '100%' } }}>
         <Toolbar />
         {children}
       </Box>
     </Box>
-  );
+  )
 }
 
 HeaderCreator.propTypes = {
@@ -292,7 +304,7 @@ HeaderCreator.propTypes = {
    * Injected by the documentation to work in an iframe.
    * You won't need it on your project.
    */
-  window: PropTypes.func,
-};
+  window: PropTypes.func
+}
 
-export default HeaderCreator;
+export default HeaderCreator

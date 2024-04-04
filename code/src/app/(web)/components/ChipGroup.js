@@ -1,4 +1,4 @@
-import { Box, Chip, Grid } from "@mui/material"
+import { Box, Chip, Grid } from '@mui/material'
 
 const ChipGroup = ({ data }) => {
   return (
@@ -6,7 +6,7 @@ const ChipGroup = ({ data }) => {
       <Grid container spacing={2}>
         {data.props.data.map(d => (
           <Grid item xs={12}>
-            <Chip label={d.label}/>
+            <Chip label={d.label} />
           </Grid>
         ))}
       </Grid>

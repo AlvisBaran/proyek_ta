@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-const { DataTypes, literal } = require('sequelize');
+const { DataTypes, literal } = require('sequelize')
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -17,37 +17,37 @@ module.exports = {
         allowNull: false,
         references: { model: 'users', key: 'id' },
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       type: {
         type: DataTypes.ENUM,
         values: ['public', 'private'],
         defaultValue: 'public',
-        allowNull: false,
+        allowNull: false
       },
       title: {
         type: DataTypes.TEXT('tiny'),
-        allowNull: false,
+        allowNull: false
       },
       body: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: false
       },
       status: {
         type: DataTypes.ENUM,
         values: ['draft', 'published'],
         defaultValue: 'draft',
-        allowNull: false,
+        allowNull: false
       },
       likeCounter: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: 0,
+        defaultValue: 0
       },
       shareCounter: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: 0,
+        defaultValue: 0
       },
       publishedAt: {
         type: DataTypes.DATE
@@ -58,14 +58,14 @@ module.exports = {
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
-        defaultValue: literal('CURRENT_TIMESTAMP'),
+        defaultValue: literal('CURRENT_TIMESTAMP')
       },
       updatedAt: {
         type: DataTypes.DATE
       }
-    });
+    })
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('contents');
+    await queryInterface.dropTable('contents')
   }
-};
+}

@@ -30,4 +30,8 @@ sequelize model:generate --name TransTopup --attributes userRef:integer,invoice:
 
 sequelize model:generate --name TransWithdraw --attributes userRef:integer,invoice:string,nominal:bigint,status:enum,note:text,requestedAt:date,repliedAt:date
 
-sequelize model:generate --name UsersFollows --attributes followerRef:integer,followerRef:integer
+sequelize model:generate --name UsersFollows --attributes followerRef:integer,followedRef:integer
+
+sequelize model:generate --name MembershipsXContents --attributes membershipRef:integer,contentRef:integer
+
+sequelize model:generate --name CategoriesXContents --attributes categoryRef:integer,contentRef:integer

@@ -3,18 +3,18 @@
 //   max: number
 // }
 
-export const range = (attr) => {
-  let { min = 0, max } = attr;
-  let result = [];
+export const range = attr => {
+  let { min = 0, max } = attr
+  let result = []
   for (let index = min; index < max; index++) {
-    result.push(index);
+    result.push(index)
   }
-  return result;
+  return result
 }
 
 export function round(value, precision) {
-  var multiplier = Math.pow(10, precision || 0);
-  return Math.round(value * multiplier) / multiplier;
+  var multiplier = Math.pow(10, precision || 0)
+  return Math.round(value * multiplier) / multiplier
 }
 
 // Remove undefined on object example

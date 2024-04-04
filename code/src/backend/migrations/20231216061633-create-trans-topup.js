@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-const { DataTypes, literal } = require('sequelize');
+const { DataTypes, literal } = require('sequelize')
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -17,7 +17,7 @@ module.exports = {
         allowNull: false,
         references: { model: 'users', key: 'id' },
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       invoice: {
         type: DataTypes.STRING,
@@ -31,7 +31,7 @@ module.exports = {
         type: DataTypes.ENUM,
         values: ['pending', 'success', 'failed'],
         defaultValue: 'pending',
-        allowNull: false,
+        allowNull: false
       },
       mt_payment_link: {
         type: DataTypes.TEXT
@@ -45,7 +45,7 @@ module.exports = {
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: literal('CURRENT_TIMESTAMP'),
+        defaultValue: literal('CURRENT_TIMESTAMP')
       },
       updatedAt: {
         allowNull: false,
@@ -54,9 +54,9 @@ module.exports = {
       deletedAt: {
         type: DataTypes.DATE
       }
-    });
+    })
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('trans_topup');
+    await queryInterface.dropTable('trans_topup')
   }
-};
+}

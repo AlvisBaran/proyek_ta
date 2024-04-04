@@ -1,8 +1,5 @@
-
 const page = () => {
-  return (
-    <div>creator withdraw page</div>
-  )
+  return <div>creator withdraw page</div>
 }
 
 export default page

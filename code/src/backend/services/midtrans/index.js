@@ -1,18 +1,18 @@
-import axios from "axios"
-import { v4 as uuidV4 } from "uuid"
+import axios from 'axios'
+import { v4 as uuidV4 } from 'uuid'
 
 // ** Midtrans Configs Constants
 const ENDPOINT = process.env.NEXT_PUBLIC_MIDTRANS_ENDPOINT
 const CLIENT_KEY = process.env.MIDTRANS_CLIENT_KEY
 const SERVER_KEY = process.env.MIDTRANS_SERVER_KEY
 const DEFAULT_SETTINGS = {
-  productName: "Top Up E-Money Web Panthreon",
-  phoneNumber: "+6289616089857",
+  productName: 'Top Up E-Money Web Panthreon',
+  phoneNumber: '+6289616089857',
   usage_limit: 1,
   customer_required: true,
   credit_card: {
     secure: true,
-    bank: "bca",
+    bank: 'bca',
     installment: {
       required: false,
       terms: {
@@ -25,20 +25,20 @@ const DEFAULT_SETTINGS = {
     }
   },
   bca_va: {
-    va_number: "11111111111"
+    va_number: '11111111111'
   },
   expiry: {
     duration: 30,
-    unit: "minutes" // minutes, hours, days, weeks, months, years, null
+    unit: 'minutes' // minutes, hours, days, weeks, months, years, null
   },
-  enabled_payments: ["credit_card", "bca_va", "indomaret"]
+  enabled_payments: ['credit_card', 'bca_va', 'indomaret']
 }
 const HTTP_FETCHER = axios.create({
   baseURL: ENDPOINT,
   headers: {
-    "Accept": "application/json",
-    "Content-Type": "application/json",
-    "Authorization": `Basic ${btoa(SERVER_KEY+":")}`
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Basic ${btoa(SERVER_KEY + ':')}`
   }
 })
 
@@ -46,15 +46,15 @@ const HTTP_FETCHER = axios.create({
 
 /**
  * Create a Top Up Payment Link
- * 
+ *
  * Adalah fungsi untuk membuat payment link fitur
  * top-up baru menggunakan midtrans.
- * 
+ *
  * Perhatikan params yang berhubungan denga user!
  * Midtrans menetapkan kalau ingin memasukkan pengguna
  * maka email adalah required karena akan dikirim ke email pengguna
  * tersebut juga (HATI HATI SAAT MENGIRIM EMAIL)
- * 
+ *
  * @param {string} transactionId Bisa masukkan id transaksinya langsung juga gpp
  * @param {number} nominalTopUp Nominal top-up nya berapa
  * @param {string} userFirstName First name customernya
@@ -65,7 +65,7 @@ const HTTP_FETCHER = axios.create({
  * @param {number|undefined} duration Durasi expired link nya dalam menit (default 30)
  * @param {number|undefined} usageLimit Limi link berapa kali digunakan (default 1)
  * @returns success: object of code: http code, orderId: midtrans order id, paymentUrl: midtrans payment url
- * @returns error: object of code: http code, message: midtrans error message 
+ * @returns error: object of code: http code, message: midtrans error message
  */
 export async function createTopUpPaymentLink(
   transactionId,
@@ -93,16 +93,18 @@ export async function createTopUpPaymentLink(
         duration: duration ?? DEFAULT_SETTINGS.expiry.duration,
         unit: DEFAULT_SETTINGS.expiry.unit
       },
-      enabled_payments: ["bca_va"],
-      item_details: [{
-        id: transactionId,
-        name: DEFAULT_SETTINGS.productName,
-        price: nominalTopUp,
-        quantity: 1,
-        brand: "Panthreon",
-        category: 'e-wallet',
-        merchant_name: "Panthreon"
-      }],
+      enabled_payments: ['bca_va'],
+      item_details: [
+        {
+          id: transactionId,
+          name: DEFAULT_SETTINGS.productName,
+          price: nominalTopUp,
+          quantity: 1,
+          brand: 'Panthreon',
+          category: 'e-wallet',
+          merchant_name: 'Panthreon'
+        }
+      ]
       // customer_details: {
       //   first_name: userFirstName,
       //   email: userEmail,
@@ -110,60 +112,60 @@ export async function createTopUpPaymentLink(
       //   notes: userNotes ?? undefined
       // }
     })
-    .then((res) => {
-      console.log(res.data)
-      return resolve({
-        success: {
-          code: res.status,
-          orderId: res.data.order_id,
-          paymentUrl: res.data.payment_url
-        }
+      .then(res => {
+        console.log(res.data)
+        return resolve({
+          success: {
+            code: res.status,
+            orderId: res.data.order_id,
+            paymentUrl: res.data.payment_url
+          }
+        })
       })
-    })
-    .catch((err) => {
-      console.log(err.response)
-      return reject({
-        error: {
-          code: err.response?.status,
-          message: err.response?.error_messages
-        }
+      .catch(err => {
+        console.log(err.response)
+        return reject({
+          error: {
+            code: err.response?.status,
+            message: err.response?.error_messages
+          }
+        })
       })
-    })
   })
 }
 
 export async function getTopUpPaymentLink(orderId) {
   return new Promise(async (resolve, reject) => {
     return await HTTP_FETCHER.get(`/v1/payment-links//${orderId}`)
-    .then((res) => {
-      return resolve(res.data)
-    })
-    .catch((err) => {
-      console.log(err.response)
-      return reject({
-        error: err.response
+      .then(res => {
+        return resolve(res.data)
       })
-    })
+      .catch(err => {
+        console.log(err.response)
+        return reject({
+          error: err.response
+        })
+      })
   })
 }
 
 export async function checkTopUpTransactionStatus(transactionId) {
   return new Promise(async (resolve, reject) => {
     return await HTTP_FETCHER.get(`/v2/${transactionId}/status`)
-    .then((res) => {
-      return resolve({
-        transaction_status: res.data.transaction_status,
-        fraud_status: res.data.fraud_status
+      .then(res => {
+        return resolve({
+          transaction_status: res.data.transaction_status,
+          fraud_status: res.data.fraud_status
+        })
       })
-    })
-    .catch((err) => {
-      console.log(err.response)
-      return reject({
-        error: {
-          code: err.response?.status_code,
-          message: err.response?.status_message
-        }
+      .catch(err => {
+        console.log(err.response)
+        return reject({
+          error: {
+            code: err.response?.status_code,
+            message: err.response?.status_message
+          }
+        })
       })
-    })
   })
 }

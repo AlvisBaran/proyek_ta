@@ -1,12 +1,12 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material'
 import React from 'react'
 
-const TabPanel = (props) => {
-  const { children, value, index, ...other } = props;
+const TabPanel = props => {
+  const { children, value, index, ...other } = props
 
   return (
     <div
-      role="tabpanel"
+      role='tabpanel'
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
@@ -18,7 +18,7 @@ const TabPanel = (props) => {
         </Box>
       )}
     </div>
-  );
+  )
 }
 
 export default TabPanel
