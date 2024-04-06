@@ -1,6 +1,8 @@
 'use client'
 import Breadcrumb from '@/app/(web)/components/Breadcrumb'
-import TextEditor from '@/app/(web)/components/TextEditor'
+// import TextEditor from '@/app/(web)/components/TextEditor'
+import dynamic from 'next/dynamic'
+const TextEditor = dynamic(() => import('@/app/(web)/components/TextEditor'), { ssr: false })
 import MyAxios from '@/hooks/MyAxios'
 import {
   Alert,
