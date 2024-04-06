@@ -80,15 +80,15 @@ export const authOptions = {
   },
   jwt: {
     maxAge: 7 * 24 * 60 * 60 // 7 days
-  }
+  },
   // Ini buat kalo mau pake custom pages
-  // pages: {
-  //   signIn: '/service/auth/signin',
-  //   signOut: '/service/auth/signout',
-  //   error: '/service/auth/error', // Error code passed in query string as ?error=
-  //   verifyRequest: '/service/auth/verify-request', // (used for check email message)
-  //   newUser: '/service/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
-  // },
+  pages: {
+    signIn: '/auth/signIn',
+    // signOut: '/service/auth/signout',
+    // error: '/service/auth/error', // Error code passed in query string as ?error=
+    // verifyRequest: '/service/auth/verify-request', // (used for check email message)
+    // newUser: '/service/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
+  },
   // Ini kalo mau custom logo dll
   // theme: {
   //   colorScheme: "auto", // "auto" | "dark" | "light"
