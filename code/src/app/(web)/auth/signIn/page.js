@@ -1,7 +1,10 @@
 import React from 'react'
+import SignIn from '../../components/SignIn'
 
 const page = () => {
-  return <div>ini halaman sign in</div>
+  return (
+    <SignIn />
+  )
 }
 
 export default page

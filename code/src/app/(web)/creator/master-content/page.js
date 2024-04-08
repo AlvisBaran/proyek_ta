@@ -10,8 +10,11 @@ import { useEffect, useState } from 'react'
 import MyAxios from '@/hooks/MyAxios'
 import PublishIcon from '@mui/icons-material/Publish'
 import UnpublishedIcon from '@mui/icons-material/Unpublished'
+import EditIcon from '@mui/icons-material/Edit'
+import { useRouter } from 'next/navigation'
 
 const page = () => {
+  const router = useRouter()
   const [dataContent, setDataContent] = useState([])
   const fetch = async () => {
     await MyAxios.get('/creator/content?creatorId=5')
@@ -38,6 +41,9 @@ const page = () => {
         console.log(err)
       })
   }
+  const handleEditKonten = async id => {
+    router.push(`/creator/master-content/edit?id=${id}`)
+  }
   const columns = [
     {
       field: 'actions',
@@ -50,6 +56,12 @@ const page = () => {
             icon={params.row.status === 'draft' ? <PublishIcon /> : <UnpublishedIcon />}
             onClick={() => handlePublishKonten(params.id, params.row.status)}
             label={params.row.status === 'draft' ? 'Publish Konten' : 'Draft Konten'}
+            showInMenu
+          />,
+          <GridActionsCellItem
+            icon={<EditIcon />}
+            onClick={() => handleEditKonten(params.id)}
+            label={'Edit Konten'}
             showInMenu
           />
         ]
@@ -156,7 +168,6 @@ const page = () => {
           }
         }}
         pageSizeOptions={[5, 10]}
-        checkboxSelection
         slots={{
           toolbar: GridToolbar
         }}
