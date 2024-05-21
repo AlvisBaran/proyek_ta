@@ -35,3 +35,5 @@ sequelize model:generate --name UsersFollows --attributes followerRef:integer,fo
 sequelize model:generate --name MembershipsXContents --attributes membershipRef:integer,contentRef:integer
 
 sequelize model:generate --name CategoriesXContents --attributes categoryRef:integer,contentRef:integer
+
+sequelize model:generate --name ContentGallery --attributes contentRef:integer,title:string,alt:string,minio_object_name:string

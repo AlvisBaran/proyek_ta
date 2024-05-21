@@ -9,6 +9,8 @@ import Membership from './membership'
 import MembershipsXContents from './membershipsxcontents'
 import Category from './category'
 import CategoriesXContents from './categoriesxcontents'
+import ContentGallery from './contentgallery'
+import UsersFollows from './usersfollows'
 
 // ** User and Notifications
 User.hasMany(Notification, { foreignKey: 'userRef' })
@@ -17,6 +19,10 @@ Notification.belongsTo(User, { foreignKey: 'userRef' })
 // ** User and Content
 User.hasMany(Content, { foreignKey: 'creatorRef', as: 'Creator' })
 Content.belongsTo(User, { foreignKey: 'creatorRef', as: 'Creator' })
+
+// ** Content and Gallery
+Content.hasMany(ContentGallery, { foreignKey: 'contentRef', as: 'Gallery' })
+ContentGallery.belongsTo(Content, { foreignKey: 'contentRef', as: 'Gallery' })
 
 // ** Content and Comment
 Content.hasMany(Comment, { foreignKey: 'contentRef' })
@@ -38,6 +44,7 @@ Reply.belongsTo(User, { foreignKey: 'authorRef' })
 Content.hasMany(ContentLikes, { foreignKey: 'contentRef' })
 ContentLikes.belongsTo(Content, { foreignKey: 'contentRef' })
 
+// ** User and Content Likes
 User.hasMany(ContentLikes, { foreignKey: 'performerRef' })
 ContentLikes.belongsTo(User, { foreignKey: 'performerRef' })
 
@@ -60,3 +67,11 @@ Category.hasMany(CategoriesXContents, { foreignKey: 'categoryRef' })
 CategoriesXContents.belongsTo(Category, { foreignKey: 'categoryRef' })
 Content.hasMany(CategoriesXContents, { foreignKey: 'contentRef' })
 CategoriesXContents.belongsTo(Content, { foreignKey: 'contentRef' })
+
+// ** User and User (Follow): Many to Many
+User.belongsToMany(User, { through: UsersFollows, foreignKey: 'followerRef', as: 'Follower' })
+User.belongsToMany(User, { through: UsersFollows, foreignKey: 'followedRef', as: 'Followed' })
+User.hasMany(UsersFollows, { foreignKey: 'followerRef' })
+UsersFollows.belongsTo(User, { foreignKey: 'followerRef' })
+User.hasMany(UsersFollows, { foreignKey: 'followedRef' })
+UsersFollows.belongsTo(User, { foreignKey: 'followedRef' })
