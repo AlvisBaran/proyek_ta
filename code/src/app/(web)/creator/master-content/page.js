@@ -11,6 +11,7 @@ import MyAxios from '@/hooks/MyAxios'
 import PublishIcon from '@mui/icons-material/Publish'
 import UnpublishedIcon from '@mui/icons-material/Unpublished'
 import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useRouter } from 'next/navigation'
 
 const page = () => {
@@ -44,6 +45,9 @@ const page = () => {
   const handleEditKonten = async id => {
     router.push(`/creator/master-content/edit?id=${id}`)
   }
+  const handleDeleteKonten = async(id) => {
+    
+  }
   const columns = [
     {
       field: 'actions',
@@ -62,6 +66,12 @@ const page = () => {
             icon={<EditIcon />}
             onClick={() => handleEditKonten(params.id)}
             label={'Edit Konten'}
+            showInMenu
+          />,
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            onClick={() => handleDeleteKonten(params.id)}
+            label={'Delete Konten'}
             showInMenu
           />
         ]

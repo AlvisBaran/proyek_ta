@@ -29,6 +29,8 @@ import {
 } from 'mui-tiptap'
 import { useSearchParams } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
+import { getSession, useSession } from 'next-auth/react'
+import { getToken } from 'next-auth/jwt'
 
 const page = () => {
   const queryParams = useSearchParams()
@@ -39,6 +41,7 @@ const page = () => {
   const [dataMembership, setDataMembership] = useState([])
   const [dataBindMembership, setDataBindMembership] = useState([])
   const rteRef = useRef(null)
+  const session = useSession()
 
   const dataBreadcrumb = [
     {
@@ -62,7 +65,16 @@ const page = () => {
           await MyAxios.get(`/creator/membership?creatorId=5`)
             .then(async ret => {
               setDataMembership(ret.data)
-              await MyAxios.get(`/creator/content/${id}/bind-membership`).then(ret => {
+              // const session = await getSession()
+              // console.log(session)
+              // const getCookies = cookies()
+              // const nextAuthSession = getCookies.get('next-auth.session-token')?.value || ''
+              console.log(session.data)
+              await MyAxios.get(`/creator/content/${id}/bind-membership`, {
+                headers: {
+                  'Authorization': `Bearer ${session.accessToken}`
+                }
+              }).then(ret => {
                 if (ret.data.length > 0) {
                   setDataBindMembership(ret.data.map(d => d.id))
                 }
@@ -76,7 +88,6 @@ const page = () => {
           console.log(err)
         })
     }
-
     fetch()
   }, [])
 

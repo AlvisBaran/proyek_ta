@@ -15,7 +15,6 @@ export const authOptions = {
       async authorize(credentials, req) {
         //get email & password from fe
         const { email, password } = credentials
-
         //get the jwt token
         let user = await User.findOne({
           where: { email },
@@ -54,26 +53,44 @@ export const authOptions = {
     // Dalam callbacks ada urutannya, jadi emang harus begini lempar-lemparan data
     async jwt({ token, user }) {
       if (!!user)
+        // token.accessToken = user.accessToken
         return {
           ...token,
           id: user.id,
           cUsername: user.cUsername,
-          role: user.role
+          role: user.role,
+          accessToken: user.accessToken
         }
       return token
     },
     async session({ session, token }) {
+      // session.accessToken = token.accessToken
       return {
         ...session,
         user: {
           ...session.user,
           id: token.id,
           cUsername: token.cUsername,
-          role: token.role
+          role: token.role,
+          accessToken: token.accessToken
         }
       }
     }
   },
+  // callbacks: {
+
+  //   jwt: async (token, user,  account) => {
+  //     if (account) {
+  //       token.accessToken = account.accessToken;
+  //     }
+  //     return token;
+  //   },
+
+  //   session: async (session, token) => {
+  //     session.accessToken = token.accessToken;
+  //     return session;
+  //   },
+  // },
   session: {
     strategy: 'jwt',
     maxAge: 7 * 24 * 60 * 60 // 7 days
@@ -83,12 +100,12 @@ export const authOptions = {
   },
   // Ini buat kalo mau pake custom pages
   pages: {
-    signIn: '/auth/signIn',
+    signIn: '/auth/signIn'
     // signOut: '/service/auth/signout',
     // error: '/service/auth/error', // Error code passed in query string as ?error=
     // verifyRequest: '/service/auth/verify-request', // (used for check email message)
     // newUser: '/service/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
-  },
+  }
   // Ini kalo mau custom logo dll
   // theme: {
   //   colorScheme: "auto", // "auto" | "dark" | "light"

@@ -32,12 +32,14 @@ import Link from 'next/link'
 import { Icon, Menu, MenuItem } from '@mui/material'
 import { AccountCircle } from '@mui/icons-material'
 import PopupState, { bindMenu, bindTrigger } from 'material-ui-popup-state'
+import { useSession } from 'next-auth/react'
 
 const drawerWidth = 240
 
 function HeaderCreator(props) {
   const { window, children } = props
   const [mobileOpen, setMobileOpen] = React.useState(false)
+  const session = useSession()
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
@@ -63,6 +65,11 @@ function HeaderCreator(props) {
       href: '/creator/request-content',
       title: 'Request Konten',
       icon: <RestorePageIcon />
+    },
+    {
+      href: '/creator/message',
+      title: 'Message',
+      icon: <MessageIcon />
     },
     {
       href: '/creator/history-transaction',
@@ -146,6 +153,7 @@ function HeaderCreator(props) {
           <PopupState variant='popover' popupId='demo-popup-menu'>
             {popupState => (
               <>
+                {/* <Typography>Saldo: </Typography> */}
                 <IconButton
                   size='large'
                   aria-label='account of current user'
@@ -227,6 +235,7 @@ function HeaderCreator(props) {
           <PopupState variant='popover' popupId='demo-popup-menu'>
             {popupState => (
               <>
+               <Typography>{session.status !== 'loading' && !!session?.data?.user ? session.data.user.name : ""}</Typography>
                 <IconButton
                   size='large'
                   aria-label='account of current user'
