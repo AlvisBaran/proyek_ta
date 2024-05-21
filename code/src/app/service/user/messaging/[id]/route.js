@@ -5,7 +5,7 @@ import User from '@/backend/models/user'
 import Message from '@/backend/models/message'
 import Chat from '@/backend/models/chat'
 
-// Message > Read One
+// ** User > Message > Read One
 export async function GET(request, { params }) {
   const searchParams = request.nextUrl.searchParams
   const userId = Number(searchParams.get('userId'))
@@ -80,7 +80,7 @@ export async function GET(request, { params }) {
   }
 }
 
-// Message > Add Chat
+// ** User > Message > Add Chat
 export async function PUT(request, { params }) {
   const searchParams = request.nextUrl.searchParams
   const userId = Number(searchParams.get('userId'))
@@ -149,7 +149,7 @@ export async function PUT(request, { params }) {
   }
 }
 
-// Message > Delete
+// ** User > Message > Delete
 export async function DELETE(request, { params }) {
   const searchParams = request.nextUrl.searchParams
   const userId = Number(searchParams.get('userId'))

@@ -6,7 +6,7 @@ import Message from '@/backend/models/message'
 import sqlz from '@/backend/configs/db'
 import Chat from '@/backend/models/chat'
 
-// Message > Read All
+// ** User > Message > Read All
 export async function GET(request) {
   const searchParams = request.nextUrl.searchParams
   const userId = Number(searchParams.get('userId'))
@@ -59,9 +59,11 @@ export async function GET(request) {
     })
 }
 
-// Message > Create
+// ** User > Message > Create
 export async function POST(request) {
   let req = {}
+  const searchParams = request.nextUrl.searchParams
+  const userId = Number(searchParams.get('userId'))
   try {
     req = await request.json()
   } catch (e) {}
@@ -70,10 +72,10 @@ export async function POST(request) {
   const joiValidate = Joi.object({
     userId: Joi.number().required(),
     user2Id: Joi.number().required()
-  }).validate(req, { abortEarly: false })
+  }).validate({ ...req, userId }, { abortEarly: false })
 
   if (!joiValidate.error) {
-    const { userId, user2Id } = req
+    const { user2Id } = req
     // Cek user 1 ada
     let currUser = await User.findByPk(userId)
     if (!currUser) {
