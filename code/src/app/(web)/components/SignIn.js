@@ -12,7 +12,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -34,7 +34,9 @@ export default function SignIn() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const router = useRouter()
-
+  
+  const session = useSession()
+  
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -50,9 +52,13 @@ export default function SignIn() {
       email,
       password,
     })
-      .then((response) => {
+      .then(async(response) => {
         console.log(response);
-        router.replace('/creator');
+        // router.replace('/creator');
+        console.log(session.data)
+        if(session.data.user.role === "normal") router.replace('/user')
+        else if(session.data.user.role === "creator") router.replace('/creator')
+        else router.replace('/admin')
       })
       .catch((error) => {
         console.log(error);
