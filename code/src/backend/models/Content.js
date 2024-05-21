@@ -27,11 +27,13 @@ Content.init(
     },
     title: {
       type: DataTypes.TEXT('tiny'),
-      allowNull: false
+      allowNull: true,
+      defaultValue: null
     },
     body: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: true,
+      defaultValue: null
     },
     status: {
       type: DataTypes.ENUM,
