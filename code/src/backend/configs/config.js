@@ -1,4 +1,4 @@
-const USE_INDEX = 0
+const USE_INDEX = 1
 const HOST = ['localhost', 'pow.h.filess.io']
 const DATABASE = ['ta_alvis_dev', 'panthreonprod_songbycool']
 const USERNAME = ['root', 'panthreonprod_songbycool']
