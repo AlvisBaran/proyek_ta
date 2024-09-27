@@ -1,7 +1,8 @@
 import Joi from 'joi'
-
+import { Op } from 'sequelize'
 import { responseString } from '@/backend/helpers/serverResponseString'
-import User from '@/backend/models/user'
+import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
+
 import Content from '@/backend/models/content'
 
 const FILTERS = {
@@ -11,36 +12,44 @@ const FILTERS = {
   type: ['public-only', 'private-only']
 }
 
-// Creator > Content > Read All
-export async function GET(request) {
+// ** Creator > Content > Read All
+export async function GET(request, response) {
   const searchParams = request.nextUrl.searchParams
-  const creatorId = searchParams.get('creatorId')
   const filterPublishStatus = searchParams.get('filterPublishStatus')
   const filterType = searchParams.get('filterType')
-  const search = searchParams.get('search')
+  const keyword = searchParams.get('keyword') ?? null
   let order = searchParams.get('order') ?? FILTERS.order[0]
   order = (order + '').toLowerCase()
   let orderType = searchParams.get('orderType') ?? FILTERS.orderType[0]
   orderType = (orderType + '').toUpperCase()
   let res = {}
 
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
+  // * Cek user adalah creator
+  if (user.role !== 'creator') {
+    res = { message: responseString.USER.NOT_CREATOR }
+    return Response.json(res, { status: 403 })
+  }
+
   const joiValidate = Joi.object({
-    creatorId: Joi.number().required(),
     filterPublishStatus: Joi.valid(...FILTERS.publishStatus)
       .allow(null)
       .optional(),
     filterType: Joi.valid(...FILTERS.type)
       .allow(null)
       .optional(),
-    search: Joi.string().allow(null).optional(),
     order: Joi.valid(...FILTERS.order).required(),
     orderType: Joi.valid(...FILTERS.orderType).required()
   }).validate(
     {
-      creatorId,
       filterPublishStatus,
       filterType,
-      search,
       order,
       orderType
     },
@@ -48,13 +57,20 @@ export async function GET(request) {
   )
 
   if (!joiValidate.error) {
-    let currCreator = await User.findByPk(creatorId)
-    if (!currCreator) {
-      res = { message: responseString.USER.NOT_FOUND }
-      return Response.json(res, { status: 404 })
+    let whereAttributes = { creatorRef: user.id, contentRequestRef: null }
+    if (!!keyword) {
+      whereAttributes = {
+        ...whereAttributes,
+        [Op.or]: [
+          { type: { [Op.like]: `%${keyword}%` } },
+          { title: { [Op.like]: `%${keyword}%` } },
+          { description: { [Op.like]: `%${keyword}%` } },
+          { body: { [Op.like]: `%${keyword}%` } },
+          { status: { [Op.like]: `%${keyword}%` } }
+        ]
+      }
     }
 
-    let whereAttributes = { creatorRef: creatorId }
     let contents = []
 
     if (!!filterPublishStatus) {
@@ -115,45 +131,46 @@ export async function GET(request) {
   }
 }
 
-// Creator > Content > Create
-export async function POST(request) {
+// ** Creator > Content > Create
+export async function POST(request, response) {
   let req = {}
   try {
     req = await request.json()
   } catch (e) {}
   let res = {}
 
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
+  // * Cek user adalah creator
+  if (user.role !== 'creator') {
+    res = { message: responseString.USER.NOT_CREATOR }
+    return Response.json(res, { status: 403 })
+  }
+
   const joiValidate = Joi.object({
-    creatorId: Joi.number().required(),
     type: Joi.valid('public', 'private').optional(),
     title: Joi.string().required(),
+    description: Joi.string().required(),
     body: Joi.string().required()
   }).validate(req, { abortEarly: false })
 
   if (!joiValidate.error) {
-    const { creatorId, type, title, body } = req
-
-    // Cek user ada
-    let currCreator = await User.findByPk(creatorId)
-    if (!currCreator) {
-      res = { message: responseString.USER.NOT_FOUND }
-      return Response.json(res, { status: 404 })
-    }
-
-    // Cek user adalah creator (sebenernya bisa bareng di atas, tapi ya sudah pisah aja)
-    if (currCreator.role !== 'creator') {
-      res = { message: 'Anda bukan seorang creator!' }
-      return Response.json(res, { status: 403 })
-    }
+    const { type, title, body, description } = req
 
     let newContent = Content.build({
-      creatorRef: creatorId,
+      creatorRef: user.id,
       type,
       title,
-      body
+      body,
+      description
     })
 
-    // Daftarkan content ke database
+    // * Daftarkan content ke database
     return await newContent
       .save()
       .then(async resp => {

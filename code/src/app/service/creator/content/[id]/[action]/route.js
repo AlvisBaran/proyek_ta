@@ -1,50 +1,49 @@
-import Joi from 'joi'
-
-import { responseString } from '@/backend/helpers/serverResponseString'
-import User from '@/backend/models/user'
-import Content from '@/backend/models/content'
 import { literal } from 'sequelize'
+import { responseString } from '@/backend/helpers/serverResponseString'
+import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
 
-// Creator > Content > Action
-export async function PUT(request, { params }) {
-  const { id, action } = params
+import Content from '@/backend/models/content'
+
+// ** Creator > Content > Action
+export async function PUT(request, response) {
+  const { id, action } = response.params
   let req = {}
   try {
     req = await request.json()
   } catch (e) {}
   let res = {}
 
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
+  // * Cek user adalah creator
+  if (user.role !== 'creator') {
+    res = { message: responseString.USER.NOT_CREATOR }
+    return Response.json(res, { status: 403 })
+  }
+
   if (action === 'publish_status') {
-    return await handlePublishStatus(id, req)
+    return await handlePublishStatus(id, user, req)
   } else {
     res = { error: responseString.SERVER.SERVER_ERROR }
     return Response.json(res, { status: 400 })
   }
 }
 
-// Creator > Content > Publish or Unpublish
-async function handlePublishStatus(id, req) {
-  let res = { message: 'handlePublishStatus', id, req }
-  const { creatorId, type } = req
+// ** Creator > Content > Publish or Unpublish
+async function handlePublishStatus(id, user, req) {
+  let res = { message: 'handlePublishStatus', id, user, req }
+  const { type } = req
 
-  // Cek user ada
-  let currCreator = await User.findByPk(creatorId)
-  if (!currCreator) {
-    res = { message: responseString.USER.NOT_FOUND }
-    return Response.json(res, { status: 404 })
-  }
-
-  // Cek user adalah creator
-  if (currCreator.role !== 'creator') {
-    res = { message: 'Anda bukan seorang creator!' }
-    return Response.json(res, { status: 403 })
-  }
-
-  // Cek content ada dan milik user yang sedang merequest
+  // * Cek content ada dan milik user yang sedang merequest
   let currContent = await Content.findOne({
     where: {
       id,
-      creatorRef: currCreator.id
+      creatorRef: user.id
     }
   })
   if (!currContent) {

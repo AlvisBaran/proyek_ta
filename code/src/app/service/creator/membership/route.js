@@ -1,34 +1,46 @@
 import Joi from 'joi'
-
+import { v4 as UUD4 } from 'uuid'
+import { Op } from 'sequelize'
 import { responseString } from '@/backend/helpers/serverResponseString'
-import User from '@/backend/models/user'
+import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
+import { mainBucketName, minioClient } from '@/minio/config'
+
 import Membership from '@/backend/models/membership'
+import { buildSystemLog } from '@/utils/logHelper'
 
 const FILTERS = {
   order: ['create-date', 'name'],
   orderType: ['DESC', 'ASC']
 }
 
-// Creator > Membership > Read All
-export async function GET(request) {
+// ** Creator > Membership > Read All
+export async function GET(request, response) {
   const searchParams = request.nextUrl.searchParams
-  const creatorId = searchParams.get('creatorId')
-  const search = searchParams.get('search')
+  const keyword = searchParams.get('keyword') ?? null
   let order = searchParams.get('order') ?? FILTERS.order[0]
   order = (order + '').toLowerCase()
   let orderType = searchParams.get('orderType') ?? FILTERS.orderType[0]
   orderType = (orderType + '').toUpperCase()
   let res = {}
 
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
+  // * Cek user adalah creator
+  if (user.role !== 'creator') {
+    res = { message: responseString.USER.NOT_CREATOR }
+    return Response.json(res, { status: 403 })
+  }
+
   const joiValidate = Joi.object({
-    creatorId: Joi.number().required(),
-    search: Joi.string().allow(null).optional(),
     order: Joi.valid(...FILTERS.order).required(),
     orderType: Joi.valid(...FILTERS.orderType).required()
   }).validate(
     {
-      creatorId,
-      search,
       order,
       orderType
     },
@@ -36,37 +48,56 @@ export async function GET(request) {
   )
 
   if (!joiValidate.error) {
-    let currCreator = await User.findByPk(creatorId)
-    if (!currCreator) {
-      res = { message: responseString.USER.NOT_FOUND }
-      return Response.json(res, { status: 404 })
-    }
-
-    // This is a function that instantly called and gets the result
+    // * This is a function that instantly called and gets the result
     const orderFilter = (function () {
       if (order === 'create-date') return 'createdAt'
       else if (order === 'name') return 'name'
       else return 'createdAt'
     })()
 
-    let whereAttributes = { userRef: creatorId }
+    let whereAttributes = { userRef: user.id }
+    if (!!keyword) {
+      whereAttributes = {
+        ...whereAttributes,
+        [Op.or]: [
+          { name: { [Op.like]: `%${keyword}%` } },
+          { slug: { [Op.like]: `%${keyword}%` } },
+          { description: { [Op.like]: `%${keyword}%` } }
+        ]
+      }
+    }
+
     let memberships = []
 
     return await Membership.findAll({
       where: { ...whereAttributes },
       order: [[orderFilter, orderType]]
     })
-      .then((res = []) => {
-        res?.map(datum =>
+      .then(async (res = []) => {
+        for (let i = 0; i < res.length; i++) {
+          const tempData = res[i]
+          let bannerUrl = null
+          if (!!tempData.banner) {
+            await minioClient
+              .presignedGetObject(mainBucketName, tempData.banner)
+              .then(url => {
+                bannerUrl = url
+              })
+              .catch(error => {
+                console.error('minio ERROR: presignedGetObject', error)
+              })
+          }
+
           memberships.push({
-            ...datum?.dataValues
+            ...tempData?.dataValues,
+            bannerUrl
           })
-        )
+        }
 
         return Response.json(memberships, { status: 200 })
       })
       .catch(err => {
-        return Response.json({ message: responseString.SERVER.SERVER_ERROR }, { status: 500 })
+        return Response.json({ message: responseString.SERVER.SERVER_ERROR, error: err }, { status: 500 })
       })
   } else {
     res = { message: responseString.VALIDATION.ERROR, error: joiValidate.error.details }
@@ -74,47 +105,89 @@ export async function GET(request) {
   }
 }
 
-// Creator > Membership > Create
-export async function POST(request) {
+// ** Creator > Membership > Create
+export async function POST(request, response) {
   let req = {}
   try {
-    req = await request.json()
+    const formData = await request.formData()
+    req.banner = formData.get('banner')
+    req.name = formData.get('name')
+    req.slug = formData.get('slug')
+    req.description = formData.get('description')
+    req.price = formData.get('price')
+    req.interval = formData.get('interval')
   } catch (e) {}
   let res = {}
 
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
+  // * Cek user adalah creator
+  if (user.role !== 'creator') {
+    res = { message: responseString.USER.NOT_CREATOR }
+    return Response.json(res, { status: 403 })
+  }
+
   const joiValidate = Joi.object({
-    creatorId: Joi.number().required(),
+    banner: Joi.object().allow(null),
     name: Joi.string().required(),
     slug: Joi.string().required(),
     description: Joi.string().required(),
-    price: Joi.number().required()
+    price: Joi.number().required(),
+    interval: Joi.number().min(1).required()
   }).validate(req, { abortEarly: false })
 
   if (!joiValidate.error) {
-    const { creatorId, name, slug, description, price } = req
+    const { banner, name, slug, description, price, interval } = req
 
-    // Cek user ada
-    let currCreator = await User.findByPk(creatorId)
-    if (!currCreator) {
-      res = { message: responseString.USER.NOT_FOUND }
-      return Response.json(res, { status: 404 })
+    // * Cek slug sudah digunakan oleh creator ini
+    const existing = await Membership.findOne({ where: { userRef: user.id, slug } })
+    if (!!existing) {
+      res = { message: `Slug "${slug}" telah digunakan!` }
+      return Response.json(res, { status: 400 })
     }
 
-    // Cek user adalah creator (sebenernya bisa bareng di atas, tapi ya sudah pisah aja)
-    if (currCreator.role !== 'creator') {
-      res = { message: 'Anda bukan seorang creator!' }
-      return Response.json(res, { status: 403 })
+    // * Ambil cUsername atau email atau id untuk bucket prefix
+    const prefix = user.cUsername ?? user.email ?? user.id
+    if (!prefix) throw new Error(buildSystemLog('Error something wrong with prefix'))
+    let bannerMinioObject = null
+    if (!!banner) {
+      // * Generate UUID untuk gambarnya
+      const newGalleryObjectId = UUD4()
+      // ** Ambil extensionnya dari nama
+      const extension = String(banner.name).split('.').pop() ?? 'png'
+      // * Build min.io object name nya
+      const newMinioObjectName = `${prefix}/membership-banner/${newGalleryObjectId}-${new Date().getTime()}.${extension}`
+      // * Mencoba masukkan ke minio
+      const bytes = await banner.arrayBuffer()
+      const buffer = Buffer.from(bytes)
+      await minioClient
+        .putObject(mainBucketName, newMinioObjectName, buffer)
+        .then(async objInfo => {
+          console.log(`uploading min.io success [${newMinioObjectName}]`, objInfo)
+          bannerMinioObject = newMinioObjectName
+        })
+        .catch(error => {
+          console.error('error min.io uploading process', error)
+          throw new Error(buildSystemLog('Error something wrong with min.io uploading process'))
+        })
     }
 
     let newMembership = Membership.build({
-      userRef: creatorId,
+      userRef: user.id,
       name,
       slug,
       description,
-      price
+      price,
+      interval,
+      banner: bannerMinioObject
     })
 
-    // Daftarkan Membership ke database
+    // * Daftarkan Membership ke database
     return await newMembership
       .save()
       .then(async resp => {

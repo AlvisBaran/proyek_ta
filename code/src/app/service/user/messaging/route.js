@@ -1,148 +1,148 @@
 import Joi from 'joi'
-
+import { Op } from 'sequelize'
 import { responseString } from '@/backend/helpers/serverResponseString'
+import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
+import { mainBucketName, minioClient } from '@/minio/config'
+
 import User from '@/backend/models/user'
 import Message from '@/backend/models/message'
-import sqlz from '@/backend/configs/db'
 import Chat from '@/backend/models/chat'
 
+import '@/backend/models/association'
+
 // ** User > Message > Read All
-export async function GET(request) {
+export async function GET(request, response) {
   const searchParams = request.nextUrl.searchParams
-  const userId = Number(searchParams.get('userId'))
+  const keyword = searchParams.get('keyword') ?? null
   let res = {}
 
-  // Cek user ada
-  let currUser = await User.findByPk(userId)
-  if (!currUser) {
-    res = { message: responseString.USER.NOT_FOUND }
-    return Response.json(res, { status: 404 })
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
   }
 
   let messages = []
 
-  return await sqlz
-    .query(`select * from ${Message.tableName} where user1Ref=${userId} or user2Ref=${userId} order by createdAt desc;`)
-    .then(async ([resp] = []) => {
-      for (let i = 0; i < resp.length; i++) {
-        const datum = resp[i]
-        let lastChat = await Chat.findOne({
-          where: { messagesRef: datum.id },
-          order: [['createdAt', 'DESC']]
+  let orQueryArray = [{ user1Ref: user.id }, { user2Ref: user.id }]
+  if (!!keyword)
+    orQueryArray = [
+      ...orQueryArray,
+      { '$User1.displayName$': { [Op.like]: `%${keyword}%` } },
+      { '$User1.cUsername$': { [Op.like]: `%${keyword}%` } },
+      { '$User2.displayName$': { [Op.like]: `%${keyword}%` } },
+      { '$User2.cUsername$': { [Op.like]: `%${keyword}%` } }
+    ]
+
+  const results = await Message.findAll({
+    where: {
+      [Op.or]: orQueryArray
+    },
+    include: [
+      { model: User, as: 'User1', attributes: ['id', 'cUsername', 'email', 'profilePicture', 'role', 'displayName'] },
+      { model: User, as: 'User2', attributes: ['id', 'cUsername', 'email', 'profilePicture', 'role', 'displayName'] },
+      { model: Chat, limit: 1, order: [['createdAt', 'DESC']] }
+    ],
+    order: [['lastModified', 'DESC']]
+  })
+
+  for (let i = 0; i < results.length; i++) {
+    const datum = results[i]
+    const Partner = user.id === datum.user1Ref ? datum.User2 : datum.User1
+
+    let profilePictureUrl = null
+    if (!!Partner && !!Partner.profilePicture) {
+      await minioClient
+        .presignedGetObject(mainBucketName, Partner.profilePicture)
+        .then(url => {
+          profilePictureUrl = url
         })
-        let partnerId = datum.user2Ref
-        if (userId === partnerId) partnerId = datum.user1Ref
-        let partnerData = await User.findByPk(partnerId)
-        messages.push({
-          ...datum,
-          partnerData: {
-            id: partnerData.id,
-            role: partnerData.role,
-            displayName: partnerData.displayName,
-            email: partnerData.email,
-            profilePicture: partnerData.profilePicture
-            // themeColor: partnerData.themeColor,
-          },
-          lastChat: !!lastChat
-            ? {
-                ...lastChat.dataValues,
-                id: undefined,
-                messagesRef: undefined
-              }
-            : undefined
+        .catch(error => {
+          console.error('minio ERROR: presignedGetObject', error)
         })
-      }
-      return Response.json(messages, { status: 200 })
+    }
+
+    messages.push({
+      ...datum.dataValues,
+      Partner: { ...Partner.dataValues, profilePictureUrl },
+      User1: undefined,
+      User2: undefined
     })
-    .catch(err => {
-      return Response.json({ message: responseString.SERVER.SERVER_ERROR, err }, { status: 500 })
-    })
+  }
+
+  return Response.json(messages, { status: 200 })
 }
 
 // ** User > Message > Create
-export async function POST(request) {
+export async function POST(request, response) {
   let req = {}
-  const searchParams = request.nextUrl.searchParams
-  const userId = Number(searchParams.get('userId'))
   try {
     req = await request.json()
   } catch (e) {}
   let res = {}
 
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
   const joiValidate = Joi.object({
-    userId: Joi.number().required(),
     user2Id: Joi.number().required()
-  }).validate({ ...req, userId }, { abortEarly: false })
+  }).validate({ ...req }, { abortEarly: false })
 
   if (!joiValidate.error) {
     const { user2Id } = req
-    // Cek user 1 ada
-    let currUser = await User.findByPk(userId)
-    if (!currUser) {
-      res = { message: responseString.USER.NOT_FOUND }
-      return Response.json(res, { status: 404 })
-    }
-
-    // Cek user 2 ada
+    // * Cek user 2 ada
     let currUser2 = await User.findByPk(user2Id)
     if (!currUser2) {
       res = { message: responseString.USER.NOT_FOUND }
       return Response.json(res, { status: 404 })
     }
 
-    // Cek ke 2 user tersebut sudah pernah chat atau belum
-    let roomExist = false
-    let currMessageRoom = await Message.findOne({
+    // * Cek ke 2 user tersebut sudah pernah chat atau belum
+    const existingRoom = await Message.findOne({
       where: {
-        user1Ref: userId,
-        user2Ref: user2Id
+        [Op.or]: [
+          { user1Ref: user.id, user2Ref: currUser2.id },
+          { user1Ref: currUser2.id, user2Ref: user.id }
+        ]
       }
     })
-    if (!!currMessageRoom) {
-      roomExist = true
-    } else {
-      currMessageRoom = await Message.findOne({
-        where: {
-          user1Ref: user2Id,
-          user2Ref: userId
-        }
-      })
-      if (!!currMessageRoom) {
-        roomExist = true
-      }
-    }
-
-    if (roomExist) {
+    if (!!existingRoom) {
       res = {
         message: responseString.MESSAGING.ROOM_ALREADY_EXISTS,
-        roomData: { ...currMessageRoom.dataValues }
+        code: 'ROOM_ALREADY_EXISTS',
+        roomData: { ...existingRoom.dataValues }
       }
-      return Response.json(res, { status: 404 })
-    } else {
-      let newMessageRoom = Message.build({
-        user1Ref: currUser.id,
-        user2Ref: currUser2.id
-      })
-
-      // Daftarkan message room ke database
-      return await newMessageRoom
-        .save()
-        .then(async resp => {
-          await newMessageRoom.reload()
-          res = {
-            message: responseString.GLOBAL.SUCCESS,
-            newValues: {
-              ...newMessageRoom.dataValues
-            }
-          }
-          return Response.json(res, { status: 200 })
-        })
-        .catch(error => {
-          res = { error: { message: responseString.MESSAGING.ROOM_ADD_FAILED }, details: error }
-          // throw new Error(res)
-          return Response.json(res, { status: 400 })
-        })
+      return Response.json(res, { status: 400 })
     }
+
+    let newMessageRoom = Message.build({
+      user1Ref: user.id,
+      user2Ref: currUser2.id
+    })
+
+    // * Daftarkan message room ke database
+    return await newMessageRoom
+      .save()
+      .then(async resp => {
+        await newMessageRoom.reload()
+        res = {
+          message: responseString.GLOBAL.SUCCESS,
+          newValues: {
+            ...newMessageRoom.dataValues
+          }
+        }
+        return Response.json(res, { status: 200 })
+      })
+      .catch(error => {
+        res = { error: { message: responseString.MESSAGING.ROOM_ADD_FAILED }, details: error }
+        // throw new Error(res)
+        return Response.json(res, { status: 400 })
+      })
   } else {
     res = { message: responseString.VALIDATION.ERROR, error: joiValidate.error.details }
     return Response.json(res, { status: 400 })

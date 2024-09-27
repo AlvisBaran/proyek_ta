@@ -1,23 +1,24 @@
-import '@/backend/models/association'
 import Joi from 'joi'
 import { responseString } from '@/backend/helpers/serverResponseString'
+
 import Comment from '@/backend/models/comment'
 import Content from '@/backend/models/content'
 import User from '@/backend/models/user'
 
-// User > Content > Comment > Read All
+import '@/backend/models/association'
+
+// ** User > Content > Comment > Read All
 export async function GET() {
   // TODO: Fetch smua comment yang ada dari sebuah content
   // TODO: Ada opsi untuk load lengkap (reply)
 
-  // ** Tidak perlu kata verrel
+  // ** Tidak perlu
 
   return Response.json({ message: 'User > Content > Comment > Read All' })
 }
 
-// User > Content > Comment > Create
+// ** User > Content > Comment > Create
 export async function POST(request, { params }) {
-  // TODO: Inser comment baru ke db
   const searchParams = request.nextUrl.searchParams
   let userId = searchParams.get('userId') ?? null
   const { contentId } = params
@@ -34,20 +35,20 @@ export async function POST(request, { params }) {
   }).validate({ ...params, userId, ...req }, { abortEarly: false })
 
   if (!joiValidate.error) {
-    // TODO: Cek user ada
+    // * Cek user ada
     let currUser = await User.findByPk(userId)
     if (!currUser) {
       res = { message: responseString.USER.NOT_FOUND }
       return Response.json(res, { status: 404 })
     }
-    // TODO: Cek content ada
+    // * Cek content ada
     let currContent = await Content.findByPk(contentId)
     if (!currContent) {
       res = { message: responseString.CONTENT.NOT_FOUND }
       return Response.json(res, { status: 404 })
     }
-    // TODO: Cek syarat, dll untuk comment (nanti aja)
-    // TODO: Add ke database
+    // * Cek syarat, dll untuk comment (nanti aja)
+    // * Add ke database
     let newComment = Comment.build({
       content: req.content,
       contentRef: currContent.id,

@@ -4,7 +4,6 @@ import sqlz from '@/backend/configs/db'
 
 class UsersWalletHistory extends Model {}
 
-// TODO: Slesaikan attribute nya untuk midtransnya
 UsersWalletHistory.init(
   {
     id: {
@@ -21,7 +20,7 @@ UsersWalletHistory.init(
       onUpdate: 'CASCADE'
     },
     nominal: {
-      type: DataTypes.TEXT,
+      type: DataTypes.BIGINT,
       allowNull: false
     },
     type: {
@@ -36,6 +35,12 @@ UsersWalletHistory.init(
     description: {
       type: DataTypes.TEXT,
       allowNull: false
+    },
+    mt_transaction_id: {
+      type: DataTypes.STRING
+    },
+    mt_order_id: {
+      type: DataTypes.STRING
     },
     createdAt: {
       type: DataTypes.DATE,

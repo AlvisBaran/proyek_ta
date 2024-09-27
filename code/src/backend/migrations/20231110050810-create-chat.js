@@ -12,7 +12,7 @@ module.exports = {
         primaryKey: true,
         type: DataTypes.INTEGER
       },
-      messagesRef: {
+      messageRef: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: { model: 'users_messages', key: 'id' },

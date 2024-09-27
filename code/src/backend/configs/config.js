@@ -1,9 +1,9 @@
 const USE_INDEX = 0
-const HOST = ['localhost', 'sql.freedb.tech']
-const DATABASE = ['ta_alvis_dev', 'freedb_ta_alvis']
-const USERNAME = ['root', 'freedb_ta_alvis_user_1']
-const PASSWORD = ['', 'm@EF!%62S99sAtR']
-const PORT = [3306, 3306]
+const HOST = ['localhost', 'pow.h.filess.io']
+const DATABASE = ['ta_alvis_dev', 'panthreonprod_songbycool']
+const USERNAME = ['root', 'panthreonprod_songbycool']
+const PASSWORD = ['', 'af9b8fd46034edd8b920f726184f681f1b9e2cae']
+const PORT = [3306, 3307]
 
 module.exports = {
   development: {
@@ -13,7 +13,6 @@ module.exports = {
     password: PASSWORD[USE_INDEX],
     port: PORT[USE_INDEX],
     dialect: 'mysql',
-    logging: false,
     dialectOptions: {
       bigNumberStrings: true
     }

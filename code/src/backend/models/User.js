@@ -4,9 +4,9 @@ import sqlz from '../configs/db'
 
 class User extends Model {}
 
-function hash(obj) {
-  return obj + '_hashed'
-}
+// async function hash(obj) {
+//   return await bcrypt.hash(obj).then(hash => hash)
+// }
 
 User.init(
   {
@@ -52,21 +52,24 @@ User.init(
     },
     password: {
       // INFO: Ini encryption
-      type: DataTypes.TEXT('tiny'),
-      set(value) {
-        this.setDataValue('password', hash(value))
-      }
+      type: DataTypes.TEXT('tiny')
+      // async set(value) {
+      //   this.setDataValue('password', await hash(value))
+      // }
       // get() { // Gatau kenapa ga bekerja
       //   const rawValue = this.getDataValue('password');
       //   return rawValue ? rawValue.toUpperCase() : null;
       // },
     },
-
-    profilePicture: DataTypes.TEXT('tiny'),
+    profilePicture: {
+      type: DataTypes.STRING
+    },
     socials: DataTypes.TEXT,
     bio: DataTypes.TEXT,
     about: DataTypes.TEXT,
-    banner: DataTypes.TEXT('tiny'),
+    banner: {
+      type: DataTypes.STRING
+    },
     themeColor: {
       type: DataTypes.STRING,
       defaultValue: '#eee',

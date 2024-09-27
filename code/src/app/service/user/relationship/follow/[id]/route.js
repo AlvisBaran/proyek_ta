@@ -1,45 +1,42 @@
 import Joi from 'joi'
-
 import { responseString } from '@/backend/helpers/serverResponseString'
+import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
+
 import User from '@/backend/models/user'
 import UsersFollows from '@/backend/models/usersfollows'
 
-// User > Relationship > Follow / Unfollow Creator
-export async function PUT(request, { params }) {
-  const creatorId = params.id
-  const searchParams = request.nextUrl.searchParams
-  const userId = searchParams.get('userId')
+// ** User > Relationship > Follow / Unfollow Creator
+export async function PUT(request, response) {
+  const creatorId = response.params.id
   let res = {}
 
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
   const joiValidate = Joi.object({
-    creatorId: Joi.number().required(),
-    userId: Joi.number().required()
-  }).validate({ userId, creatorId }, { abortEarly: false })
+    creatorId: Joi.number().required()
+  }).validate({ creatorId }, { abortEarly: false })
 
   if (!joiValidate.error) {
-    // Cek User Ada
-    let currUser = await User.findByPk(userId)
-    if (!currUser) {
-      res = { message: responseString.USER.NOT_FOUND }
-      return Response.json(res, { status: 404 })
-    }
-
-    // Cek Creator Ada
+    // * Cek Creator Ada
     let currCreator = await User.findByPk(creatorId)
     if (!currCreator) {
       res = { message: responseString.USER.NOT_FOUND }
       return Response.json(res, { status: 404 })
     }
 
-    // Cek Jika Target Creator bukan creator
+    // * Cek Jika Target Creator bukan creator
     if (currCreator.role !== 'creator') {
       res = { message: 'Target user bukan seorang creator!' }
       return Response.json(res, { status: 400 })
     }
 
-    // Cek User Sudah Pernah Follow
+    // * Cek User Sudah Pernah Follow
     let existItem = await UsersFollows.findOne({
-      where: { followerRef: userId, followedRef: creatorId },
+      where: { followerRef: user.id, followedRef: creatorId },
       paranoid: false
     })
     if (!!existItem) {
@@ -73,7 +70,7 @@ export async function PUT(request, { params }) {
 
       // Insert Data
       let newItem = UsersFollows.build({
-        followerRef: userId,
+        followerRef: user.id,
         followedRef: creatorId
       })
 

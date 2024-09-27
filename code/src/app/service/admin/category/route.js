@@ -1,14 +1,37 @@
 import Joi from 'joi'
-
+import { Op } from 'sequelize'
 import { responseString } from '@/backend/helpers/serverResponseString'
-import Category from '@/backend/models/category'
 import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
+
 import User from '@/backend/models/user'
+import Category from '@/backend/models/category'
 
 // ** Admin > Category > Read All
-export async function GET() {
+export async function GET(request, response) {
+  const searchParams = request.nextUrl.searchParams
+  const keyword = searchParams.get('keyword') ?? null
+  let res = {}
+
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
+  // * Cek User adalah admin
+  if (user.role !== 'admin') {
+    res = { message: responseString.USER.NOT_ADMIN }
+    return Response.json(res, { status: 403 })
+  }
+
+  let where = {}
+  if (!!keyword) {
+    where = { ...where, label: { [Op.like]: `%${keyword}%` } }
+  }
+
   let categories = []
-  return await Category.findAll({ order: [['createdAt', 'DESC']] })
+  return await Category.findAll({ where, order: [['createdAt', 'DESC']], paranoid: true })
     .then((resp = []) => {
       resp?.map(datum => categories.push({ ...datum?.dataValues }))
 
@@ -34,7 +57,7 @@ export async function POST(request, response) {
     return Response.json(res, { status: error.code })
   }
 
-  // TODO:: Validasi input
+  // * Validasi input
   const joiValidate = Joi.object({
     label: Joi.string().required()
   }).validate(req, { abortEarly: false })
@@ -49,7 +72,7 @@ export async function POST(request, response) {
 
     let newCategory = Category.build({ ...req })
 
-    // TODO:: Cek category terdaftar di database
+    // * Cek category terdaftar di database
     let categorySnapshot = await Category.findOne({ where: { label: req.label } })
 
     if (!!categorySnapshot) {
@@ -57,7 +80,7 @@ export async function POST(request, response) {
       return Response.json(res, { status: 400 })
     }
 
-    // TODO:: Daftarkan category ke database
+    // * Daftarkan category ke database
     return await newCategory
       .save()
       .then(async resp => {

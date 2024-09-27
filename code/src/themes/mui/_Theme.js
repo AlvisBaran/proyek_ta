@@ -17,7 +17,19 @@ export const MuiTheme = createTheme(
             // background: 'linear-gradient(90deg, #FF8329 11.75%, #D0428C 51.5%, #A200EE 91.26%)'
           }
         }
+      },
+      MuiTab: {
+        styleOverrides: {
+          root: {
+            textTransform: 'none'
+          }
+        }
       }
+      // MuiTextField: {
+      //   styleOverrides: {
+      //     root: {}
+      //   }
+      // }
     },
     palette: {
       background: {

@@ -1,7 +1,6 @@
 'use strict'
 import { Model, DataTypes, literal } from 'sequelize'
 import sqlz from '@/backend/configs/db'
-import { slugify } from '@/utils/textHelper.mjs'
 
 class Membership extends Model {}
 
@@ -33,8 +32,7 @@ Membership.init(
       // }
     },
     banner: {
-      // Sementara
-      type: DataTypes.TEXT('tiny')
+      type: DataTypes.STRING
     },
     description: {
       type: DataTypes.TEXT,
@@ -46,6 +44,11 @@ Membership.init(
       allowNull: false,
       defaultValue: 1000
     },
+    interval: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 30
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,
@@ -53,12 +56,16 @@ Membership.init(
     },
     updatedAt: {
       type: DataTypes.DATE
+    },
+    deletedAt: {
+      type: DataTypes.DATE
     }
   },
   {
     sequelize: sqlz,
     modelName: 'Membership',
-    tableName: 'users_memberships'
+    tableName: 'users_memberships',
+    paranoid: true
   }
 )
 

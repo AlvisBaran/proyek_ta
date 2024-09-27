@@ -26,8 +26,7 @@ ContentGallery.init(
       type: DataTypes.STRING
     },
     minio_object_name: {
-      type: DataTypes.STRING,
-      unique: true
+      type: DataTypes.STRING
     },
     deletedAt: {
       type: DataTypes.DATE

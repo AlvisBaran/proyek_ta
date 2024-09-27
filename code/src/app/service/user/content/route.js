@@ -1,7 +1,7 @@
 import { responseString } from '@/backend/helpers/serverResponseString'
 import Content from '@/backend/models/content'
 
-// User > Content > Get / Search Content
+// ** User > Content > Get / Search Content
 export async function GET() {
   // TODO: Tambahin algoritma, syarat, membersip, dll serta pagination
   let contents = []

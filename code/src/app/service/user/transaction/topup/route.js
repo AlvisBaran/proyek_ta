@@ -1,25 +1,27 @@
 import Joi from 'joi'
+import dayjs from 'dayjs'
 import { responseString } from '@/backend/helpers/serverResponseString'
 import { createTopUpPaymentLink } from '@/backend/services/midtrans'
+import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
+
 import User from '@/backend/models/user'
 import TransTopup from '@/backend/models/transtopup'
-import dayjs from 'dayjs'
 
 import '@/backend/models/association'
 
 const TOTAL_MIDTRANS_RETRY = 1
 
-// Transaction > Top Up > Read All
-export async function GET(request) {
+// ** Transaction > Top Up > Read All
+export async function GET(request, response) {
   const searchParams = request.nextUrl.searchParams
-  const userId = searchParams.get('userId')
   const filterStatus = searchParams.get('filterStatus') ?? 'all'
+  let res = {}
 
-  // Cek user ada
-  let currUser = await User.findByPk(userId)
-  if (!currUser) {
-    res = { message: responseString.USER.NOT_FOUND }
-    return Response.json(res, { status: 404 })
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
   }
 
   let transactions = []
@@ -50,31 +52,27 @@ export async function GET(request) {
     })
 }
 
-// Transaction > Top Up > Create
-export async function POST(request) {
-  const searchParams = request.nextUrl.searchParams
-  const userId = searchParams.get('userId')
+// ** Transaction > Top Up > Create
+export async function POST(request, response) {
   let req = {}
   try {
     req = await request.json()
   } catch (e) {}
   let res = {}
 
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
   const joiValidate = Joi.object({
-    userId: Joi.number().required(),
     nominal: Joi.number().greater(9999).less(50000000).required()
-  }).validate({ ...req, userId }, { abortEarly: false })
+  }).validate({ ...req }, { abortEarly: false })
 
   if (!joiValidate.error) {
     const { nominal } = req
-
-    // Cek user ada
-    let currUser = await User.findByPk(userId)
-    if (!currUser) {
-      res = { message: responseString.USER.NOT_FOUND }
-      return Response.json(res, { status: 404 })
-    }
-
     // Mencoba untuk terus mencoba membuat transaction selama gagal
     // namun tidak sampai lebih dari TOTAL_MIDTRANS_RETRY
     let newId = undefined
@@ -86,8 +84,8 @@ export async function POST(request) {
       let tempMidtransResponse = await createTopUpPaymentLink(
         newId,
         nominal,
-        `${currUser.cUsername ?? currUser.displayName}`,
-        currUser.email
+        `${user.cUsername ?? user.displayName}`,
+        user.email
       )
       // console.info(tryCounter, tempMidtransResponse)
       if (!!tempMidtransResponse && tempMidtransResponse.success) {
@@ -103,7 +101,7 @@ export async function POST(request) {
 
     // Jika midtrans success maka buat database record
     let newTopUpData = TransTopup.build({
-      userRef: currUser.id,
+      userRef: user.id,
       invoice: newMidtransData.transactionId,
       nominal: Number(nominal),
       status: 'pending',

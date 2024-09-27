@@ -32,8 +32,7 @@ module.exports = {
         // }
       },
       banner: {
-        // Sementara
-        type: DataTypes.TEXT('tiny')
+        type: DataTypes.STRING
       },
       description: {
         type: DataTypes.TEXT,
@@ -45,12 +44,20 @@ module.exports = {
         allowNull: false,
         defaultValue: 1000
       },
+      interval: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 30
+      },
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: literal('CURRENT_TIMESTAMP')
       },
       updatedAt: {
+        type: DataTypes.DATE
+      },
+      deletedAt: {
         type: DataTypes.DATE
       }
     })

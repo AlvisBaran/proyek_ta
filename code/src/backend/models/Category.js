@@ -23,12 +23,16 @@ Category.init(
     },
     updatedAt: {
       type: DataTypes.DATE
+    },
+    deletedAt: {
+      type: DataTypes.DATE
     }
   },
   {
     sequelize: sqlz,
     modelName: 'Category',
-    tableName: 'categories'
+    tableName: 'categories',
+    paranoid: true
   }
 )
 

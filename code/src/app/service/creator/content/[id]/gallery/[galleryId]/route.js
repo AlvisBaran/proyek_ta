@@ -1,10 +1,10 @@
+import Joi from 'joi'
 import { responseString } from '@/backend/helpers/serverResponseString'
-import Content from '@/backend/models/content'
-import ContentGallery from '@/backend/models/contentgallery'
-import User from '@/backend/models/user'
 import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
 import { mainBucketName, minioClient } from '@/minio/config'
-import Joi from 'joi'
+
+import Content from '@/backend/models/content'
+import ContentGallery from '@/backend/models/contentgallery'
 
 // ** Creator > Content > Gallery > Delete
 export async function DELETE(request, response) {
@@ -23,24 +23,22 @@ export async function DELETE(request, response) {
     return Response.json(res, { status: error.code })
   }
 
+  // * Cek user adalah creator
+  if (user.role !== 'creator') {
+    res = { message: responseString.USER.NOT_CREATOR }
+    return Response.json(res, { status: 403 })
+  }
+
   const joiValidate = Joi.object({
     contentId: Joi.number().required()
   }).validate({ contentId }, { abortEarly: false })
 
   if (!joiValidate.error) {
-    let currCreator = await User.findByPk(user.id)
-
-    // * Cek user adalah creator
-    if (currCreator.role !== 'creator') {
-      res = { message: 'Anda bukan seorang creator!' }
-      return Response.json(res, { status: 403 })
-    }
-
     // * Cek content ada dan milik user yang sedang merequest
     let currContent = await Content.findOne({
       where: {
         id: contentId,
-        creatorRef: currCreator.id
+        creatorRef: user.id
       },
       attributes: ['id', 'creatorRef', 'title', 'createdAt', 'status']
     })

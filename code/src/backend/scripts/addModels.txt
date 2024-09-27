@@ -8,7 +8,7 @@ sequelize model:generate --name Category --attributes label:string
 
 sequelize model:generate --name Message --attributes user1Ref:integer,user2Ref:integer,lastModified:date
 
-sequelize model:generate --name Chat --attributes messagesRef:integer,authorRef:integer,content:text
+sequelize model:generate --name Chat --attributes messageRef:integer,authorRef:integer,content:text
 
 sequelize model:generate --name Membership --attributes userRef:integer,name:string,description:text,price:bigint
 
@@ -37,3 +37,13 @@ sequelize model:generate --name MembershipsXContents --attributes membershipRef:
 sequelize model:generate --name CategoriesXContents --attributes categoryRef:integer,contentRef:integer
 
 sequelize model:generate --name ContentGallery --attributes contentRef:integer,title:string,alt:string,minio_object_name:string
+
+sequelize model:generate --name ContentRequest --attributes creatorRef:integer,applicantRef:integer,contentRef:integer,requestNote:text,status:enum,price:integer,leftoverPrice:integer,canceledAt:date
+
+sequelize model:generate --name ContentRequestMember --attributes contentRequestRef:integer,userRef:integer,contentRef:integer
+
+sequelize model:generate --name ContentRequestPayment --attributes contentRequestRef:integer,userRef:integer,nominal:integer
+
+sequelize model:generate --name UserMembershipPurchase --attributes userRef:integer,membershipRef:integer,expiredAt:date
+
+sequelize model:generate --name Bank --attributes name:string,swiftCode:string

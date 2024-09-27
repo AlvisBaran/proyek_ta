@@ -1,14 +1,14 @@
 import Joi from 'joi'
 import { v4 as UUD4 } from 'uuid'
 import { responseString } from '@/backend/helpers/serverResponseString'
-import Content from '@/backend/models/content'
-import User from '@/backend/models/user'
 import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
 import { mainBucketName, minioClient } from '@/minio/config'
+import { buildSystemLog } from '@/utils/logHelper'
+
+import Content from '@/backend/models/content'
+import ContentGallery from '@/backend/models/contentgallery'
 
 import '@/backend/models/association'
-import ContentGallery from '@/backend/models/contentgallery'
-import { buildSystemLog } from '@/utils/logHelper'
 
 // ** Creator > Content > Gallery > Read All
 export async function GET(request, response) {
@@ -23,25 +23,23 @@ export async function GET(request, response) {
     return Response.json(res, { status: error.code })
   }
 
+  // * Cek user adalah creator
+  if (user.role !== 'creator') {
+    res = { message: responseString.USER.NOT_CREATOR }
+    return Response.json(res, { status: 403 })
+  }
+
   const joiValidate = Joi.object({
     contentId: Joi.number().required()
   }).validate({ contentId }, { abortEarly: false })
 
   if (!joiValidate.error) {
-    let currCreator = await User.findByPk(user.id)
-
-    // * Cek user adalah creator
-    if (currCreator.role !== 'creator') {
-      res = { message: 'Anda bukan seorang creator!' }
-      return Response.json(res, { status: 403 })
-    }
-
     // * Cek content ada dan milik user yang sedang merequest
     // * Skalian get all gallery
     let currContent = await Content.findOne({
       where: {
         id: contentId,
-        creatorRef: currCreator.id
+        creatorRef: user.id
       },
       attributes: ['id', 'creatorRef', 'title', 'createdAt', 'status'],
       include: { model: ContentGallery, as: 'Gallery' }
@@ -54,6 +52,7 @@ export async function GET(request, response) {
     const galleries = []
     for (let i = 0; i < currContent.Gallery.length; i++) {
       const currGallery = currContent.Gallery[i]
+      // ** Mengambil setiap url dari object yang bersangkutan menggunakan object_name
       await minioClient
         .presignedGetObject(mainBucketName, currGallery.minio_object_name)
         .then(url => {
@@ -94,6 +93,12 @@ export async function POST(request, response) {
     return Response.json(res, { status: error.code })
   }
 
+  // * Cek user adalah creator
+  if (user.role !== 'creator') {
+    res = { message: responseString.USER.NOT_CREATOR }
+    return Response.json(res, { status: 403 })
+  }
+
   const joiValidate = Joi.object({
     contentId: Joi.number().required(),
     title: Joi.string().optional(),
@@ -102,19 +107,11 @@ export async function POST(request, response) {
   }).validate({ ...req, contentId }, { abortEarly: false })
 
   if (!joiValidate.error) {
-    let currCreator = await User.findByPk(user.id)
-
-    // * Cek user adalah creator
-    if (currCreator.role !== 'creator') {
-      res = { message: 'Anda bukan seorang creator!' }
-      return Response.json(res, { status: 403 })
-    }
-
     // * Cek content ada dan milik user yang sedang merequest
     let currContent = await Content.findOne({
       where: {
         id: contentId,
-        creatorRef: currCreator.id
+        creatorRef: user.id
       }
     })
     if (!currContent) {
@@ -124,14 +121,14 @@ export async function POST(request, response) {
 
     try {
       // * Ambil cUsername atau email atau id untuk bucket prefix
-      const prefix = currCreator.cUsername ?? currCreator.email ?? currCreator.id
+      const prefix = user.cUsername ?? user.email ?? user.id
       if (!prefix) throw new Error(buildSystemLog('Error something wrong with prefix'))
       // * Generate UUID untuk gambarnya
       const newGalleryObjectId = UUD4()
       // ** Ambil extensionnya dari nama
       const extension = String(req.image.name).split('.').pop() ?? 'png'
       // * Build min.io object name nya
-      const newMinioObjectName = `${prefix}/${newGalleryObjectId}-${new Date().getTime()}.${extension}`
+      const newMinioObjectName = `${prefix}/content-gallery/${newGalleryObjectId}-${new Date().getTime()}.${extension}`
       // * Mencoba masukkan ke minio
       const bytes = await req.image.arrayBuffer()
       const buffer = Buffer.from(bytes)
@@ -143,7 +140,7 @@ export async function POST(request, response) {
           let newGallery = ContentGallery.build({
             contentRef: currContent.id,
             title: req.title,
-            alt: String(req.alt).toLowerCase().replace(' ', '-').trim(),
+            alt: String(req.alt).toLowerCase().replaceAll(' ', '-').trim(),
             minio_object_name: newMinioObjectName
           })
           // * Insert data gallery ke database
@@ -170,7 +167,6 @@ export async function POST(request, response) {
         })
     } catch (e) {
       res = { message: e }
-      console.log('error nya disini', e)
       return Response.json(res, { status: 400 })
     }
   } else {

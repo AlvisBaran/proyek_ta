@@ -1,63 +1,58 @@
 import Joi from 'joi'
-
 import sqlz from '@/backend/configs/db'
+import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
 import { responseString } from '@/backend/helpers/serverResponseString'
-import AccountUpgradeRequests from '@/backend/models/accountupgraderequests'
-import User from '@/backend/models/user'
 
-// Admin > Account Upgrade > Read One
-export async function GET(request, { params }) {
-  const { id } = params
+import User from '@/backend/models/user'
+import AccountUpgradeRequests from '@/backend/models/accountupgraderequests'
+
+import '@/backend/models/association'
+
+// ** Admin > Account Upgrade > Read One
+export async function GET(request, response) {
+  const { id } = response.params
   let res = {}
+
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
+  // * Cek User adalah admin
+  if (user.role !== 'admin') {
+    res = { message: responseString.USER.NOT_ADMIN }
+    return Response.json(res, { status: 403 })
+  }
 
   const joiValidate = Joi.object({
     id: Joi.number().required()
   }).validate(params, { abortEarly: false })
 
   if (!joiValidate.error) {
-    let currItem = await AccountUpgradeRequests.findByPk(id)
+    let currItem = await AccountUpgradeRequests.findByPk(id, {
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'cUsername', 'displayName', 'email'],
+          as: 'Applicant'
+        },
+        {
+          model: User,
+          attributes: ['id', 'cUsername', 'displayName', 'email'],
+          as: 'Admin'
+        }
+      ]
+    })
     if (!currItem) {
       res = { message: responseString.GLOBAL.NOT_FOUND }
       return Response.json(res, { status: 404 })
     }
 
-    let applicant = await User.findByPk(currItem.applicantRef)
-    if (!applicant) {
-      res = { message: responseString.USER.NOT_FOUND }
-      return Response.json(res, { status: 404 })
-    }
-
-    let admin = undefined
-    if (!!currItem.adminRef) {
-      admin = await User.findByPk(currItem.applicantRef)
-      if (!admin) {
-        res = { message: responseString.USER.NOT_FOUND }
-        return Response.json(res, { status: 404 })
-      }
-      admin = {
-        ...admin.dataValues,
-        saldo: undefined,
-        socials: undefined,
-        bio: undefined,
-        about: undefined,
-        banner: undefined,
-        password: undefined
-      }
-    }
-
     return Response.json(
       {
-        ...currItem.dataValues,
-        applicant: {
-          ...applicant.dataValues,
-          saldo: undefined,
-          socials: undefined,
-          bio: undefined,
-          about: undefined,
-          banner: undefined,
-          password: undefined
-        },
-        admin
+        ...currItem.dataValues
       },
       { status: 200 }
     )
@@ -67,14 +62,27 @@ export async function GET(request, { params }) {
   }
 }
 
-// Admin > Account Upgrade > Send Response
-export async function PUT(request, { params }) {
-  const { id } = params
+// ** Admin > Account Upgrade > Send Response
+export async function PUT(request, response) {
+  const { id } = response.params
   let req = {}
   try {
     req = await request.json()
   } catch (e) {}
   let res = {}
+
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
+  // * Cek User adalah admin
+  if (user.role !== 'admin') {
+    res = { message: responseString.USER.NOT_ADMIN }
+    return Response.json(res, { status: 403 })
+  }
 
   const joiValidate = Joi.object({
     idRequest: Joi.number().required(),
@@ -82,10 +90,11 @@ export async function PUT(request, { params }) {
     action: Joi.valid('approve', 'decline').required(),
     adminNote: Joi.string().allow('').allow(null).required(),
     specifiedUsername: Joi.string().allow(null).optional()
-  }).validate({ ...req, idRequest: id }, { abortEarly: false })
+  }).validate({ ...req, idRequest: id, adminId: user.id }, { abortEarly: false })
 
   if (!joiValidate.error) {
-    const { adminId, action, adminNote, specifiedUsername } = req
+    const { action, adminNote, specifiedUsername } = req
+    const adminId = user.id
     const idRequest = Number(id)
 
     let currRequest = await AccountUpgradeRequests.findByPk(idRequest)
@@ -110,8 +119,6 @@ export async function PUT(request, { params }) {
     currRequest.newUsername = newUsername
     currRequest.adminRef = adminId
     if (!!adminNote) currRequest.adminNote = adminNote
-
-    // console.info(currRequest.dataValues)
 
     if (action === 'approve') {
       try {

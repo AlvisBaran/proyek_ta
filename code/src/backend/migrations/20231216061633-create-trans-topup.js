@@ -48,7 +48,6 @@ module.exports = {
         defaultValue: literal('CURRENT_TIMESTAMP')
       },
       updatedAt: {
-        allowNull: false,
         type: DataTypes.DATE
       },
       deletedAt: {

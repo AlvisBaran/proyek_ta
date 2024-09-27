@@ -30,6 +30,9 @@ module.exports = {
         allowNull: true,
         defaultValue: null
       },
+      description: {
+        type: DataTypes.TEXT('tiny')
+      },
       body: {
         type: DataTypes.TEXT,
         allowNull: true,
@@ -40,6 +43,11 @@ module.exports = {
         values: ['draft', 'published'],
         defaultValue: 'draft',
         allowNull: false
+      },
+      contentRequestRef: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: null
       },
       likeCounter: {
         type: DataTypes.INTEGER,

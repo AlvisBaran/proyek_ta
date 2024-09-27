@@ -4,6 +4,7 @@ import { responseString } from '@/backend/helpers/serverResponseString'
 import User from '@/backend/models/user'
 import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
 import Category from '@/backend/models/category'
+import sqlz from '@/backend/configs/db'
 
 // ** Admin > Category > Read One
 export async function GET(request, response) {
@@ -125,7 +126,7 @@ export async function DELETE(request, response) {
   // Cek user adalah admin
   let currUser = await User.findByPk(user.id)
   if (currUser.role !== 'admin') {
-    res = { message: 'FORBIDDEN!\nAnda bukan admin!' }
+    res = { message: responseString.USER.NOT_ADMIN }
     return Response.json(res, { status: 403 })
   }
 
@@ -134,16 +135,20 @@ export async function DELETE(request, response) {
     res = { message: responseString.GLOBAL.NOT_FOUND }
     return Response.json(res, { status: 404 })
   } else {
-    return await currCategory
-      .destroy()
-      .then(resp => {
-        res = { message: responseString.GLOBAL.SUCCESS }
-        return Response.json(res, { status: 200 })
-      })
-      .catch(error => {
-        res = { error: { message: responseString.GLOBAL.DELETE_FAILED }, details: error }
-        return Response.json(res, { status: 400 })
-      })
+    const t = await sqlz.transaction()
+
+    try {
+      currCategory.label = `${currCategory.label}-deleted-at-${new Date().toISOString()}`
+      await currCategory.save({ transaction: t })
+      await currCategory.destroy({ transaction: t })
+      await t.commit()
+
+      res = { message: responseString.GLOBAL.SUCCESS }
+      return Response.json(res, { status: 200 })
+    } catch (error) {
+      res = { error: { message: responseString.GLOBAL.DELETE_FAILED }, details: error }
+      return Response.json(res, { status: 400 })
+    }
   }
   // return Response.json({ error: responseString.GLOBAL.UNFINISHED_SERVICE }, { status: 403 });
 }

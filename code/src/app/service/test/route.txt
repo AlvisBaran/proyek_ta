@@ -1,7 +1,9 @@
-import User from '@/backend/models/user'
-import '@/backend/models/association'
+import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
 
-export async function GET() {
-  const users = await User.findAll()
-  return Response.json(users)
+export async function GET(request, response) {
+  const { user, error } = await getUserFromServerSession(request, response)
+
+  return Response.json({
+    user
+  })
 }

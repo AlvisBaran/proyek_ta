@@ -19,9 +19,16 @@ TransWithdraw.init(
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE'
     },
-    invoice: {
+    nomorRekening: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    bankRef: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: 'banks', key: 'id' },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE'
     },
     nominal: {
       type: DataTypes.BIGINT,
@@ -33,16 +40,11 @@ TransWithdraw.init(
       defaultValue: 'on-hold',
       allowNull: false
     },
+    proofOfTransfer: {
+      type: DataTypes.STRING(255)
+    },
     note: {
       type: DataTypes.TEXT
-    },
-    requestedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: literal('CURRENT_TIMESTAMP')
-    },
-    repliedAt: {
-      type: DataTypes.DATE
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -50,7 +52,6 @@ TransWithdraw.init(
       defaultValue: literal('CURRENT_TIMESTAMP')
     },
     updatedAt: {
-      allowNull: false,
       type: DataTypes.DATE
     },
     deletedAt: {

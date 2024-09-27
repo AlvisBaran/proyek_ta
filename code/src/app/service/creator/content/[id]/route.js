@@ -1,34 +1,43 @@
 import Joi from 'joi'
-
 import { responseString } from '@/backend/helpers/serverResponseString'
-import User from '@/backend/models/user'
-import Content from '@/backend/models/content'
+import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
 
-// Creator > Content > Read One
-export async function GET(request, { params }) {
-  const searchParams = request.nextUrl.searchParams
-  const creatorId = searchParams.get('creatorId')
-  const { id } = params
+import Content from '@/backend/models/content'
+import Category from '@/backend/models/category'
+import Membership from '@/backend/models/membership'
+
+import '@/backend/models/association'
+
+// ** Creator > Content > Read One
+export async function GET(request, response) {
+  const { id } = response.params
   let res = {}
 
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
+  // * Cek user adalah creator
+  if (user.role !== 'creator') {
+    res = { message: responseString.USER.NOT_CREATOR }
+    return Response.json(res, { status: 403 })
+  }
+
   const joiValidate = Joi.object({
-    creatorId: Joi.number().required(),
     id: Joi.number().required()
-  }).validate({ ...params, creatorId }, { abortEarly: false })
+  }).validate({ id }, { abortEarly: false })
 
   if (!joiValidate.error) {
-    let currCreator = await User.findByPk(creatorId)
-    if (!currCreator) {
-      res = { message: responseString.USER.NOT_FOUND }
-      return Response.json(res, { status: 404 })
-    }
-
-    // Cek content ada dan milik user yang sedang merequest
+    // * Cek content ada dan milik user yang sedang merequest
     let currContent = await Content.findOne({
       where: {
         id,
-        creatorRef: currCreator.id
-      }
+        creatorRef: user.id
+      },
+      include: [{ model: Membership }, { model: Category }]
     })
     if (!currContent) {
       res = { message: responseString.GLOBAL.NOT_FOUND }
@@ -47,43 +56,43 @@ export async function GET(request, { params }) {
   }
 }
 
-// Creator > Content > Update
-export async function PUT(request, { params }) {
-  const { id } = params
+// ** Creator > Content > Update
+export async function PUT(request, response) {
+  const { id } = response.params
   let req = {}
   try {
     req = await request.json()
   } catch (e) {}
   let res = {}
 
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
+  // * Cek user adalah creator
+  if (user.role !== 'creator') {
+    res = { message: responseString.USER.NOT_CREATOR }
+    return Response.json(res, { status: 403 })
+  }
+
   const joiValidate = Joi.object({
-    creatorId: Joi.number().required(),
     type: Joi.valid('public', 'private').allow(null).optional(),
     title: Joi.string().allow(null).optional(),
+    description: Joi.string().allow(null).optional(),
     body: Joi.string().allow(null).optional()
   }).validate(req, { abortEarly: false })
 
   if (!joiValidate.error) {
-    const { creatorId, type, title, body } = req
+    const { type, title, body, description } = req
 
-    // Cek user ada
-    let currCreator = await User.findByPk(creatorId)
-    if (!currCreator) {
-      res = { message: responseString.USER.NOT_FOUND }
-      return Response.json(res, { status: 404 })
-    }
-
-    // Cek user adalah creator
-    if (currCreator.role !== 'creator') {
-      res = { message: 'Anda bukan seorang creator!' }
-      return Response.json(res, { status: 403 })
-    }
-
-    // Cek content ada dan milik user yang sedang merequest
+    // * Cek content ada dan milik user yang sedang merequest
     let currContent = await Content.findOne({
       where: {
         id,
-        creatorRef: currCreator.id
+        creatorRef: user.id
       }
     })
     if (!currContent) {
@@ -105,6 +114,10 @@ export async function PUT(request, { params }) {
     if (body !== undefined) {
       currContent.body = body
       changingAttributes.push('body')
+    }
+    if (description !== undefined) {
+      currContent.description = description
+      changingAttributes.push('description')
     }
 
     if (changingAttributes.length <= 0) {
@@ -141,35 +154,33 @@ export async function PUT(request, { params }) {
   }
 }
 
-// Creator > Content > Delete
-export async function DELETE(request, { params }) {
-  const searchParams = request.nextUrl.searchParams
-  const creatorId = searchParams.get('creatorId')
-  const { id } = params
+// ** Creator > Content > Delete
+export async function DELETE(request, response) {
+  const { id } = response.params
   let req = {}
   try {
     req = await request.json()
   } catch (e) {}
   let res = {}
 
-  // Cek user ada
-  let currCreator = await User.findByPk(creatorId)
-  if (!currCreator) {
-    res = { message: responseString.USER.NOT_FOUND }
-    return Response.json(res, { status: 404 })
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
   }
 
-  // Cek user adalah creator
-  if (currCreator.role !== 'creator') {
-    res = { message: 'Anda bukan seorang creator!' }
+  // * Cek user adalah creator
+  if (user.role !== 'creator') {
+    res = { message: responseString.USER.NOT_CREATOR }
     return Response.json(res, { status: 403 })
   }
 
-  // Cek content ada dan milik user yang sedang merequest
+  // * Cek content ada dan milik user yang sedang merequest
   let currContent = await Content.findOne({
     where: {
       id,
-      creatorRef: currCreator.id
+      creatorRef: user.id
     }
   })
   if (!currContent) {

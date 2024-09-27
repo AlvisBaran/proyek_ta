@@ -10,14 +10,14 @@ import User from '@/backend/models/user'
 export async function GET() {
   // TODO: Fetch smua reply dari comment dari content
 
-  // ** Tidak perlu kata verrel
+  // ** Tidak perlu
 
   return Response.json({ message: 'User > Content > Comment > Reply > Get All' })
 }
 
 // User > Content > Comment > Reply > Create
 export async function POST(request, { params }) {
-  // TODO: Insert reply ke db
+  // * Insert reply ke db
   const searchParams = request.nextUrl.searchParams
   let userId = searchParams.get('userId') ?? null
   const { contentId, commentId } = params
@@ -35,31 +35,31 @@ export async function POST(request, { params }) {
   }).validate({ ...params, userId, ...req }, { abortEarly: false })
 
   if (!joiValidate.error) {
-    // TODO: Cek user ada
+    // * Cek user ada
     let currUser = await User.findByPk(userId)
     if (!currUser) {
       res = { message: responseString.USER.NOT_FOUND }
       return Response.json(res, { status: 404 })
     }
-    // TODO: Cek content ada
+    // * Cek content ada
     let currContent = await Content.findByPk(contentId)
     if (!currContent) {
       res = { message: responseString.CONTENT.NOT_FOUND }
       return Response.json(res, { status: 404 })
     }
-    // TODO: Cek comment ada
+    // * Cek comment ada
     let currComment = await Comment.findByPk(commentId)
     if (!currComment) {
       res = { message: responseString.GLOBAL.NOT_FOUND }
       return Response.json(res, { status: 404 })
     }
-    // TODO: Cek comment milik content
+    // * Cek comment milik content
     if (currComment.contentRef !== currContent.id) {
       res = { message: 'Comment ini bukan milik content yang berkaitan!' }
       return Response.json(res, { status: 404 })
     }
-    // TODO: Cek syarat, dll untuk reply (nanti aja)
-    // TODO: Add ke database
+    // * Cek syarat, dll untuk reply (nanti aja)
+    // * Add ke database
     let newReply = Reply.build({
       content: req.content,
       commentRef: currComment.id,

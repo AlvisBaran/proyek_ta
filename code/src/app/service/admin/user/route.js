@@ -1,24 +1,50 @@
 import Joi from 'joi'
-
+import { Op } from 'sequelize'
 import { responseString } from '@/backend/helpers/serverResponseString'
+import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
+
 import User from '@/backend/models/user'
 
-// Admin > User > Read All
-export async function GET() {
+// ** Admin > User > Read All
+export async function GET(request, response) {
+  const searchParams = request.nextUrl.searchParams
+  const keyword = searchParams.get('keyword') ?? null
+  let res = {}
+
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
+  // * Cek User adalah admin
+  if (user.role !== 'admin') {
+    res = { message: responseString.USER.NOT_ADMIN }
+    return Response.json(res, { status: 403 })
+  }
+
+  let where = {}
+  if (!!keyword) {
+    where = {
+      ...where,
+      [Op.or]: [
+        { cUsername: { [Op.like]: `%${keyword}%` } },
+        { email: { [Op.like]: `%${keyword}%` } },
+        { displayName: { [Op.like]: `%${keyword}%` } },
+        { role: { [Op.like]: `%${keyword}%` } }
+      ]
+    }
+  }
+
   let users = []
-  return await User.findAll({ order: [['joinDate', 'DESC']] })
+  return await User.findAll({
+    where,
+    attributes: ['id', 'displayName', 'email', 'cUsername', 'joinDate', 'role', 'banStatus'],
+    order: [['joinDate', 'DESC']]
+  })
     .then((resp = []) => {
-      resp?.map(datum =>
-        users.push({
-          ...datum?.dataValues,
-          saldo: undefined,
-          socials: undefined,
-          bio: undefined,
-          about: undefined,
-          banner: undefined,
-          password: undefined
-        })
-      )
+      users = resp.map(item => item.dataValues)
 
       return Response.json(users, { status: 200 })
     })
@@ -27,7 +53,7 @@ export async function GET() {
     })
 }
 
-// Admin > User > Create
+// ** Admin > User > Create
 export async function POST(request) {
   let req = {}
   try {
@@ -35,7 +61,7 @@ export async function POST(request) {
   } catch (e) {}
   let res = {}
 
-  // TODO:: Validasi input
+  // * Validasi input
   const joiValidate = Joi.object({
     role: Joi.valid('normal', 'creator', 'admin').optional(),
     email: Joi.string().email().required(),
@@ -50,9 +76,14 @@ export async function POST(request) {
   }).validate(req, { abortEarly: false })
 
   if (!joiValidate.error) {
-    let newUser = User.build({ ...req })
+    let newUser = User.build({
+      role: req.role,
+      email: req.email,
+      password: req.password,
+      displayName: req.displayName
+    })
 
-    // TODO:: Cek user terdaftar di database
+    // * Cek user terdaftar di database
     let userSnapshot = await User.findOne({ where: { email: newUser.email } })
 
     if (!!userSnapshot) {
@@ -60,7 +91,7 @@ export async function POST(request) {
       return Response.json(res, { status: 400 })
     }
 
-    // TODO:: Daftarkan user ke database
+    // * Daftarkan user ke database
     return await newUser
       .save()
       .then(async resp => {

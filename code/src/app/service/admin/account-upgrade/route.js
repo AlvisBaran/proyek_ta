@@ -1,78 +1,72 @@
 import Joi from 'joi'
-
+import { Op } from 'sequelize'
 import { responseString } from '@/backend/helpers/serverResponseString'
-import AccountUpgradeRequests from '@/backend/models/accountupgraderequests'
-import User from '@/backend/models/user'
 
-// Admin > Account Upgrade > Read All
+import User from '@/backend/models/user'
+import AccountUpgradeRequests from '@/backend/models/accountupgraderequests'
+
+import '@/backend/models/association'
+
+const FILTERS = {
+  STATUS: ['requested', 'approved', 'declined']
+}
+
+// ** Admin > Account Upgrade > Read All
 export async function GET(request) {
   const searchParams = request.nextUrl.searchParams
-  // const restriction = searchParams.get('restriction')
-  const notRespondedOnly = searchParams.get('notRespondedOnly')
+  const keyword = searchParams.get('keyword')
+  const filterStatus = searchParams.get('filterStatus') ?? null
   let res = {}
 
-  // const joiValidate = Joi.object({
-  //   restriction: Joi.valid("normal", "extra").optional(),
-  // }).validate({restriction}, {abortEarly: false});
+  const joiValidate = Joi.object({
+    filterStatus: Joi.valid(...FILTERS.STATUS)
+      .valid(null)
+      .optional()
+  }).validate({ filterStatus }, { abortEarly: false })
 
-  // if (!joiValidate.error) {
-  let requestsList = []
-  let whereAttributes = {}
-  // if (!restriction) restriction = 'normal';
-  if (!!notRespondedOnly) whereAttributes = { ...whereAttributes, status: 'requested' }
-
-  return await AccountUpgradeRequests.findAll({
-    where: { ...whereAttributes },
-    order: [['requestedAt', 'DESC']]
-  })
-    .then(async resps => {
-      for (let i = 0; i < resps.length; i++) {
-        const requestItem = resps[i]
-
-        // Load Applicant
-        let applicant = undefined
-        let tempApplicant = await User.findByPk(requestItem.applicantRef)
-        if (!!tempApplicant) {
-          applicant = {
-            ...tempApplicant.dataValues,
-            password: undefined,
-            saldo: undefined,
-            socials: undefined,
-            bio: undefined,
-            about: undefined,
-            banner: undefined
-          }
-        }
-
-        // Load Admin If exists
-        let admin = undefined
-        if (!!requestItem.adminRef) {
-          let tempAdmin = await User.findByPk(requestItem.adminRef)
-          admin = {
-            ...tempAdmin.dataValues,
-            password: undefined,
-            saldo: undefined,
-            socials: undefined,
-            bio: undefined,
-            about: undefined,
-            banner: undefined
-          }
-        }
-
-        requestsList.push({
-          ...requestItem.dataValues,
-          applicant,
-          admin
-        })
+  if (!joiValidate.error) {
+    let requestsList = []
+    let whereAttributes = {}
+    if (!!keyword)
+      whereAttributes = {
+        ...whereAttributes,
+        [Op.or]: [
+          { newUsername: { [Op.like]: `%${keyword}%` } },
+          { '$Applicant.displayName$': { [Op.like]: `%${keyword}%` } },
+          { '$Applicant.email$': { [Op.like]: `%${keyword}%` } },
+          { '$Applicant.cUsername$': { [Op.like]: `%${keyword}%` } },
+          { '$Admin.displayName$': { [Op.like]: `%${keyword}%` } },
+          { '$Admin.email$': { [Op.like]: `%${keyword}%` } },
+          { '$Admin.cUsername$': { [Op.like]: `%${keyword}%` } }
+        ]
       }
-      return Response.json(requestsList, { status: 200 })
+    if (!!filterStatus) whereAttributes = { ...whereAttributes, status: filterStatus }
+
+    return await AccountUpgradeRequests.findAll({
+      where: { ...whereAttributes },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'cUsername', 'displayName', 'email'],
+          as: 'Applicant'
+        },
+        {
+          model: User,
+          attributes: ['id', 'cUsername', 'displayName', 'email'],
+          as: 'Admin'
+        }
+      ],
+      order: [['requestedAt', 'DESC']]
     })
-    .catch(err => {
-      return Response.json({ message: responseString.SERVER.SERVER_ERROR }, { status: 500 })
-    })
-  // }
-  // else {
-  //   res = { message: responseString.VALIDATION.ERROR, error: joiValidate.error.details };
-  //   return Response.json(res, { status: 400 });
-  // }
+      .then(async resps => {
+        requestsList = resps.map(item => item.dataValues)
+        return Response.json(requestsList, { status: 200 })
+      })
+      .catch(err => {
+        return Response.json({ message: responseString.SERVER.SERVER_ERROR, error: err }, { status: 500 })
+      })
+  } else {
+    res = { message: responseString.VALIDATION.ERROR, error: joiValidate.error.details }
+    return Response.json(res, { status: 400 })
+  }
 }

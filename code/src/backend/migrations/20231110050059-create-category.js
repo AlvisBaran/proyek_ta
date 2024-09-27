@@ -23,6 +23,9 @@ module.exports = {
       },
       updatedAt: {
         type: DataTypes.DATE
+      },
+      deletedAt: {
+        type: DataTypes.DATE
       }
     })
   },

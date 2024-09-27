@@ -7,33 +7,34 @@ import Reply from '@/backend/models/reply'
 import '@/backend/models/association'
 import ContentShares from '@/backend/models/contentshares'
 import sqlz from '@/backend/configs/db'
+import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
+import ContentGallery from '@/backend/models/contentgallery'
+import { mainBucketName, minioClient } from '@/minio/config'
 
-// User > Content > Get One Content
-export async function GET(request, { params }) {
-  // TODO: Get content (with gallery)
-  // TODO: Ada opsi untuk load lengkap (comment, reply)
+// ** User > Content > Get One Content
+export async function GET(request, response) {
   const searchParams = request.nextUrl.searchParams
   const withComments = searchParams.get('noComments') ? false : true
   const withReplies = searchParams.get('noReplies') ? false : true
-  let userId = searchParams.get('userId') ?? null
+  const withGalleries = searchParams.get('noGalleries') ? false : true
   let sharerUserId = searchParams.get('sharerUserId') ?? null
-  const { contentId } = params
+  const { contentId } = response.params
   let res = {}
+
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
 
   const joiValidate = Joi.object({
     contentId: Joi.number().required(),
-    userId: Joi.number().allow(null),
     sharerUserId: Joi.number().allow(null)
-  }).validate({ ...params, userId, sharerUserId }, { abortEarly: false })
+  }).validate({ contentId, sharerUserId }, { abortEarly: false })
 
   if (!joiValidate.error) {
-    // TODO: Cek user ada (klo ga ada gpp)
-    let currUser = null
-    if (!!userId) {
-      userId = Number(userId)
-      currUser = await User.findByPk(userId)
-    }
-    // TODO: Fetch content sekalian cek ada
+    // * Fetch content sekalian cek ada
     let include = [
       {
         model: User,
@@ -67,6 +68,12 @@ export async function GET(request, { params }) {
         include: commentInclude
       })
     }
+    if (withGalleries) {
+      include.push({
+        model: ContentGallery,
+        as: 'Gallery'
+      })
+    }
     let currContent = await Content.findOne({
       where: { id: contentId },
       include,
@@ -77,31 +84,31 @@ export async function GET(request, { params }) {
       return Response.json(res, { status: 404 })
     }
 
-    // TODO(DONE): Cek content public or private
+    // * Cek content public or private
     if (currContent.type === 'private') {
-      // TODO(DONE): -> kalo private dan user login ga ada return
-      if (!currUser) {
+      // * -> kalo private dan user login ga ada return
+      if (!user) {
         res = { message: responseString.GLOBAL.FORBIDDEN, error: 'FORBIDDEN!' }
         return Response.json(res, { status: 403 })
       } else {
         // TODO: -> kalo private dan user login ada cek membershipnya
         // TODO: ---> kalo membership ga ada return
-        // TODO(DONE): ---> kalo ada ya lanjut
+        // * ---> kalo ada ya lanjut
       }
     }
-    // TODO(DONE): -> kalo public ya udah next
+    // * -> kalo public ya udah next
 
     // ** Ini kalo ada sharer dan opener
     if (!!sharerUserId) {
       let currSharer = await User.findByPk(sharerUserId)
-      if (!!currSharer && !!currUser) {
+      if (!!currSharer && !!user) {
         try {
           await sqlz.transaction(async t => {
             // * Masukan ke db
             let newContentShares = ContentShares.build({
               contentRef: currContent.id,
               sharerRef: currSharer.id,
-              openerRef: currUser.id
+              openerRef: user.id
             })
             await newContentShares.save().catch(error => {
               throw new Error({ message: responseString.GLOBAL.FAILED, details: error })
@@ -120,9 +127,28 @@ export async function GET(request, { params }) {
       }
     }
 
+    // * Menambah URL ke object Gallery
+    const galleries = []
+    for (let i = 0; i < currContent.Gallery.length; i++) {
+      const currGallery = currContent.Gallery[i]
+      // ** Mengambil setiap url dari object yang bersangkutan menggunakan object_name
+      await minioClient
+        .presignedGetObject(mainBucketName, currGallery.minio_object_name)
+        .then(url => {
+          galleries.push({
+            ...currGallery.dataValues,
+            url
+          })
+        })
+        .catch(error => {
+          console.error('minio ERROR: presignedGetObject', error)
+        })
+    }
+
     return Response.json(
       {
-        ...currContent.dataValues
+        ...currContent.dataValues,
+        Gallery: galleries
       },
       { status: 200 }
     )

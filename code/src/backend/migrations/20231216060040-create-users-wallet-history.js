@@ -20,7 +20,7 @@ module.exports = {
         onUpdate: 'CASCADE'
       },
       nominal: {
-        type: DataTypes.TEXT,
+        type: DataTypes.BIGINT,
         allowNull: false
       },
       type: {
@@ -36,10 +36,19 @@ module.exports = {
         type: DataTypes.TEXT,
         allowNull: false
       },
+      mt_transaction_id: {
+        type: DataTypes.STRING
+      },
+      mt_order_id: {
+        type: DataTypes.STRING
+      },
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: literal('CURRENT_TIMESTAMP')
+      },
+      deletedAt: {
+        type: DataTypes.DATE
       }
     })
   },

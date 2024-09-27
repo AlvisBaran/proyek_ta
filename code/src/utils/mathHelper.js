@@ -1,8 +1,3 @@
-// interface IRangeAttr {
-//   min?: number
-//   max: number
-// }
-
 export const range = attr => {
   let { min = 0, max } = attr
   let result = []
