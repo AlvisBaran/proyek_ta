@@ -1,4 +1,4 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/backend/configs/auth'
 import { getServerSession } from 'next-auth'
 import User from '../models/user'
 import { decomposeName } from './nextAuthUserSessionHelper'
