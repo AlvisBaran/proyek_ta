@@ -10,6 +10,11 @@ try {
   sqlz = new Sequelize({
     dialect: 'mysql',
     dialectModule: mysql2,
+    pool: {
+      max: 2,
+      min: 0,
+      idle: 10000
+    },
     host: process.env.NEXT_PUBLIC_DB_HOST ?? 'localhost',
     database: process.env.NEXT_PUBLIC_DB_NAME ?? 'ta_alvis_dev',
     username: process.env.NEXT_PUBLIC_DB_USERNAME ?? 'root',
@@ -23,18 +28,7 @@ try {
   await sqlz.authenticate()
   console.info(buildSystemLog('Database connection established;'))
 } catch (e) {
-  console.info(buildSystemLog('Database connection error: ' + e.message))
+  console.info(buildSystemLog('Database connection error: ' + e))
 }
 
 export default sqlz
-
-// export const resetDB = async () => {
-//   if (!sqlz) {
-//     console.info(buildSystemLog("Connection is not established;"));
-//   }
-//   else {
-//     console.info(buildSystemLog("Initializing database reset..."));
-//     await sqlz.drop();
-//     console.into(buildSystemLog("Database reset success;"));
-//   }
-// }
