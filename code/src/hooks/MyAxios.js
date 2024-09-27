@@ -1,5 +1,5 @@
 import axios from 'axios'
 
 export default axios.create({
-  baseURL: `http://localhost:3000/service/`
+  baseURL: `${process.env.NEXT_PUBLIC_SITE_URL}/service/`
 })
