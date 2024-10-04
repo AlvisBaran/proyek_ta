@@ -53,7 +53,7 @@ export async function DELETE(request, response) {
         id: galleryId,
         contentRef: currContent.id
       },
-      attributes: ['id', 'contentRef', 'minio_object_name', 'createdAt']
+      attributes: ['id', 'contentRef', 'type', 'minio_object_name', 'createdAt']
     })
     if (!currGallery) {
       res = { message: responseString.GLOBAL.NOT_FOUND }

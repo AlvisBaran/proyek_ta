@@ -8,7 +8,8 @@ export const responseString = {
     UPDATE_FAILED: 'Gagal melakukan pembaruan data!',
     ALREADY_EXISTS: 'Item yang ingin anda tambahkan sudah pernah ada!',
     DELETE_FAILED: 'Gagal menghapus item!',
-    FORBIDDEN: 'Route ini adalah area terlarang untuk anda!'
+    FORBIDDEN: 'Route ini adalah area terlarang untuk anda!',
+    TRANSACTION_ERROR: 'Gagal saat transaksi database!'
   },
   VALIDATION: {
     ERROR: 'Input yang diberi tidak lolos validasi!',

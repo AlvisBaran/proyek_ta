@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
@@ -21,15 +22,14 @@ import {
   useTheme
 } from '@mui/material'
 
-import PinterestIcon from '@mui/icons-material/Pinterest'
 import PaymentIcon from '@mui/icons-material/Payment'
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn'
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
 
 import MyAxios from '@/hooks/MyAxios'
-import LoadingSpinner from '@/app/(web)/_components/LoadingSpinner'
+import Logo from '@/app/(web)/_components/Logo'
 import { intlNumberFormat } from '@/utils/intlNumberFormat'
-import Link from 'next/link'
+import LoadingSpinner from '@/app/(web)/_components/LoadingSpinner'
 
 const membershipDefaultValues = { data: null, loading: false, success: false, error: false }
 const buyMembershipDefaultValues = { loading: false, success: false, error: false }
@@ -82,7 +82,7 @@ export default function CheckoutMembershipPage({ params }) {
         <Grid item xs={12} md={6} sx={{ minHeight: '100vh' }}>
           <Box sx={{ width: '100%', p: upMd ? 2 : 1 }}>
             <Link href={'/home'}>
-              <PinterestIcon fontSize='large' />
+              <Logo fontSize='large' />
             </Link>
           </Box>
           {membership.loading ? (
@@ -133,7 +133,7 @@ export default function CheckoutMembershipPage({ params }) {
         <Grid item xs={12} md={6} sx={{ bgcolor: upMd ? theme.palette.primary.contrastText : undefined }}>
           <Stack alignItems='center' justifyContent='center' height='100%'>
             <Typography variant='h4' textAlign='center'>
-              <PinterestIcon fontSize='large' />
+              <Logo fontSize='large' />
               ANTHREON CHECKOUT
             </Typography>
             <Typography variant='h5' textAlign='center'>

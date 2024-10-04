@@ -1,4 +1,5 @@
 import { responseString } from '@/backend/helpers/serverResponseString'
+
 import Bank from '@/backend/models/bank'
 
 // ** Bank > Read One

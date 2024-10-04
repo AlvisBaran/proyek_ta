@@ -19,11 +19,14 @@ ContentGallery.init(
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE'
     },
-    title: {
+    name: {
       type: DataTypes.STRING
     },
-    alt: {
-      type: DataTypes.STRING
+    type: {
+      type: DataTypes.ENUM,
+      values: ['image', 'video'],
+      defaultValue: 'image',
+      allowNull: false
     },
     minio_object_name: {
       type: DataTypes.STRING

@@ -6,6 +6,7 @@ import { MuiFileInput } from 'mui-file-input'
 import toast from 'react-hot-toast'
 
 import {
+  Avatar,
   Box,
   Button,
   Card,
@@ -16,8 +17,13 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  FormHelperText,
   Grid,
   IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   TextField,
   Typography
@@ -26,6 +32,8 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import CloseIcon from '@mui/icons-material/Close'
+import ImageIcon from '@mui/icons-material/Image'
+import MovieIcon from '@mui/icons-material/Movie'
 
 import MyAxios from '@/hooks/MyAxios'
 import { useDialog } from '@/hooks/useDialog'
@@ -34,6 +42,11 @@ import LoadingSpinner from '@/app/(web)/_components/LoadingSpinner'
 
 import dayjs from 'dayjs'
 import { formatDateTime } from '@/utils/dayjsConst'
+
+const typeOptions = [
+  { value: 'image', label: 'Image' },
+  { value: 'video', label: 'Video' }
+]
 
 const galleryDefaultValues = { data: [], loading: false, error: false, success: false }
 const deleteGalleryDefaultValues = { loading: false, error: false, success: false }
@@ -83,7 +96,7 @@ export default function GallerySection({ content, fetchContent }) {
     <Box>
       <PageHeader
         title='Gallery'
-        subTitle="Set content's images. Max: 4"
+        subTitle="Set content's galleries. Max: 4"
         action={
           <Button
             variant='contained'
@@ -104,7 +117,8 @@ export default function GallerySection({ content, fetchContent }) {
             <Grid key={`creator-content-edit-${content.data.id}-gallery-item-${index}`} item xs={12} md={6}>
               <Card elevation={3}>
                 <CardHeader
-                  title={item.title}
+                  avatar={<Avatar>{item.type === 'image' ? <ImageIcon /> : <MovieIcon />}</Avatar>}
+                  title={item.name}
                   titleTypographyProps={{ variant: 'body1', fontWeight: 600 }}
                   subheader={dayjs(item.createdAt).format(formatDateTime)}
                   subheaderTypographyProps={{ variant: 'body2' }}
@@ -125,11 +139,12 @@ export default function GallerySection({ content, fetchContent }) {
                 />
                 <CardActionArea>
                   <CardMedia
-                    component='img'
+                    component={item.type === 'video' ? 'video' : 'img'}
+                    controls
+                    controlsList='nodownload'
                     sx={{ aspectRatio: '9:16', height: 260 }}
                     src={item.url}
-                    title={item.title}
-                    alt={item.alt}
+                    title={item.name}
                   />
                 </CardActionArea>
               </Card>
@@ -159,9 +174,9 @@ function AddGalleryDialog({ contentId, open, onClose, onSuccess }) {
   // * Form Hook
   const formHook = useForm({
     defaultValues: {
-      title: '',
-      alt: '',
-      image: null
+      name: '',
+      type: 'image',
+      file: null
     },
     mode: 'onChange'
   })
@@ -176,9 +191,9 @@ function AddGalleryDialog({ contentId, open, onClose, onSuccess }) {
   async function onSubmit(data) {
     setAddGallery({ ...addGallery, loading: true, error: false, success: false })
     const formData = new FormData()
-    formData.append('title', data.title)
-    formData.append('alt', data.alt)
-    if (!!data.image) formData.append('image', data.image)
+    formData.append('name', data.name)
+    formData.append('type', data.type)
+    if (!!data.file) formData.append('file', data.file)
     await MyAxios.post(`/creator/content/${contentId}/gallery`, formData)
       .then(resp => {
         toast.success('Success add gallery!')
@@ -207,15 +222,15 @@ function AddGalleryDialog({ contentId, open, onClose, onSuccess }) {
         <Box component='form' id={addGalleryFormId} onSubmit={formHook.handleSubmit(onSubmit)}>
           <Controller
             control={formHook.control}
-            name='image'
-            rules={{ required: 'Image is required!' }}
+            name='file'
+            rules={{ required: 'File is required!' }}
             render={({ field, fieldState }) => (
               <MuiFileInput
                 fullWidth
                 margin='normal'
-                label='Image'
+                label='File'
                 inputProps={{
-                  accept: 'image/*, .doc, .docx, .pdf, .xls, .xlsx, .ppt, .pptx'
+                  accept: 'image/*, .mp4, .avi'
                 }}
                 {...field}
                 error={Boolean(fieldState.error)}
@@ -223,31 +238,41 @@ function AddGalleryDialog({ contentId, open, onClose, onSuccess }) {
               />
             )}
           />
-          <TextField
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            margin='normal'
-            label='Title'
-            placeholder='Type your image title here!'
-            {...formHook.register('title', {
-              required: 'Title field is required!',
-              minLength: { value: 2, message: 'Min lenght of 2!' }
-            })}
-            error={Boolean(formHook.formState.errors.title)}
-            helperText={Boolean(formHook.formState.errors.title) ? formHook.formState.errors.title.message : undefined}
+          <Controller
+            control={formHook.control}
+            name='type'
+            render={({ field, fieldState }) => (
+              <FormControl fullWidth error={Boolean(fieldState.error)} margin='normal'>
+                <InputLabel id='content-gallery-add-type-label'>Type</InputLabel>
+                <Select
+                  labelId='content-gallery-add-type-label'
+                  id='content-gallery-add-type'
+                  label='Status'
+                  value={field.value}
+                  onChange={e => field.onChange(e.target.value)}
+                >
+                  {typeOptions.map((item, index) => (
+                    <MenuItem key={`content-gallery-add-type-item-${index}`} value={item.value}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {Boolean(fieldState.error) ? <FormHelperText>{fieldState.error.message}</FormHelperText> : null}
+              </FormControl>
+            )}
           />
           <TextField
             fullWidth
             InputLabelProps={{ shrink: true }}
             margin='normal'
-            label='Alternative Text'
-            placeholder='Type your image alterative text here!'
-            {...formHook.register('alt', {
-              required: 'Alternative Text field is required!',
+            label='Name'
+            placeholder='Type your file name here!'
+            {...formHook.register('name', {
+              required: 'Name field is required!',
               minLength: { value: 2, message: 'Min lenght of 2!' }
             })}
-            error={Boolean(formHook.formState.errors.alt)}
-            helperText={Boolean(formHook.formState.errors.alt) ? formHook.formState.errors.alt.message : undefined}
+            error={Boolean(formHook.formState.errors.title)}
+            helperText={Boolean(formHook.formState.errors.title) ? formHook.formState.errors.title.message : undefined}
           />
         </Box>
       </DialogContent>

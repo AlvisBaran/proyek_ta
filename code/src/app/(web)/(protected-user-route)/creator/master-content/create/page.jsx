@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
 
 import { Alert, Box, Button, Grid, TextField } from '@mui/material'
 
@@ -12,7 +13,6 @@ import SaveIcon from '@mui/icons-material/Save'
 import MyAxios from '@/hooks/MyAxios'
 import Breadcrumb from '@/app/(web)/_components/Breadcrumb'
 import CreatorPageLayout from '../../_components/layout'
-import toast from 'react-hot-toast'
 const TextEditor = dynamic(() => import('@/app/(web)/_components/TextEditor'), { ssr: false })
 
 const createDefaultValues = { loading: false, error: false, success: false }

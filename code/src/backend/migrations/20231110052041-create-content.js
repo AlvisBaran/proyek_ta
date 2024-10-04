@@ -49,6 +49,11 @@ module.exports = {
         allowNull: true,
         defaultValue: null
       },
+      viewCounter: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
       likeCounter: {
         type: DataTypes.INTEGER,
         allowNull: false,

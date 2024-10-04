@@ -4,6 +4,11 @@ import { getUserFromComposedSession } from '@/backend/utils/nextAuthUserSessionH
 
 export const dynamic = 'force-dynamic'
 
+export const metadata = {
+  title: 'Sign In | Panthreon',
+  description: 'Sign in to your account on Panthreon'
+}
+
 export default async function ProtectedNonUserRouteLayout({ children }) {
   const session = await getServerAuthSession()
   const user = getUserFromComposedSession(session)

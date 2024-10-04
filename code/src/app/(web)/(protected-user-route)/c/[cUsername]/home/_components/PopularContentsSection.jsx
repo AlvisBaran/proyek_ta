@@ -14,7 +14,7 @@ export default function PopularContentsSection({ cUsername }) {
   const [contents, setContents] = useState(contentsDefaultValues)
 
   // * Fetch Data
-  async function fetchContets() {
+  async function fetchContents() {
     setContents({ ...contents, loading: true, success: false, error: false })
     await MyAxios.get(`/feeds/creator/${cUsername}/content/popular`, {
       params: {
@@ -31,7 +31,7 @@ export default function PopularContentsSection({ cUsername }) {
 
   // * Fetch data on load
   useEffect(() => {
-    if (!!cUsername) fetchContets()
+    if (!!cUsername) fetchContents()
   }, [cUsername])
 
   if (contents.loading)

@@ -80,9 +80,9 @@ export async function POST(request, response) {
   let req = {}
   try {
     const formData = await request.formData()
-    req.title = formData.get('title')
-    req.alt = formData.get('alt')
-    req.image = formData.get('image')
+    req.name = formData.get('name')
+    req.type = formData.get('type')
+    req.file = formData.get('file')
   } catch (e) {}
   let res = {}
 
@@ -101,9 +101,9 @@ export async function POST(request, response) {
 
   const joiValidate = Joi.object({
     contentId: Joi.number().required(),
-    title: Joi.string().optional(),
-    alt: Joi.string().optional(),
-    image: Joi.any().required()
+    name: Joi.string().optional(),
+    type: Joi.valid('image', 'video'),
+    file: Joi.any().required()
   }).validate({ ...req, contentId }, { abortEarly: false })
 
   if (!joiValidate.error) {
@@ -126,11 +126,11 @@ export async function POST(request, response) {
       // * Generate UUID untuk gambarnya
       const newGalleryObjectId = UUD4()
       // ** Ambil extensionnya dari nama
-      const extension = String(req.image.name).split('.').pop() ?? 'png'
+      const extension = String(req.file.name).split('.').pop() ?? 'png'
       // * Build min.io object name nya
       const newMinioObjectName = `${prefix}/content-gallery/${newGalleryObjectId}-${new Date().getTime()}.${extension}`
       // * Mencoba masukkan ke minio
-      const bytes = await req.image.arrayBuffer()
+      const bytes = await req.file.arrayBuffer()
       const buffer = Buffer.from(bytes)
       return minioClient
         .putObject(mainBucketName, newMinioObjectName, buffer)
@@ -139,8 +139,8 @@ export async function POST(request, response) {
           // * Build data gallery yang akan diinsert ke database
           let newGallery = ContentGallery.build({
             contentRef: currContent.id,
-            title: req.title,
-            alt: String(req.alt).toLowerCase().replaceAll(' ', '-').trim(),
+            name: req.name,
+            type: req.type,
             minio_object_name: newMinioObjectName
           })
           // * Insert data gallery ke database

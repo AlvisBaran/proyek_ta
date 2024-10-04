@@ -8,12 +8,14 @@ import Content from '@/backend/models/content'
 import ContentGallery from '@/backend/models/contentgallery'
 
 import '@/backend/models/association'
+import { Op } from 'sequelize'
 
 // ** Feeds > Creator > Get Creator's Contents > Popular
 export async function GET(request, response) {
   const searchParams = request.nextUrl.searchParams
   let page = searchParams.get('page') ?? 1
   let perPage = searchParams.get('perPage') ?? 12
+  let exclude = searchParams.getAll('exclude[]') ?? []
   const { creatorId } = response.params
   let res = {}
 
@@ -42,9 +44,18 @@ export async function GET(request, response) {
       return Response.json(res, { status: 404 })
     }
 
+    let where = { creatorRef: currCreator.id, status: 'published', contentRequestRef: null }
+    if (!!exclude && exclude.length > 0) {
+      where = { ...where, id: { [Op.not]: exclude } }
+    }
+
     const results = await Content.findAndCountAll({
-      where: { creatorRef: currCreator.id, status: 'published', contentRequestRef: null },
-      order: [['likeCounter', 'ASC']],
+      where,
+      order: [
+        ['viewCounter', 'DESC'],
+        ['likeCounter', 'DESC'],
+        ['shareCounter', 'DESC']
+      ],
       limit: perPage,
       offset: (page - 1) * perPage,
       include: [
@@ -56,7 +67,7 @@ export async function GET(request, response) {
         {
           model: ContentGallery,
           as: 'Gallery',
-          limit: 4
+          limit: 1
           // order: [['createdAt', 'DESC']],
         }
       ]

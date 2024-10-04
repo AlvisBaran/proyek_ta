@@ -56,7 +56,7 @@ export async function GET(request, response) {
         {
           model: ContentGallery,
           as: 'Gallery',
-          limit: 4
+          limit: 1
           // order: [['createdAt', 'DESC']],
         }
       ]

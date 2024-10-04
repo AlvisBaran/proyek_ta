@@ -74,7 +74,7 @@ export default function UserPageLayoutDrawerNavsUserInterfaces() {
             <ListItemAvatar>
               <Avatar src={user.profilePicture} />
             </ListItemAvatar>
-            <ListItemText primary={user.displayName} secondary={user.role} />
+            <ListItemText primary={user.displayName} secondary={user.role === 'normal' ? 'member' : user.role} />
           </ListItem>
         </List>
 

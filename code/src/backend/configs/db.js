@@ -13,7 +13,7 @@ try {
     pool: {
       max: 2,
       min: 0,
-      idle: 10000
+      idle: 5000
     },
     host: process.env.NEXT_PUBLIC_DB_HOST ?? 'localhost',
     database: process.env.NEXT_PUBLIC_DB_NAME ?? 'ta_alvis_dev',

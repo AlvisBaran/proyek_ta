@@ -83,7 +83,7 @@ export default function MembershipAddDialog({ open, onClose, onSuccess }) {
                   margin='normal'
                   label='Banner'
                   inputProps={{
-                    accept: 'image/*, .doc, .docx, .pdf, .xls, .xlsx, .ppt, .pptx'
+                    accept: 'image/*'
                   }}
                   {...field}
                   error={Boolean(fieldState.error)}

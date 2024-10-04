@@ -104,13 +104,13 @@ export async function createTopUpPaymentLink(
           category: 'e-wallet',
           merchant_name: 'Panthreon'
         }
-      ]
-      // customer_details: {
-      //   first_name: userFirstName,
-      //   email: userEmail,
-      //   phone: userPhone ?? DEFAULT_SETTINGS.phoneNumber,
-      //   notes: userNotes ?? undefined
-      // }
+      ],
+      customer_details: {
+        first_name: userFirstName,
+        email: userEmail
+        // phone: userPhone ?? DEFAULT_SETTINGS.phoneNumber,
+        // notes: userNotes ?? undefined
+      }
     })
       .then(res => {
         console.log(res.data)

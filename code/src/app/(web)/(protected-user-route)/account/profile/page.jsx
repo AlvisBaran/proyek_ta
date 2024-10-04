@@ -4,6 +4,7 @@ import { Fragment, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { MuiFileInput } from 'mui-file-input'
 import toast from 'react-hot-toast'
+import dynamic from 'next/dynamic'
 
 import { Avatar, Box, Button, Divider, Stack, TextField } from '@mui/material'
 
@@ -13,6 +14,7 @@ import AccountLayout from '../_components/AccountLayout'
 import MyAxios from '@/hooks/MyAxios'
 import LoadingSpinner from '@/app/(web)/_components/LoadingSpinner'
 import PageHeader from '@/app/(web)/_components/PageHeader'
+const TextEditor = dynamic(() => import('@/app/(web)/_components/TextEditor'), { ssr: false })
 
 const userDefaultValues = { data: null, loading: false, success: false, error: false }
 const updateProfileDefaultValues = { loading: false, success: false, error: false }
@@ -39,8 +41,8 @@ export default function UserAccountProfilePage() {
       .then(resp => {
         formHook.reset({
           displayName: resp.data.displayName,
-          bio: resp.data.bio,
-          about: resp.data.about
+          bio: resp.data.bio ?? '',
+          about: resp.data.about ?? ''
         })
         setUser({ ...user, data: resp.data, loading: false, success: true })
         if (updateSession) {
@@ -107,7 +109,7 @@ export default function UserAccountProfilePage() {
                   <MuiFileInput
                     label='Upload New Profile Picture'
                     inputProps={{
-                      accept: 'image/*, .doc, .docx, .pdf, .xls, .xlsx, .ppt, .pptx'
+                      accept: 'image/*'
                     }}
                     {...field}
                     error={Boolean(fieldState.error)}
@@ -132,7 +134,7 @@ export default function UserAccountProfilePage() {
                       <MuiFileInput
                         label='Upload New Banner'
                         inputProps={{
-                          accept: 'image/*, .doc, .docx, .pdf, .xls, .xlsx, .ppt, .pptx'
+                          accept: 'image/*'
                         }}
                         {...field}
                         error={Boolean(fieldState.error)}
@@ -141,14 +143,19 @@ export default function UserAccountProfilePage() {
                       />
                     )}
                   />
-                  <TextField
-                    fullWidth
-                    label='About'
-                    multiline
-                    minRows={2}
-                    value={user.data.about}
-                    error
-                    helperText='About belum rich text ya!'
+                  <Controller
+                    control={formHook.control}
+                    name='about'
+                    render={({ field, fieldState }) => (
+                      <Box>
+                        {Boolean(fieldState.error) ? (
+                          <Alert severity='error' sx={{ mb: 1 }}>
+                            {fieldState.error.message}
+                          </Alert>
+                        ) : null}
+                        <TextEditor text={field.value} setText={newValue => field.onChange(newValue)} />
+                      </Box>
+                    )}
                   />
                 </Fragment>
               ) : null}

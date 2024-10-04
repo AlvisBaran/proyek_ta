@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation'
 
 import { List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, Stack } from '@mui/material'
 
-import PinterestIcon from '@mui/icons-material/Pinterest'
 import PeopleIcon from '@mui/icons-material/People'
 import InsightsIcon from '@mui/icons-material/Insights'
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
@@ -17,6 +16,7 @@ import AddCardIcon from '@mui/icons-material/AddCard'
 import WalletIcon from '@mui/icons-material/Wallet'
 // import RedeemIcon from '@mui/icons-material/Redeem'
 
+import Logo from '@/app/(web)/_components/Logo'
 import AdminPageLayoutDrawerNavsUserInterfaces from './DrawerNavsUserInterfaces'
 
 const navs = [
@@ -96,7 +96,7 @@ export default function AdminPageLayoutDrawerNavs() {
         <ListItem disablePadding>
           <ListItemButton disabled>
             <ListItemAvatar>
-              <PinterestIcon fontSize='large' />
+              <Logo fontSize='large' />
             </ListItemAvatar>
           </ListItemButton>
         </ListItem>

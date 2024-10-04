@@ -118,7 +118,7 @@ export default function MembershipEditDialog({ id, open, onClose, onSuccess }) {
                     margin='normal'
                     label={!!membership.data.bannerUrl ? 'Upload New Banner' : 'Upload Banner'}
                     inputProps={{
-                      accept: 'image/*, .doc, .docx, .pdf, .xls, .xlsx, .ppt, .pptx'
+                      accept: 'image/*'
                     }}
                     {...field}
                     error={Boolean(fieldState.error)}

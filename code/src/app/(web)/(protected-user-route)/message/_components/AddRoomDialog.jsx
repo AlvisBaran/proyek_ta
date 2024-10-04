@@ -51,7 +51,7 @@ export default function AddRoomDialog({ open, onClose, onSuccess }) {
       })
   }
 
-  // * On User is selected
+  // * Create New Room
   async function createNewRoom(selectedUser) {
     setCreateRoom({ ...createRoom, loading: true, error: false, success: false })
     await MyAxios.post('/user/messaging', { user2Id: selectedUser.id })

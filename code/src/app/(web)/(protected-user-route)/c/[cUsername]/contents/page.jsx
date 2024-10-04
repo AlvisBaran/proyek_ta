@@ -10,6 +10,7 @@ import ContentCard from '@/app/(web)/_components/content-ui/ContentCard'
 
 import MyAxios from '@/hooks/MyAxios'
 import { range } from '@/utils/mathHelper'
+import toast from 'react-hot-toast'
 
 const contentsDefaultValues = {
   data: [],
@@ -31,7 +32,7 @@ export default function CreatorContentsPage({ params }) {
   const [contents, setContents] = useState(contentsDefaultValues)
 
   // ** Fetch Data
-  async function fetchContets() {
+  async function fetchContents() {
     setContents({ ...contents, loading: true, success: false, error: false })
     await MyAxios.get(`/feeds/creator/${cUsername}/content`, {
       params: {
@@ -51,13 +52,15 @@ export default function CreatorContentsPage({ params }) {
         })
       })
       .catch(err => {
+        console.error(err)
+        toast.error(`Failed to load contents!\n${err.response.data.messsage}`)
         setContents({ ...contents, data: [], loading: false, error: true })
       })
   }
 
   // * Fetch data on load
   useEffect(() => {
-    if (!!cUsername) fetchContets()
+    if (!!cUsername) fetchContents()
   }, [cUsername, page])
 
   function PaginationComponent({ position }) {

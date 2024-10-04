@@ -87,7 +87,7 @@ export default function ApproveDialog({ id, open, onClose, onSuccess }) {
                 margin='normal'
                 label='Proof of Transfer'
                 inputProps={{
-                  accept: 'image/*, .doc, .docx, .pdf, .xls, .xlsx, .ppt, .pptx'
+                  accept: 'image/*, .pdf'
                 }}
                 {...field}
                 error={Boolean(fieldState.error)}

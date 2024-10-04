@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 
 import { Avatar, Box, Button, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 
@@ -9,7 +10,6 @@ import LoadingSpinner from '@/app/(web)/_components/LoadingSpinner'
 
 import MyAxios from '@/hooks/MyAxios'
 import { intlNumberFormat } from '@/utils/intlNumberFormat'
-import toast from 'react-hot-toast'
 
 const creatorDefaultValues = { data: null, loading: false, error: false, success: false }
 const followUnfollowDefaultValues = { loading: false, success: false, error: false }

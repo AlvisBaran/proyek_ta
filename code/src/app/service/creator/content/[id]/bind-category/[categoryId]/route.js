@@ -1,9 +1,10 @@
+import Joi from 'joi'
 import { responseString } from '@/backend/helpers/serverResponseString'
+import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
+
+import User from '@/backend/models/user'
 import Content from '@/backend/models/content'
 import CategoriesXContents from '@/backend/models/categoriesxcontents'
-import User from '@/backend/models/user'
-import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
-import Joi from 'joi'
 
 import '@/backend/models/association'
 

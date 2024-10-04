@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation'
 
 import { List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, Stack } from '@mui/material'
 
-import PinterestIcon from '@mui/icons-material/Pinterest'
 import HomeIcon from '@mui/icons-material/Home'
 import MessageIcon from '@mui/icons-material/Message'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
@@ -14,9 +13,9 @@ import BusinessCenterIcon from '@mui/icons-material/BusinessCenter'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import CreateIcon from '@mui/icons-material/Create'
 
-import UserPageLayoutDrawerNavsUserInterfaces from './DrawerNavsUserInterfaces'
-
 import { getUserFromComposedSession } from '@/backend/utils/nextAuthUserSessionHelper'
+import Logo from '@/app/(web)/_components/Logo'
+import UserPageLayoutDrawerNavsUserInterfaces from './DrawerNavsUserInterfaces'
 
 const navs = [
   { label: 'Home', icon: <HomeIcon />, href: '/home' },
@@ -65,7 +64,7 @@ export default function UserPageLayoutDrawerNavs() {
         <ListItem disablePadding>
           <ListItemButton disabled>
             <ListItemAvatar>
-              <PinterestIcon fontSize='large' />
+              <Logo fontSize='large' />
             </ListItemAvatar>
           </ListItemButton>
         </ListItem>

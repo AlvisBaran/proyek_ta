@@ -14,31 +14,37 @@ import {
   useTheme
 } from '@mui/material'
 
+import VisibilityIcon from '@mui/icons-material/Visibility'
 import FavoriteIcon from '@mui/icons-material/Favorite'
 import ShareIcon from '@mui/icons-material/Share'
 
 import { formatDayMonth } from '@/utils/dayjsConst'
+import { intlNumberFormat } from '@/utils/intlNumberFormat'
 
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
 dayjs.extend(relativeTime)
 
-export default function ContentCard({ content, relativeDate = false }) {
+export default function ContentCard({ content, relativeDate = false, equalHeight = false }) {
   const theme = useTheme()
   const upMd = useMediaQuery(theme.breakpoints.up('md'))
 
   if (!!content)
     return (
-      <Card elevation={3}>
-        <CardActionArea LinkComponent={Link} href={`/contents/${content.id}`}>
+      <Card elevation={3} sx={{ height: equalHeight ? '100%' : undefined }}>
+        <CardActionArea
+          LinkComponent={Link}
+          href={`/contents/${content.id}`}
+          sx={{ height: equalHeight ? '100%' : undefined }}
+        >
           <CardMedia
-            component='img'
+            component={content.Gallery[0]?.type === 'video' ? 'video' : 'img'}
             loading='lazy'
             src={content.Gallery[0]?.url}
-            alt={content.Gallery[0]?.alt}
-            title={content.Gallery[0]?.title}
+            title={content.Gallery[0]?.name}
             height={upMd ? 200 : 120}
+            onContextMenu={e => e.preventDefault()}
           />
           <CardHeader
             title={content.title}
@@ -55,12 +61,16 @@ export default function ContentCard({ content, relativeDate = false }) {
             </Typography>
             <Stack direction='row' alignItems='center' gap={2} mt={2}>
               <Stack direction='row' alignItems='center' gap={1}>
+                <VisibilityIcon fontSize='11' />
+                <Typography variant='caption'>{intlNumberFormat(content.viewCounter, true)}</Typography>
+              </Stack>
+              <Stack direction='row' alignItems='center' gap={1}>
                 <FavoriteIcon fontSize='11' />
-                <Typography variant='caption'>{content.likeCounter}</Typography>
+                <Typography variant='caption'>{intlNumberFormat(content.likeCounter, true)}</Typography>
               </Stack>
               <Stack direction='row' alignItems='center' gap={1}>
                 <ShareIcon fontSize='11' />
-                <Typography variant='caption'>{content.shareCounter}</Typography>
+                <Typography variant='caption'>{intlNumberFormat(content.shareCounter, true)}</Typography>
               </Stack>
             </Stack>
           </CardContent>

@@ -1,31 +1,34 @@
 import Joi from 'joi'
-import User from '@/backend/models/user'
-import Content from '@/backend/models/content'
 import { responseString } from '@/backend/helpers/serverResponseString'
+import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
+
+import sqlz from '@/backend/configs/db'
+import Content from '@/backend/models/content'
 import ContentLikes from '@/backend/models/contentlikes'
 
-// User > Content > Like / Unlike
-export async function PUT(request, { params }) {
-  const contentId = params.contentId
-  const searchParams = request.nextUrl.searchParams
-  const userId = searchParams.get('userId')
+import '@/backend/models/association'
+
+// ** User > Content > Like / Unlike
+export async function PUT(request, response) {
+  const contentId = response.params.contentId
   let res = {}
 
+  // * Cek user ada
+  const { user, error } = await getUserFromServerSession(request, response)
+  if (!!error) {
+    res = { message: error.message }
+    return Response.json(res, { status: error.code })
+  }
+
   const joiValidate = Joi.object({
-    contentId: Joi.number().required(),
-    userId: Joi.number().required()
-  }).validate({ userId, contentId }, { abortEarly: false })
+    contentId: Joi.number().required()
+  }).validate({ contentId }, { abortEarly: false })
 
   if (!joiValidate.error) {
-    // Cek User Ada
-    let currUser = await User.findByPk(userId)
-    if (!currUser) {
-      res = { message: responseString.USER.NOT_FOUND }
-      return Response.json(res, { status: 404 })
-    }
-
-    // Cek Content Ada
-    let currContent = await Content.findByPk(contentId)
+    // * Cek Content Ada
+    let currContent = await Content.findByPk(contentId, {
+      attributes: ['id', 'type', 'status', 'likeCounter']
+    })
     if (!currContent) {
       res = { message: responseString.CONTENT.NOT_FOUND }
       return Response.json(res, { status: 404 })
@@ -33,60 +36,59 @@ export async function PUT(request, { params }) {
 
     // TODO: Cek segala macem syarat untuk like (jika perlu)
 
-    // Cek User Sudah Pernah Like
+    // * Cek User Sudah Pernah Like
     let existItem = await ContentLikes.findOne({
-      where: { performerRef: userId, contentRef: contentId },
+      where: { performerRef: user.id, contentRef: contentId },
       paranoid: false
     })
-    if (!!existItem) {
-      // ** Logic untuk toggle like status
 
-      if (existItem.deletedAt === null || existItem.deletedAt === undefined) {
-        return await existItem
-          .destroy()
-          .then(resp => {
-            res = { message: responseString.GLOBAL.SUCCESS, method: 'DESTROY' }
-            return Response.json(res, { status: 200 })
-          })
-          .catch(error => {
-            res = { error: { message: responseString.GLOBAL.FAILED }, details: error }
-            return Response.json(res, { status: 400 })
-          })
-      } else {
-        return await existItem
-          .restore()
-          .then(resp => {
-            res = { message: responseString.GLOBAL.SUCCESS, method: 'RESTORE' }
-            return Response.json(res, { status: 200 })
-          })
-          .catch(error => {
-            res = { error: { message: responseString.GLOBAL.FAILED }, details: error }
-            return Response.json(res, { status: 400 })
-          })
-      }
-    } else {
-      // ** Logic untuk create new
+    const t = await sqlz.transaction()
 
-      // Insert Data
-      let newItem = ContentLikes.build({
-        performerRef: userId,
-        contentRef: contentId
-      })
+    try {
+      if (!!existItem) {
+        // ** Logic untuk toggle like status
+        if (existItem.deletedAt === null || existItem.deletedAt === undefined) {
+          await currContent.decrement('likeCounter', { by: 1, transaction: t })
+          await existItem.destroy({ transaction: t })
+          await t.commit()
 
-      return await newItem
-        .save()
-        .then(async resp => {
-          await newItem.reload()
-          res = {
-            message: responseString.GLOBAL.SUCCESS,
-            method: 'CREATE_NEW'
-          }
+          await currContent.reload({ attributes: ['id', 'likeCounter'] })
+          res = { message: responseString.GLOBAL.SUCCESS, method: 'DESTROY', newCount: currContent.likeCounter }
           return Response.json(res, { status: 200 })
+        } else {
+          await currContent.increment('likeCounter', { by: 1, transaction: t })
+          await existItem.restore({ transaction: t })
+          await t.commit()
+
+          await currContent.reload({ attributes: ['id', 'likeCounter'] })
+          res = { message: responseString.GLOBAL.SUCCESS, method: 'RESTORE', newCount: currContent.likeCounter }
+          return Response.json(res, { status: 200 })
+        }
+      } else {
+        // ** Logic untuk create new
+        // * Insert Data
+        let newItem = ContentLikes.build({
+          performerRef: user.id,
+          contentRef: contentId
         })
-        .catch(error => {
-          res = { error: { message: responseString.GLOBAL.ADD_FAILED }, details: error }
-          return Response.json(res, { status: 400 })
-        })
+
+        await currContent.increment('likeCounter', { by: 1, transaction: t })
+        await newItem.save({ transaction: t })
+        await t.commit()
+
+        await currContent.reload({ attributes: ['id', 'likeCounter'] })
+        await newItem.reload()
+        res = {
+          message: responseString.GLOBAL.SUCCESS,
+          method: 'CREATE_NEW',
+          newCount: currContent.likeCounter
+        }
+        return Response.json(res, { status: 200 })
+      }
+    } catch (err) {
+      await t.rollback()
+      res = { message: responseString.GLOBAL.TRANSACTION_ERROR, error: err }
+      return Response.json(res, { status: 400 })
     }
   } else {
     res = { message: responseString.VALIDATION.ERROR, error: joiValidate.error.details }

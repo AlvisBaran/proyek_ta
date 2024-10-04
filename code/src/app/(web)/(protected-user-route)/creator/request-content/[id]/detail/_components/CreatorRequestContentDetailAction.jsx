@@ -7,12 +7,7 @@ import { IconButton, ListItemIcon, Menu, MenuItem } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 
-const SET_CONTENT_ALLOWED_STATUS = [
-  'on-progress',
-  'waiting-requestor-confirmation',
-  'waiting-payment',
-  'waiting-creator-confirmation'
-]
+const SET_CONTENT_ALLOWED_STATUS = ['on-progress', 'waiting-requestor-confirmation']
 
 export default function CreatorRequestContentDetailAction({ data, setOpenSetContentDialog }) {
   const [anchorEl, setAnchorEl] = useState(null)

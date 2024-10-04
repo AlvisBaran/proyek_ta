@@ -38,8 +38,13 @@ export async function GET(request, response) {
     const followingIds = currFollowings.map(item => Number(item.followedRef))
 
     const results = await Content.findAndCountAll({
-      where: { creatorRef: followingIds },
-      order: [['createdAt', 'DESC']],
+      where: { creatorRef: followingIds, contentRequestRef: null },
+      order: [
+        ['createdAt', 'DESC'],
+        ['viewCounter', 'DESC'],
+        ['shareCounter', 'DESC'],
+        ['likeCounter', 'DESC']
+      ],
       limit: perPage,
       offset: (page - 1) * perPage,
       include: [
@@ -51,7 +56,7 @@ export async function GET(request, response) {
         {
           model: ContentGallery,
           as: 'Gallery',
-          limit: 4
+          limit: 1
           // order: [['createdAt', 'DESC']],
         }
       ]

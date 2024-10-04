@@ -1,11 +1,14 @@
 import Joi from 'joi'
 import dayjs from 'dayjs'
 import { responseString } from '@/backend/helpers/serverResponseString'
-import { createTopUpPaymentLink } from '@/backend/services/midtrans'
+import { checkTopUpTransactionStatus, createTopUpPaymentLink, getTopUpPaymentLink } from '@/backend/services/midtrans'
 import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
+import { intlNumberFormat } from '@/utils/intlNumberFormat'
+import { createUserWalletHistory } from '@/backend/services/wallet-history'
 
-import User from '@/backend/models/user'
+import sqlz from '@/backend/configs/db'
 import TransTopup from '@/backend/models/transtopup'
+import User from '@/backend/models/user'
 
 import '@/backend/models/association'
 
@@ -37,13 +40,76 @@ export async function GET(request, response) {
   return await TransTopup.findAll({
     where: whereAttributes,
     order: [['createdAt', 'DESC']]
-    // include: {
-    //   model: User,
-    //   attributes: ["id", "cUsername", "role", "banStatus", "displayName", "email", "profilePicture"]
-    // }
   })
-    .then((resp = []) => {
-      resp?.map(datum => transactions.push({ ...datum?.dataValues }))
+    .then(async resp => {
+      for (let i = 0; i < resp.length; i++) {
+        const tempData = resp[i]
+
+        // * Ini untuk cek ke midtrans
+        const dbUpdates = []
+        if (tempData.status === 'pending') {
+          let mt_transaction_id = tempData.mt_transaction_id
+          let updateData = {}
+          if (mt_transaction_id === null) {
+            const getPaymentLink = await getTopUpPaymentLink(tempData.invoice)
+            if (!!getPaymentLink.purchases && !!getPaymentLink.purchases[0]) {
+              updateData = {
+                ...updateData,
+                mt_transaction_id: getPaymentLink.purchases[0].transaction_id,
+                mt_order_id: getPaymentLink.purchases[0].order_id
+              }
+              mt_transaction_id = getPaymentLink.purchases[0].transaction_id
+              dbUpdates.push('mt_transaction_id', 'mt_order_id')
+            }
+          }
+
+          let newStatus = null
+          if (!!mt_transaction_id) {
+            await checkTopUpTransactionStatus(mt_transaction_id).then(async ({ transaction_status, fraud_status }) => {
+              if (transaction_status === 'capture' || transaction_status === 'settlement') {
+                const t = await sqlz.transaction()
+                try {
+                  await User.increment('saldo', {
+                    by: tempData.nominal,
+                    where: { id: tempData.userRef },
+                    transaction: t
+                  })
+                  await createUserWalletHistory(
+                    t,
+                    tempData.userRef,
+                    tempData.nominal,
+                    'in',
+                    `Top Up Rp ${intlNumberFormat(tempData.nominal, true)}`,
+                    `Top Up dengan invoice [${tempData.invoice}]`
+                  )
+                  newStatus = 'success'
+                  await t.commit()
+                } catch (e) {
+                  console.error('error di try catch transaction e', e)
+                  await t.rollback()
+                }
+              } else if (
+                transaction_status === 'deny' ||
+                transaction_status === 'cancel' ||
+                transaction_status === 'expire' ||
+                transaction_status === 'refund' ||
+                transaction_status === 'partial_refund'
+              ) {
+                newStatus = 'failed'
+              }
+              if (newStatus !== null) {
+                updateData = { ...updateData, status: newStatus }
+                dbUpdates.push('status')
+              }
+            })
+          }
+
+          if (Object.keys(updateData).length > 0)
+            await TransTopup.update(updateData, { where: { id: tempData.id }, fields: dbUpdates })
+        }
+
+        transactions.push({ ...tempData?.dataValues })
+      }
 
       return Response.json(transactions, { status: 200 })
     })
@@ -99,15 +165,29 @@ export async function POST(request, response) {
       if (tryCounter >= 20) throw new Error('limit breaker exceeded')
     } while (!newMidtransData || tryCounter < TOTAL_MIDTRANS_RETRY)
 
-    // Jika midtrans success maka buat database record
+    // ! Ga bisa karena klo blom bayar ga muncul datanya
+    // // * Ambil Data Baru Dari Midtrans karena return aslinya tidak lengkap
+    // let mt_transaction_id = null
+    // let mt_order_id = null
+    // const getPaymentLink = await getTopUpPaymentLink(newMidtransData.transactionId)
+    // console.log('getPaymentLink', getPaymentLink)
+    // if (!!getPaymentLink.purchases && !!getPaymentLink.purchases[0]) {
+    //   mt_transaction_id = getPaymentLink.purchases[0].transaction_id
+    //   mt_order_id = getPaymentLink.purchases[0].order_id
+    // }
+
+    // * Build Data
     let newTopUpData = TransTopup.build({
       userRef: user.id,
       invoice: newMidtransData.transactionId,
       nominal: Number(nominal),
       status: 'pending',
       mt_payment_link: newMidtransData.paymentUrl
+      // mt_transaction_id,
+      // mt_order_id
     })
 
+    // * Insert to DB
     return await newTopUpData
       .save()
       .then(async resp => {

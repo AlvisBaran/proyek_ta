@@ -10,6 +10,8 @@ export const dynamic = 'force-dynamic'
 
 // ** User > Relationship > List Following
 export async function GET(request, response) {
+  const searchParams = request.nextUrl.searchParams
+  let limit = searchParams.get('limit') ?? null
   let res = {}
 
   // * Cek user ada
@@ -19,13 +21,17 @@ export async function GET(request, response) {
     return Response.json(res, { status: error.code })
   }
 
+  let otherAttr = {}
+  if (!!limit) otherAttr = { ...otherAttr, limit: Number(limit) }
+
   const currFoll = await UsersFollows.findAll({
     where: { followerRef: user.id },
     include: {
       model: User,
       foreignKey: 'followedRef',
       attributes: ['id', 'cUsername', 'displayName', 'profilePicture', 'bio']
-    }
+    },
+    ...otherAttr
   })
 
   const following = []

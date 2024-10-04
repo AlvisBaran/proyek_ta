@@ -9,12 +9,7 @@ import Content from '@/backend/models/content'
 
 import '@/backend/models/association'
 
-const ALLOWED_STATUS = [
-  'on-progress',
-  'waiting-requestor-confirmation',
-  'waiting-payment',
-  'waiting-creator-confirmation'
-]
+const ALLOWED_STATUS = ['on-progress', 'waiting-requestor-confirmation']
 
 // ** Creator > Content Request > Set Content
 export async function PUT(request, response) {

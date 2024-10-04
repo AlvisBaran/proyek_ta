@@ -17,13 +17,13 @@ import {
   useTheme
 } from '@mui/material'
 
-import PinterestIcon from '@mui/icons-material/Pinterest'
 import PaymentIcon from '@mui/icons-material/Payment'
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn'
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 import MyAxios from '@/hooks/MyAxios'
+import Logo from '@/app/(web)/_components/Logo'
 import LoadingSpinner from '@/app/(web)/_components/LoadingSpinner'
 
 const contentRequestDefaultValues = { data: null, loading: false, success: false, error: false }
@@ -89,7 +89,7 @@ export default function AddPaymentDialog({ open, onClose, onSuccess, contentRequ
         <Grid container sx={{ minHeight: '100vh' }}>
           <Grid item xs={12} md={6} sx={{ minHeight: '100vh' }}>
             <Box sx={{ width: '100%', p: upMd ? 2 : 1 }}>
-              <PinterestIcon fontSize='large' />
+              <Logo fontSize='large' />
             </Box>
             {contentRequest.loading ? (
               <LoadingSpinner />
@@ -147,7 +147,7 @@ export default function AddPaymentDialog({ open, onClose, onSuccess, contentRequ
           <Grid item xs={12} md={6} sx={{ bgcolor: upMd ? theme.palette.primary.contrastText : undefined }}>
             <Stack alignItems='center' justifyContent='center' height='100%'>
               <Typography variant='h4' textAlign='center'>
-                <PinterestIcon fontSize='large' />
+                <Logo fontSize='large' />
                 ANTHREON CHECKOUT
               </Typography>
               <Typography variant='h5' textAlign='center'>

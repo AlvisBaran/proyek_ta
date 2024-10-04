@@ -50,7 +50,7 @@ const baseColumns = [
       return (
         <Chip
           size='small'
-          label={String(params.value).toUpperCase().replaceAll('-', ' ')}
+          label={params.value === 'normal' ? 'MEMBER' : String(params.value).toUpperCase().replaceAll('-', ' ')}
           color={
             params.value === 'admin'
               ? 'error'

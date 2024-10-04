@@ -9,20 +9,44 @@ import PeopleIcon from '@mui/icons-material/People'
 import CardMembershipIcon from '@mui/icons-material/CardMembership'
 import ShopIcon from '@mui/icons-material/Shop'
 import ListAltIcon from '@mui/icons-material/ListAlt'
+import AddCardIcon from '@mui/icons-material/AddCard'
 
 import PageHeader from '@/app/(web)/_components/PageHeader'
 
 const accountLayoutNavs = [
-  { label: 'Profile', value: 'profile', icon: <AccountCircleIcon />, subTitle: 'Set up your account profile' },
-  { label: 'Following', value: 'following', icon: <PeopleIcon />, subTitle: 'Creator you followed!' },
+  {
+    label: 'Profile',
+    value: 'profile',
+    icon: <AccountCircleIcon />,
+    subTitle: 'Set up your account profile',
+    action: null
+  },
+  { label: 'Following', value: 'following', icon: <PeopleIcon />, subTitle: 'Creator you followed!', action: null },
   {
     label: 'Memberships',
     value: 'memberships',
     icon: <CardMembershipIcon />,
-    subTitle: 'Your membership purchase history'
+    subTitle: 'Your membership purchase history',
+    action: null
   },
-  { label: 'Top-up', value: 'top-up', icon: <ShopIcon />, subTitle: 'Your top-up history' },
-  { label: 'Wallet History', value: 'wallet-history', icon: <ListAltIcon />, subTitle: 'Your full wallet history' }
+  {
+    label: 'Top-up',
+    value: 'top-up',
+    icon: <ShopIcon />,
+    subTitle: 'Your top-up history',
+    action: (
+      <Button variant='contained' size='small' startIcon={<AddCardIcon />} LinkComponent={Link} href='/checkout/top-up'>
+        Top Up
+      </Button>
+    )
+  },
+  {
+    label: 'Wallet History',
+    value: 'wallet-history',
+    icon: <ListAltIcon />,
+    subTitle: 'Your full wallet history',
+    action: null
+  }
 ]
 
 export default function AccountLayout({ children, activeNav }) {
@@ -57,7 +81,7 @@ export default function AccountLayout({ children, activeNav }) {
             </Box>
           </Grid>
           <Grid item xs={12} md={9}>
-            <PageHeader title={currNav.label} subTitle={currNav.subTitle} />
+            <PageHeader title={currNav.label} subTitle={currNav.subTitle} action={currNav.action} />
             {/* <Divider sx={{ mt: 1 }} /> */}
             <Box>{children}</Box>
           </Grid>
