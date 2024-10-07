@@ -35,7 +35,7 @@ module.exports = {
       readStatus: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: 0
+        defaultValue: false
       },
       createdAt: {
         allowNull: false,

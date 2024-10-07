@@ -1,4 +1,3 @@
-import { Op } from 'sequelize'
 import { responseString } from '@/backend/helpers/serverResponseString'
 
 import Category from '@/backend/models/category'
@@ -21,7 +20,10 @@ export async function GET() {
     .then((resp = []) => {
       resp?.map(datum => categories.push({ ...datum?.dataValues }))
 
-      categories = categories.sort((a, b) => b.CategoriesXContents.length - a.CategoriesXContents.length).slice(0, 20)
+      categories = categories
+        .filter(item => item.CategoriesXContents.length > 0)
+        .sort((a, b) => b.CategoriesXContents.length - a.CategoriesXContents.length)
+        .slice(0, 20)
 
       return Response.json(categories, { status: 200 })
     })

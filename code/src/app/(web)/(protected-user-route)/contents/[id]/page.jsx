@@ -53,7 +53,7 @@ export default function UserContentDetail({ params }) {
   const [likeUnlike, setLikeUnlike] = useState(likeUnlikeDefaultValues)
   const [shareDialogValues, setShareDialogValues] = useState(shareDialogDefaultValues)
   const [refetchComments, setRefetchComments] = useState(refetchCommentsDefaultValues)
-  console.log(content.data)
+
   // * Fetch Data
   async function fetchData() {
     setContent({ ...content, loading: true, error: false, success: false })

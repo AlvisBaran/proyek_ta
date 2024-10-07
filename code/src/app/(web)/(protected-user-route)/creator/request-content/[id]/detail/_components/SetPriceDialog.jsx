@@ -21,7 +21,7 @@ import { intlNumberFormat } from '@/utils/intlNumberFormat'
 
 const formId = 'creator-content-request-set-price-form'
 const setPriceDefaultValues = { loading: false, error: false, success: false }
-const PERSENTASE_ADMIN = 10
+const PERSENTASE_ADMIN = 3
 
 export default function SetPriceDialog({ open, onClose, onSuccess, contentRequest }) {
   const [setPrice, setSetPrice] = useState(setPriceDefaultValues)
@@ -72,7 +72,9 @@ export default function SetPriceDialog({ open, onClose, onSuccess, contentReques
     <Dialog maxWidth='xs' fullWidth open={open} onClose={handleClose}>
       <DialogTitle>Set Price</DialogTitle>
       <DialogContent>
-        <DialogContentText>Nominal you get when finished will be cut by 10% as admin fee.</DialogContentText>
+        <DialogContentText>
+          Nominal you get when finished will be cut by {intlNumberFormat(PERSENTASE_ADMIN, true)}% as admin fee.
+        </DialogContentText>
         <Box component='form' id={formId} onSubmit={formHook.handleSubmit(onSubmit)} autoComplete='off'>
           <TextField
             fullWidth

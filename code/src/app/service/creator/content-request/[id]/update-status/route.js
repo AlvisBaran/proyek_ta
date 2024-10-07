@@ -75,7 +75,7 @@ export async function PUT(request, response) {
       })
     } else if (req.mode === 'confirm-payment' && ALLOWED_STATUS.CONFIRM_PAYMENT.includes(currCR.status)) {
       const t = await sqlz.transaction()
-      const PERSENTASE_ADMIN = 10
+      const PERSENTASE_ADMIN = 3
       const BIAYA_ADMIN = Math.floor((Number(currCR.price) * PERSENTASE_ADMIN) / 100)
 
       try {

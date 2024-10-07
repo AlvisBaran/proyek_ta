@@ -121,7 +121,7 @@ export async function POST(request, response) {
 
     // * Insert DB
     const t = await sqlz.transaction()
-    const PERSENTASE_ADMIN = 10
+    const PERSENTASE_ADMIN = 3
     const BIAYA_ADMIN = Math.floor((Number(currMembership.price) * PERSENTASE_ADMIN) / 100)
 
     try {

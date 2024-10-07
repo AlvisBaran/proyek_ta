@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize'
-import * as mysql2 from 'mysql2'
+// import * as mysql2 from 'mysql2'
+import * as pg from 'pg'
 
 import { buildSystemLog } from '@/utils/logHelper'
 
@@ -8,8 +9,8 @@ var sqlz
 try {
   console.info(buildSystemLog('Initializing database connection...'))
   sqlz = new Sequelize({
-    dialect: 'mysql',
-    dialectModule: mysql2,
+    dialect: 'postgres',
+    dialectModule: pg,
     pool: {
       max: 2,
       min: 0,

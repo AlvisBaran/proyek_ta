@@ -1,12 +1,13 @@
-import '@/backend/models/association'
-
 import Joi from 'joi'
 import { v4 as UUD4 } from 'uuid'
 import { responseString } from '@/backend/helpers/serverResponseString'
-import User from '@/backend/models/user'
 import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
 import { mainBucketName, minioClient } from '@/minio/config'
 import { buildSystemLog } from '@/utils/logHelper'
+
+import User from '@/backend/models/user'
+
+import '@/backend/models/association'
 
 // ** User > Profile > Get Self
 export async function GET(request, response) {
@@ -77,8 +78,8 @@ export async function PUT(request, response) {
   const joiValidate = Joi.object({
     displayName: Joi.string().allow(null),
     profilePicture: Joi.object().allow(null),
-    bio: Joi.string().allow(null),
-    about: Joi.string().allow(null),
+    bio: Joi.string().allow(''),
+    about: Joi.string().allow('').allow(null),
     banner: Joi.object().allow(null),
     themeColor: Joi.string().allow(null)
   }).validate({ ...req }, { abortEarly: false })
@@ -116,12 +117,12 @@ export async function PUT(request, response) {
         currUser.displayName = newDisplayName
         changingAttributes.push('displayName')
       }
-      if (!!req.bio) {
+      if (req.bio !== null) {
         oldValues.bio = currUser.bio
         currUser.bio = req.bio
         changingAttributes.push('bio')
       }
-      if (!!req.about) {
+      if (req.about !== null) {
         oldValues.about = currUser.about
         currUser.about = req.about
         changingAttributes.push('about')

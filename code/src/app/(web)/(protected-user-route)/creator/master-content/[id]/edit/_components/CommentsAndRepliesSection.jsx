@@ -19,6 +19,8 @@ import {
   Typography
 } from '@mui/material'
 
+import QuestionMarkIcon from '@mui/icons-material/QuestionMark'
+
 import MyAxios from '@/hooks/MyAxios'
 import LoadingSpinner from '@/app/(web)/_components/LoadingSpinner'
 
@@ -70,6 +72,16 @@ export default function CommentsAndRepliesSection({ content }) {
               {comments.data?.map((comment, index) => (
                 <CommentListItem key={`creator-content-edit-comment-${index}`} index={index} comment={comment} />
               ))}
+              {comments.data.length <= 0 ? (
+                <ListItem>
+                  <ListItemAvatar>
+                    <Avatar>
+                      <QuestionMarkIcon />
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText primary='Opps!' secondary='There are no comments and replies yet!' />
+                </ListItem>
+              ) : null}
             </List>
           </CardContent>
         ) : null}

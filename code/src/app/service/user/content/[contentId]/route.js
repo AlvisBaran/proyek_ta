@@ -77,6 +77,7 @@ export async function GET(request, response) {
         model: ContentGallery,
         as: 'Gallery'
       })
+      order.push(['Gallery', 'createdAt', 'ASC'])
     }
     include.push({ model: Category })
 
