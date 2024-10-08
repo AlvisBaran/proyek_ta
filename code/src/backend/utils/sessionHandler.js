@@ -34,8 +34,8 @@ export async function getUserFromServerSession(req, res) {
         req,
         {
           ...res,
-          getHeader: name => res.headers?.get(name),
-          setHeader: (name, value) => res.headers?.set(name, value)
+          // getHeader: name => res.headers?.get(name),
+          // setHeader: (name, value) => res.headers?.set(name, value)
         },
         authOptions
       )
