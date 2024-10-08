@@ -31,12 +31,12 @@ export async function getUserFromServerSession(req, res) {
       })
     } else {
       const session = await getServerSession(
-        req,
-        {
-          ...res,
-          // getHeader: name => res.headers?.get(name),
-          // setHeader: (name, value) => res.headers?.set(name, value)
-        },
+        // req,
+        // {
+        //   ...res,
+        //   // getHeader: name => res.headers?.get(name),
+        //   // setHeader: (name, value) => res.headers?.set(name, value)
+        // },
         authOptions
       )
       if (!!session && !!session?.user) {
