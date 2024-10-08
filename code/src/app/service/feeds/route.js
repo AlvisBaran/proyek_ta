@@ -38,7 +38,7 @@ export async function GET(request, response) {
     const followingIds = currFollowings.map(item => Number(item.followedRef))
 
     const results = await Content.findAndCountAll({
-      where: { creatorRef: followingIds, contentRequestRef: null },
+      where: { creatorRef: followingIds, contentRequestRef: null, status: 'published' },
       order: [
         ['createdAt', 'DESC'],
         ['viewCounter', 'DESC'],

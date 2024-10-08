@@ -2,6 +2,7 @@ import { responseString } from '@/backend/helpers/serverResponseString'
 
 import Category from '@/backend/models/category'
 import CategoriesXContents from '@/backend/models/categoriesxcontents'
+import Content from '@/backend/models/content'
 
 import '@/backend/models/association'
 
@@ -11,7 +12,11 @@ export async function GET() {
 
   let categories = []
   return await Category.findAll({
-    include: { model: CategoriesXContents, attributes: ['id'] },
+    include: {
+      model: CategoriesXContents,
+      attributes: ['id'],
+      include: { model: Content, attributes: ['id', 'status'], where: { status: 'published' } }
+    },
     order: [
       ['createdAt', 'DESC'],
       ['label', 'ASC']

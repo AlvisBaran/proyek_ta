@@ -17,7 +17,7 @@ export async function GET(request, response) {
   // * Cek user ada
   const { user, error } = await getUserFromServerSession(request, response)
   if (!!error) {
-    res = { message: error.message, error }
+    res = { message: error.message }
     return Response.json(res, { status: error.code })
   }
 
