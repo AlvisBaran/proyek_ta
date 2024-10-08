@@ -60,7 +60,7 @@ export async function getUserFromServerSession(req, res) {
       return resolve({
         error: {
           code: 401,
-          sessionUser: session.user,
+          sessionUser: JSON.stringify(session),
           message: 'Unauthorized Session User!'
         }
       })
