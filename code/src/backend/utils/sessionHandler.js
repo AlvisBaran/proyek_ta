@@ -1,7 +1,7 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { getServerSession } from 'next-auth'
-import User from '../models/user'
 import { decomposeName } from './nextAuthUserSessionHelper'
+import { getServerAuthSession } from '../configs/auth'
+
+import User from '../models/user'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,15 +30,7 @@ export async function getUserFromServerSession(req, res) {
         }
       })
     } else {
-      const session = await getServerSession(
-        // req,
-        // {
-        //   ...res,
-        //   // getHeader: name => res.headers?.get(name),
-        //   // setHeader: (name, value) => res.headers?.set(name, value)
-        // },
-        authOptions
-      )
+      const session = await getServerAuthSession()
       if (!!session && !!session?.user) {
         return resolve({
           user: {
