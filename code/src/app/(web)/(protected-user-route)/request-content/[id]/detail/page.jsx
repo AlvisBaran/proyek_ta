@@ -31,6 +31,7 @@ import { getUserFromComposedSession } from '@/backend/utils/nextAuthUserSessionH
 import UserPageLayout from '@/app/(web)/(protected-user-route)/_components/layout'
 import LoadingSpinner from '@/app/(web)/_components/LoadingSpinner'
 import CustomViewMode from '@/app/(web)/_components/CustomViewMode'
+import ContentPreviewSection from './_components/ContentPreviewSection'
 
 const contentRequestDefaultValues = { data: null, loading: false, success: false, error: false }
 const confirmDoneDefaultValues = { loading: false, success: false, error: false }
@@ -227,9 +228,12 @@ export default function UserRequestContentDetailPage({ params }) {
                   </CardContent>
                 </Card>
               </Grid>
-              {!!contentRequest.data.Content ? (
+              {!!contentRequest.data.contentRef ? (
                 <Grid item xs={12}>
-                  Content Preview nya
+                  <ContentPreviewSection
+                    contentId={contentRequest.data.contentRef}
+                    status={contentRequest.data.status}
+                  />
                 </Grid>
               ) : null}
             </Grid>

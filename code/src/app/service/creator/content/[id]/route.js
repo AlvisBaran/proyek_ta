@@ -7,6 +7,7 @@ import Category from '@/backend/models/category'
 import Membership from '@/backend/models/membership'
 
 import '@/backend/models/association'
+import ContentRequest from '@/backend/models/contentrequest'
 
 // ** Creator > Content > Read One
 export async function GET(request, response) {
@@ -37,7 +38,7 @@ export async function GET(request, response) {
         id,
         creatorRef: user.id
       },
-      include: [{ model: Membership }, { model: Category }]
+      include: [{ model: Membership }, { model: Category }, { model: ContentRequest, attributes: ['id', 'status'] }]
     })
     if (!currContent) {
       res = { message: responseString.GLOBAL.NOT_FOUND }

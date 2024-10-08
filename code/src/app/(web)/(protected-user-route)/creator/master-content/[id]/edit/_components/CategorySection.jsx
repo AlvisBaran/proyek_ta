@@ -33,6 +33,11 @@ export default function CategorySection({ content, fetchContent }) {
   const [updateCategories, setUpdateCategories] = useState(updateCategoriesDefaultValues)
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [firstLoad, setFirstLoad] = useState(true)
+  const contentRequest =
+    !!content.data && !!content.data.ContentRequests && !!content.data.ContentRequests[0]
+      ? content.data.ContentRequests[0]
+      : null
+  const disableEdit = !!contentRequest && contentRequest.status === 'done'
 
   // * Fetch Data
   async function fetchCategories() {
@@ -98,7 +103,7 @@ export default function CategorySection({ content, fetchContent }) {
           <Button
             variant='contained'
             startIcon={<SaveIcon />}
-            disabled={content.loading || categories.loading || updateCategories.loading}
+            disabled={content.loading || categories.loading || updateCategories.loading || disableEdit}
             onClick={handleUpdateCategories}
           >
             {updateCategories.loading ? 'Loading...' : 'Save'}

@@ -15,7 +15,7 @@ module.exports = {
     port: PORT[USE_INDEX],
     dialect: DIALECT[USE_INDEX],
     dialectOptions: {
-      bigNumberStrings: true
+      bigNumberStrings: false
     }
   },
   test: {
@@ -26,7 +26,7 @@ module.exports = {
     port: PORT[USE_INDEX],
     dialect: DIALECT[USE_INDEX],
     dialectOptions: {
-      bigNumberStrings: true
+      bigNumberStrings: false
     }
   },
   production: {
@@ -37,7 +37,7 @@ module.exports = {
     port: PORT[USE_INDEX],
     dialect: DIALECT[USE_INDEX],
     dialectOptions: {
-      bigNumberStrings: true
+      bigNumberStrings: false
       // ssl: {
       //   ca: fs.readFileSync(__dirname + '/mysql-ca-main.crt')
       // }

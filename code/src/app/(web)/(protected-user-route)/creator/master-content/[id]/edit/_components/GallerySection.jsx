@@ -52,6 +52,11 @@ const galleryDefaultValues = { data: [], loading: false, error: false, success: 
 const deleteGalleryDefaultValues = { loading: false, error: false, success: false }
 
 export default function GallerySection({ content, fetchContent }) {
+  const contentRequest =
+    !!content.data && !!content.data.ContentRequests && !!content.data.ContentRequests[0]
+      ? content.data.ContentRequests[0]
+      : null
+  const disableEdit = !!contentRequest && contentRequest.status === 'done'
   const { pushConfirm } = useDialog()
   const [gallery, setGallery] = useState(galleryDefaultValues)
   const [deleteGallery, setDeleteGallery] = useState(deleteGalleryDefaultValues)
@@ -101,7 +106,7 @@ export default function GallerySection({ content, fetchContent }) {
           <Button
             variant='contained'
             startIcon={<AddIcon />}
-            disabled={content.loading || gallery.loading || gallery.data?.length >= 4}
+            disabled={content.loading || gallery.loading || gallery.data?.length >= 4 || disableEdit}
             onClick={() => setOpenAddDialog(true)}
           >
             Add
@@ -125,6 +130,7 @@ export default function GallerySection({ content, fetchContent }) {
                   action={
                     <IconButton
                       color='error'
+                      disabled={content.loading || disableEdit}
                       onClick={() =>
                         pushConfirm({
                           title: 'Delete gallery?',
@@ -271,8 +277,8 @@ function AddGalleryDialog({ contentId, open, onClose, onSuccess }) {
               required: 'Name field is required!',
               minLength: { value: 2, message: 'Min lenght of 2!' }
             })}
-            error={Boolean(formHook.formState.errors.title)}
-            helperText={Boolean(formHook.formState.errors.title) ? formHook.formState.errors.title.message : undefined}
+            error={Boolean(formHook.formState.errors.name)}
+            helperText={Boolean(formHook.formState.errors.name) ? formHook.formState.errors.name.message : undefined}
           />
         </Box>
       </DialogContent>

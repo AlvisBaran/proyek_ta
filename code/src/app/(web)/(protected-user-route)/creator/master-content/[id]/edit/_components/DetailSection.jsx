@@ -19,6 +19,11 @@ const editDefaultValues = { loading: false, success: false, error: false }
 
 export default function DetailSection({ content, fetchContent }) {
   const [edit, setEdit] = useState(editDefaultValues)
+  const contentRequest =
+    !!content.data && !!content.data.ContentRequests && !!content.data.ContentRequests[0]
+      ? content.data.ContentRequests[0]
+      : null
+  const disableEdit = !!contentRequest && contentRequest.status === 'done'
 
   // * Form Hook
   const formHook = useForm({
@@ -74,7 +79,7 @@ export default function DetailSection({ content, fetchContent }) {
             form={detailFormId}
             variant='contained'
             startIcon={<SaveIcon />}
-            disabled={edit.loading}
+            disabled={edit.loading || disableEdit}
           >
             {edit.loading ? 'Loading...' : 'Save'}
           </Button>

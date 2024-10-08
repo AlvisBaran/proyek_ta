@@ -32,6 +32,7 @@ import CustomViewMode from '@/app/(web)/_components/CustomViewMode'
 import CreatorRequestContentDetailAction from './_components/CreatorRequestContentDetailAction'
 import SetPriceDialog from './_components/SetPriceDialog'
 import SetContentDialog from './_components/SetContentDialog'
+import Link from 'next/link'
 
 const activeNav = 'detail'
 const contentRequestDefaultValue = { data: null, loading: false, success: false, error: false }
@@ -175,7 +176,7 @@ export default function CreatorRequestContentDetailMainPage({ params }) {
                         <Button
                           size='small'
                           variant='outlined'
-                          disabled={setStatus.loading || contentRequest.data.leftoverPrice !== 0}
+                          disabled={setStatus.loading || Number(contentRequest.data.leftoverPrice) !== 0}
                           onClick={() =>
                             pushConfirm({
                               title: 'Confirm Payment?',
@@ -223,10 +224,18 @@ export default function CreatorRequestContentDetailMainPage({ params }) {
                   {contentRequest.data.requestNote}
                 </Typography>
               </Grid>
-              {!!contentRequest.data.Content ? (
+              {!!contentRequest.data.contentRef ? (
                 <Grid item xs={12}>
-                  <Typography fontWeight={600}>Content</Typography>
-                  <Box sx={{ p: 1 }}>Content nya</Box>
+                  <Typography fontWeight={600} mb={1}>
+                    Content
+                  </Typography>
+                  <Button
+                    LinkComponent={Link}
+                    href={`/creator/master-content/${contentRequest.data.contentRef}/edit`}
+                    variant='outlined'
+                  >
+                    Go to content
+                  </Button>
                 </Grid>
               ) : null}
             </Grid>

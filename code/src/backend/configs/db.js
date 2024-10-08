@@ -16,13 +16,16 @@ try {
       min: 0,
       idle: 5000
     },
-    host: process.env.NEXT_PUBLIC_DB_HOST ?? 'localhost',
-    database: process.env.NEXT_PUBLIC_DB_NAME ?? 'ta_alvis_dev',
-    username: process.env.NEXT_PUBLIC_DB_USERNAME ?? 'root',
-    password: process.env.NEXT_PUBLIC_DB_PASSWORD ?? '',
+    host: process.env.DB_HOST ?? 'localhost',
+    database: process.env.DB_NAME ?? 'ta_alvis_dev',
+    username: process.env.DB_USERNAME ?? 'root',
+    password: process.env.DB_PASSWORD ?? '',
     // logging: process.env.NODE_ENV === 'production',
     logging: false,
-    port: process.env.NEXT_PUBLIC_DB_PORT ?? 3306
+    port: process.env.DB_PORT ?? 3306,
+    dialectOptions: {
+      bigNumberStrings: false
+    }
   })
 
   console.info(buildSystemLog('Authenticating...'))

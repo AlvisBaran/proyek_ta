@@ -28,7 +28,8 @@ export const responseString = {
     DELETE_FAILED: 'Gagal menghapus user!',
     INUFICENT_BALANCE: 'Saldo tidak cukup untuk melakukan transaksi!',
     NOT_ADMIN: 'User bukan admin!',
-    NOT_CREATOR: 'User bukan creator!'
+    NOT_CREATOR: 'User bukan creator!',
+    CHANGE_PASSWORD_SUCCESS: 'Berhasil mengganti password!\nLogin selanjutnya akan menggunakan password yang baru!'
   },
   CREATOR: {
     NOT_FOUND: 'Creator tidak ditemukan!'

@@ -10,6 +10,7 @@ import CardMembershipIcon from '@mui/icons-material/CardMembership'
 import ShopIcon from '@mui/icons-material/Shop'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import AddCardIcon from '@mui/icons-material/AddCard'
+import LockResetIcon from '@mui/icons-material/LockReset'
 
 import PageHeader from '@/app/(web)/_components/PageHeader'
 
@@ -46,6 +47,13 @@ const accountLayoutNavs = [
     icon: <ListAltIcon />,
     subTitle: 'Your full wallet history',
     action: null
+  },
+  {
+    label: 'Change Password',
+    value: 'change-password',
+    icon: <LockResetIcon />,
+    subTitle: 'Change your current password!',
+    action: null
   }
 ]
 
@@ -72,7 +80,11 @@ export default function AccountLayout({ children, activeNav }) {
                     startIcon={upMd ? undefined : nav.icon}
                     endIcon={upMd ? nav.icon : undefined}
                     variant={nav.value === activeNav ? 'contained' : 'text'}
-                    sx={{ my: nav.value === activeNav ? 1 : 0, justifyContent: upMd ? 'end' : 'start' }}
+                    sx={{
+                      my: nav.value === activeNav ? 1 : 0,
+                      justifyContent: upMd ? 'end' : 'start',
+                      textAlign: upMd ? 'end' : 'start'
+                    }}
                   >
                     {nav.label}
                   </Button>

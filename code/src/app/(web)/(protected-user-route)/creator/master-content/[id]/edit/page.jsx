@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-import { Stack } from '@mui/material'
+import { Alert, AlertTitle, Stack } from '@mui/material'
 
 import MyAxios from '@/hooks/MyAxios'
 import Breadcrumb from '@/app/(web)/_components/Breadcrumb'
@@ -21,6 +21,11 @@ export default function CraetorMasterContentEditPage({ params }) {
   const id = params.id
   const router = useRouter()
   const [content, setContent] = useState(contentDefaultValues)
+  const contentRequest =
+    !!content.data && !!content.data.ContentRequests && !!content.data.ContentRequests[0]
+      ? content.data.ContentRequests[0]
+      : null
+  const disableEdit = !!contentRequest && contentRequest.status === 'done'
 
   // * Fetch Data
   async function fetchContent() {
@@ -56,6 +61,13 @@ export default function CraetorMasterContentEditPage({ params }) {
         ]}
       />
       <Stack gap={2}>
+        {disableEdit ? (
+          <Alert severity='info'>
+            <AlertTitle>Attention!</AlertTitle>
+            This content is setted as requested content by User and set to done. This will cause you won't be able to
+            edit this content anymore!
+          </Alert>
+        ) : null}
         <DetailSection content={content} fetchContent={fetchContent} />
         <GallerySection content={content} fetchContent={fetchContent} />
         <CategorySection content={content} fetchContent={fetchContent} />

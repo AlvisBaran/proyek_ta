@@ -55,7 +55,6 @@ export default function CommentsAndRepliesSection({ content }) {
 
   return (
     <Box>
-      {/* <PageHeader title='Comments & Replies' subTitle="Content's comments and replies" sx={{ mb: 2 }} /> */}
       <Card elevation={3}>
         <CardHeader
           title='Comments & Replies'

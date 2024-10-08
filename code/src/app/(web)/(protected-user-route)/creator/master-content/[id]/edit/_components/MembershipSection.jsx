@@ -40,6 +40,11 @@ export default function MembershipSection({ content, fetchContent }) {
   const [updateMemberships, setUpdateMemberships] = useState(updateMembershipsDefaultValues)
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [firstLoad, setFirstLoad] = useState(true)
+  const contentRequest =
+    !!content.data && !!content.data.ContentRequests && !!content.data.ContentRequests[0]
+      ? content.data.ContentRequests[0]
+      : null
+  const disableEdit = !!contentRequest && contentRequest.status === 'done'
 
   // * Fetch Data
   async function fetchMemberships() {
@@ -105,7 +110,7 @@ export default function MembershipSection({ content, fetchContent }) {
           <Button
             variant='contained'
             startIcon={<SaveIcon />}
-            disabled={content.loading || memberships.loading || updateMemberships.loading}
+            disabled={content.loading || memberships.loading || updateMemberships.loading || disableEdit}
             onClick={handleUpdateMemberships}
           >
             {updateMemberships.loading ? 'Loading...' : 'Save'}
