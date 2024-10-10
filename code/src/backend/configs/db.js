@@ -1,16 +1,18 @@
 import { Sequelize } from 'sequelize'
-// import * as mysql2 from 'mysql2'
+import * as mysql2 from 'mysql2'
 import * as pg from 'pg'
 
 import { buildSystemLog } from '@/utils/logHelper'
 
 var sqlz
 
+const dialect = 'postgres'
+
 try {
   console.info(buildSystemLog('Initializing database connection...'))
   sqlz = new Sequelize({
-    dialect: 'postgres',
-    dialectModule: pg,
+    dialect,
+    dialectModule: dialect === 'postgres' ? pg : mysql2,
     pool: {
       max: 2,
       min: 0,
