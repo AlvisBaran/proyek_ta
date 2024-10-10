@@ -62,11 +62,11 @@ export async function GET(request, response) {
       whereAttributes = {
         ...whereAttributes,
         [Op.or]: [
-          { type: { [Op.like]: `%${keyword}%` } },
-          { title: { [Op.like]: `%${keyword}%` } },
-          { description: { [Op.like]: `%${keyword}%` } },
-          { body: { [Op.like]: `%${keyword}%` } },
-          { status: { [Op.like]: `%${keyword}%` } }
+          { type: { [Op.iLike]: `%${keyword}%` } },
+          { title: { [Op.iLike]: `%${keyword}%` } },
+          { description: { [Op.iLike]: `%${keyword}%` } },
+          { body: { [Op.iLike]: `%${keyword}%` } },
+          { status: { [Op.iLike]: `%${keyword}%` } }
         ]
       }
     }

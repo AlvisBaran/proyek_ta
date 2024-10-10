@@ -49,10 +49,10 @@ export async function GET(request, response) {
       where = {
         ...where,
         [Op.or]: [
-          { requestNote: { [Op.like]: `%${keyword}%` } },
-          { status: { [Op.like]: `%${keyword}%` } },
-          { '$ContentRequestor.displayName$': { [Op.like]: `%${keyword}%` } },
-          { '$ContentRequestor.email$': { [Op.like]: `%${keyword}%` } }
+          { requestNote: { [Op.iLike]: `%${keyword}%` } },
+          { status: { [Op.iLike]: `%${keyword}%` } },
+          { '$ContentRequestor.displayName$': { [Op.iLike]: `%${keyword}%` } },
+          { '$ContentRequestor.email$': { [Op.iLike]: `%${keyword}%` } }
         ]
       }
     if (!!status) where = { ...where, status: String(status).toLowerCase() }

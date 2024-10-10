@@ -38,7 +38,7 @@ export async function GET(request, response) {
         //   [Op.ne]: "banned"
         // },
         cUsername: {
-          [Op.like]: `%${keyword}%`
+          [Op.iLike]: `%${keyword}%`
         }
       },
       order: [['joinDate', 'DESC']],

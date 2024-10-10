@@ -61,7 +61,7 @@ export async function POST(request) {
       ],
       where: {
         status: 'published',
-        [Op.or]: [{ title: { [Op.like]: `%${keyword}%` } }, { body: { [Op.like]: `%${keyword}%` } }]
+        [Op.or]: [{ title: { [Op.iLike]: `%${keyword}%` } }, { body: { [Op.iLike]: `%${keyword}%` } }]
       },
       order: [['createdAt', 'DESC']]
       // attributes: ['id', 'cUsername', 'role', 'banStatus', 'displayName', 'email', 'profilePicture']

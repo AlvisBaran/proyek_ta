@@ -27,7 +27,7 @@ export async function GET(request, response) {
 
   let where = {}
   if (!!keyword) {
-    where = { ...where, label: { [Op.like]: `%${keyword}%` } }
+    where = { ...where, label: { [Op.iLike]: `%${keyword}%` } }
   }
 
   let categories = []

@@ -31,13 +31,13 @@ export async function GET(request) {
       whereAttributes = {
         ...whereAttributes,
         [Op.or]: [
-          { newUsername: { [Op.like]: `%${keyword}%` } },
-          { '$Applicant.displayName$': { [Op.like]: `%${keyword}%` } },
-          { '$Applicant.email$': { [Op.like]: `%${keyword}%` } },
-          { '$Applicant.cUsername$': { [Op.like]: `%${keyword}%` } },
-          { '$Admin.displayName$': { [Op.like]: `%${keyword}%` } },
-          { '$Admin.email$': { [Op.like]: `%${keyword}%` } },
-          { '$Admin.cUsername$': { [Op.like]: `%${keyword}%` } }
+          { newUsername: { [Op.iLike]: `%${keyword}%` } },
+          { '$Applicant.displayName$': { [Op.iLike]: `%${keyword}%` } },
+          { '$Applicant.email$': { [Op.iLike]: `%${keyword}%` } },
+          { '$Applicant.cUsername$': { [Op.iLike]: `%${keyword}%` } },
+          { '$Admin.displayName$': { [Op.iLike]: `%${keyword}%` } },
+          { '$Admin.email$': { [Op.iLike]: `%${keyword}%` } },
+          { '$Admin.cUsername$': { [Op.iLike]: `%${keyword}%` } }
         ]
       }
     if (!!filterStatus) whereAttributes = { ...whereAttributes, status: filterStatus }

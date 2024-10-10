@@ -29,10 +29,10 @@ export async function GET(request, response) {
   if (!!keyword)
     orQueryArray = [
       ...orQueryArray,
-      { '$User1.displayName$': { [Op.like]: `%${keyword}%` } },
-      { '$User1.cUsername$': { [Op.like]: `%${keyword}%` } },
-      { '$User2.displayName$': { [Op.like]: `%${keyword}%` } },
-      { '$User2.cUsername$': { [Op.like]: `%${keyword}%` } }
+      { '$User1.displayName$': { [Op.iLike]: `%${keyword}%` } },
+      { '$User1.cUsername$': { [Op.iLike]: `%${keyword}%` } },
+      { '$User2.displayName$': { [Op.iLike]: `%${keyword}%` } },
+      { '$User2.cUsername$': { [Op.iLike]: `%${keyword}%` } }
     ]
 
   const results = await Message.findAll({

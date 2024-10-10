@@ -41,14 +41,14 @@ export async function GET(request, response) {
       where = {
         ...where,
         [Op.or]: [
-          { nomorRekening: { [Op.like]: `%${keyword}%` } },
-          { status: { [Op.like]: `%${keyword}%` } },
-          { note: { [Op.like]: `%${keyword}%` } },
-          { '$User.displayName$': { [Op.like]: `%${keyword}%` } },
-          { '$User.cUsername$': { [Op.like]: `%${keyword}%` } },
-          { '$Bank.name$': { [Op.like]: `%${keyword}%` } },
-          { '$Bank.alias$': { [Op.like]: `%${keyword}%` } },
-          { '$Bank.swiftCode$': { [Op.like]: `%${keyword}%` } }
+          { nomorRekening: { [Op.iLike]: `%${keyword}%` } },
+          { status: { [Op.iLike]: `%${keyword}%` } },
+          { note: { [Op.iLike]: `%${keyword}%` } },
+          { '$User.displayName$': { [Op.iLike]: `%${keyword}%` } },
+          { '$User.cUsername$': { [Op.iLike]: `%${keyword}%` } },
+          { '$Bank.name$': { [Op.iLike]: `%${keyword}%` } },
+          { '$Bank.alias$': { [Op.iLike]: `%${keyword}%` } },
+          { '$Bank.swiftCode$': { [Op.iLike]: `%${keyword}%` } }
         ]
       }
 

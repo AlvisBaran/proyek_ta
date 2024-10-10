@@ -29,10 +29,10 @@ export async function GET(request, response) {
     where = {
       ...where,
       [Op.or]: [
-        { cUsername: { [Op.like]: `%${keyword}%` } },
-        { email: { [Op.like]: `%${keyword}%` } },
-        { displayName: { [Op.like]: `%${keyword}%` } },
-        { role: { [Op.like]: `%${keyword}%` } }
+        { cUsername: { [Op.iLike]: `%${keyword}%` } },
+        { email: { [Op.iLike]: `%${keyword}%` } },
+        { displayName: { [Op.iLike]: `%${keyword}%` } },
+        { role: { [Op.iLike]: `%${keyword}%` } }
       ]
     }
   }

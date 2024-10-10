@@ -24,7 +24,7 @@ export async function GET(request, response) {
   if (!!keyword)
     where = {
       ...where,
-      [Op.or]: [{ displayName: { [Op.like]: `%${keyword}%` } }, { cUsername: { [Op.like]: `%${keyword}%` } }]
+      [Op.or]: [{ displayName: { [Op.iLike]: `%${keyword}%` } }, { cUsername: { [Op.iLike]: `%${keyword}%` } }]
     }
 
   const users = []

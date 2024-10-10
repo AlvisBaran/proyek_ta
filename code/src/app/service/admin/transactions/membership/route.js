@@ -32,12 +32,12 @@ export async function GET(request, response) {
     where = {
       ...where,
       [Op.or]: [
-        { '$Membership.name$': { [Op.like]: `%${keyword}%` } },
-        { '$Membership.slug$': { [Op.like]: `%${keyword}%` } },
-        { '$User.displayName$': { [Op.like]: `%${keyword}%` } },
-        { '$User.cUsername$': { [Op.like]: `%${keyword}%` } },
-        { '$Membership.User.displayName$': { [Op.like]: `%${keyword}%` } },
-        { '$Membership.User.cUsername$': { [Op.like]: `%${keyword}%` } }
+        { '$Membership.name$': { [Op.iLike]: `%${keyword}%` } },
+        { '$Membership.slug$': { [Op.iLike]: `%${keyword}%` } },
+        { '$User.displayName$': { [Op.iLike]: `%${keyword}%` } },
+        { '$User.cUsername$': { [Op.iLike]: `%${keyword}%` } },
+        { '$Membership.User.displayName$': { [Op.iLike]: `%${keyword}%` } },
+        { '$Membership.User.cUsername$': { [Op.iLike]: `%${keyword}%` } }
       ]
     }
 

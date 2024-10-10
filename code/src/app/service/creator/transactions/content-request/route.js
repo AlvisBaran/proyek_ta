@@ -32,8 +32,8 @@ export async function GET(request, response) {
     where = {
       ...where,
       [Op.or]: [
-        { '$User.displayName$': { [Op.like]: `%${keyword}%` } },
-        { '$User.cUsername$': { [Op.like]: `%${keyword}%` } }
+        { '$User.displayName$': { [Op.iLike]: `%${keyword}%` } },
+        { '$User.cUsername$': { [Op.iLike]: `%${keyword}%` } }
       ]
     }
 
