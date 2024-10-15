@@ -32,6 +32,12 @@ module.exports = {
         allowNull: false
       },
       bannedDate: DataTypes.DATE,
+      countryRef: {
+        type: DataTypes.INTEGER,
+        references: { model: 'countries', key: 'id' },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+      },
       joinDate: {
         type: DataTypes.DATE,
         allowNull: false,

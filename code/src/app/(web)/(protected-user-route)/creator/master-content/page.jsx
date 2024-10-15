@@ -92,6 +92,20 @@ const baseColumns = [
   },
   {
     flex: 1,
+    minWidth: 120,
+    type: 'number',
+    field: 'viewCounter',
+    headerName: 'Visits'
+  },
+  {
+    flex: 1,
+    minWidth: 120,
+    type: 'number',
+    field: 'uniqueViews',
+    headerName: 'Views'
+  },
+  {
+    flex: 1,
     minWidth: 180,
     type: 'dateTime',
     field: 'createdAt',

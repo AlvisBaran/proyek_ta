@@ -1,5 +1,7 @@
 // Scripts for sequelize-cli to generate model and migration files
 
+sequelize model:generate --name Country --attributes code:string,name:string
+
 sequelize model:generate --name User --attributes cUsername:string
 
 sequelize model:generate --name Notification --attributes icon_id:string
@@ -47,3 +49,5 @@ sequelize model:generate --name ContentRequestPayment --attributes contentReques
 sequelize model:generate --name UserMembershipPurchase --attributes userRef:integer,membershipRef:integer,expiredAt:date
 
 sequelize model:generate --name Bank --attributes name:string,swiftCode:string
+
+sequelize model:generate --name ContentUniqueViews --attributes contentRef:integer,userRef:integer

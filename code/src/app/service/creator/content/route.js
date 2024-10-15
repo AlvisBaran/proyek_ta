@@ -4,6 +4,7 @@ import { responseString } from '@/backend/helpers/serverResponseString'
 import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
 
 import Content from '@/backend/models/content'
+import ContentUniqueViews from '@/backend/models/contentuniqueviews'
 
 const FILTERS = {
   order: ['create-date', 'title', 'most-like', 'most-share'],
@@ -113,12 +114,14 @@ export async function GET(request, response) {
       where: { ...whereAttributes },
       order: [[orderFilter, orderType]]
     })
-      .then((res = []) => {
-        res?.map(datum =>
-          contents.push({
-            ...datum?.dataValues
-          })
-        )
+      .then(async (res = []) => {
+        for (let i = 0; i < res.length; i++) {
+          const tempData = res[i]
+          // * Mengambil jumlah unique views
+          const uniqueViews = (await ContentUniqueViews.count({ where: { contentRef: tempData.id } })) ?? 0
+
+          contents.push({ ...tempData.dataValues, uniqueViews })
+        }
 
         return Response.json(contents, { status: 200 })
       })

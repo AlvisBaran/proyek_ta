@@ -12,6 +12,7 @@ import Comment from '@/backend/models/comment'
 import Reply from '@/backend/models/reply'
 import Category from '@/backend/models/category'
 import UsersFollows from '@/backend/models/usersfollows'
+import ContentUniqueViews from '@/backend/models/contentuniqueviews'
 
 import '@/backend/models/association'
 
@@ -261,6 +262,18 @@ export async function GET(request, response) {
     // * Menambah jumlah view
     await Content.increment('viewCounter', { by: 1, where: { id: currContent.id } })
 
+    // * Menambah jumlah unique views
+    const existingContentUniqueViews = await ContentUniqueViews.findOne({
+      where: { userRef: user.id, contentRef: currContent.id }
+    })
+    if (!existingContentUniqueViews) {
+      const newContentUniqueViews = ContentUniqueViews.build({ userRef: user.id, contentRef: currContent.id })
+      await newContentUniqueViews.save()
+    }
+
+    // * Mengambil jumlah unique views
+    const uniqueViews = (await ContentUniqueViews.count({ where: { contentRef: currContent.id } })) ?? 0
+
     await currContent.reload()
     return Response.json(
       {
@@ -272,7 +285,8 @@ export async function GET(request, response) {
           followed
         },
         Gallery: galleries,
-        Comments: comments
+        Comments: comments,
+        uniqueViews
       },
       { status: 200 }
     )

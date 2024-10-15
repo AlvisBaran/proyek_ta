@@ -19,7 +19,9 @@ module.exports = {
           bio: 'I am an artist of abstraction and creativity. Follow me if you like my artwork!',
           about: "<h1>It's me melowmelow-chan!</h1><p>Follow if you like my arts!</p>",
           themeColor: '#BE3144',
-          joinDate: new Date('2023-11-14 20:38:41')
+          joinDate: new Date('2023-11-14 20:38:41'),
+          saldo: 0,
+          countryRef: 104
         },
         {
           role: 'creator',
@@ -32,7 +34,9 @@ module.exports = {
           bio: 'You like blood? Me like too!',
           about: '<p>Follow if you like my arts!</p>',
           themeColor: '#BE3144',
-          joinDate: new Date('2023-12-14 20:38:41')
+          joinDate: new Date('2023-12-14 20:38:41'),
+          saldo: 0,
+          countryRef: 104
         },
         {
           role: 'creator',
@@ -45,7 +49,9 @@ module.exports = {
           bio: 'You like flowers? Me like too!',
           about: '<p>Follow if you like my arts!</p>',
           themeColor: '#BE3144',
-          joinDate: new Date('2023-12-16 20:38:41')
+          joinDate: new Date('2023-12-16 20:38:41'),
+          saldo: 0,
+          countryRef: 104
         },
         {
           role: 'creator',
@@ -58,7 +64,9 @@ module.exports = {
           bio: 'You like alvis? Me like too!',
           about: '<p>Follow if you like my arts!</p>',
           themeColor: '#BE3144',
-          joinDate: new Date('2023-12-17 20:38:41')
+          joinDate: new Date('2023-12-17 20:38:41'),
+          saldo: 0,
+          countryRef: 104
         }
       ],
       {}

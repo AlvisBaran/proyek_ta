@@ -21,6 +21,11 @@ import TransWithdraw from './transwithdraw'
 import AccountUpgradeRequests from './accountupgraderequests'
 import Message from './message'
 import Chat from './chat'
+import Country from './country'
+
+// ** Country and User
+Country.hasMany(User, { foreignKey: 'countryRef' })
+User.belongsTo(Country, { foreignKey: 'countryRef' })
 
 // ** User and Notifications
 User.hasMany(Notification, { foreignKey: 'userRef' })

@@ -24,6 +24,7 @@ import CategoryIcon from '@mui/icons-material/Category'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import FavoriteIcon from '@mui/icons-material/Favorite'
 import ShareIcon from '@mui/icons-material/Share'
+import AdsClickIcon from '@mui/icons-material/AdsClick'
 
 import MyAxios from '@/hooks/MyAxios'
 import { intlNumberFormat } from '@/utils/intlNumberFormat'
@@ -177,6 +178,10 @@ export default function UserContentDetail({ params }) {
                   <Stack direction='row' alignItems='center' gap={2} sx={{ flexGrow: 1, color: 'GrayText' }}>
                     <Stack direction='row' alignItems='center' gap={0.5}>
                       <VisibilityIcon />
+                      <Typography variant='body2'>{intlNumberFormat(content.data.uniqueViews, true)}</Typography>
+                    </Stack>
+                    <Stack direction='row' alignItems='center' gap={0.5}>
+                      <AdsClickIcon />
                       <Typography variant='body2'>{intlNumberFormat(content.data.viewCounter, true)}</Typography>
                     </Stack>
                     <Stack

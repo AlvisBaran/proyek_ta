@@ -31,7 +31,7 @@ export default function UserCategoryDetailPage({ params }) {
   const page = !!searchPage && !isNaN(Number(searchPage)) ? Number(searchPage) : 1
   const [category, setCategory] = useState(categoryDefaultValues)
   const [contents, setContents] = useState(contentsDefaultValues)
-  console.log(contents.data)
+
   // * Fetch Category
   async function fetchCategory() {
     setCategory({ ...category, loading: true, error: false, success: false })

@@ -16,7 +16,7 @@ import {
   useTheme
 } from '@mui/material'
 
-import VisibilityIcon from '@mui/icons-material/Visibility'
+import AdsClickIcon from '@mui/icons-material/AdsClick'
 import FavoriteIcon from '@mui/icons-material/Favorite'
 import ShareIcon from '@mui/icons-material/Share'
 
@@ -63,7 +63,7 @@ export default function ContentCardWithCreator({ content, relativeDate = false, 
             </Typography>
             <Stack direction='row' alignItems='center' gap={2} mt={2}>
               <Stack direction='row' alignItems='center' gap={1}>
-                <VisibilityIcon fontSize='11' />
+                <AdsClickIcon fontSize='11' />
                 <Typography variant='caption'>{intlNumberFormat(content.viewCounter, true)}</Typography>
               </Stack>
               <Stack direction='row' alignItems='center' gap={1}>

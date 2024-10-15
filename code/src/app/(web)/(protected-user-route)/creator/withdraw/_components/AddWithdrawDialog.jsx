@@ -25,15 +25,19 @@ import CloseIcon from '@mui/icons-material/Close'
 
 import MyAxios from '@/hooks/MyAxios'
 import { labelBuilder } from '@/utils/labelBuilder'
+import CustomViewMode from '@/app/(web)/_components/CustomViewMode'
+import { intlNumberFormat } from '@/utils/intlNumberFormat'
 
 const formId = 'creator-withdraw-add-form'
 const createWithdrawDefaultValues = { loading: false, error: false, success: false }
 const banksDefaultValues = { data: [], loading: false, error: false, success: false }
+const saldoDefaulValues = { data: null, loading: false, error: false, success: false }
 
 export default function AddWithdrawDialog({ open, onClose, onSuccess }) {
   const theme = useTheme()
   const upMd = useMediaQuery(theme.breakpoints.up('md'))
   const [create, setCreate] = useState(createWithdrawDefaultValues)
+  const [saldo, setSaldo] = useState(saldoDefaulValues)
   const [banks, setBanks] = useState(banksDefaultValues)
 
   // * Form Hook
@@ -57,6 +61,20 @@ export default function AddWithdrawDialog({ open, onClose, onSuccess }) {
         console.error(err)
         toast.error(`Failed load banks data!\n${err.response.data.message}`)
         setBanks({ ...banks, data: [], loading: false, error: true })
+      })
+  }
+
+  // * Fetch Saldo
+  async function fetchSaldo() {
+    setSaldo({ ...saldo, loading: true, error: false, success: false })
+    await MyAxios.get('/user/balance')
+      .then(resp => {
+        setSaldo({ ...saldo, data: resp.data, loading: false, success: true })
+      })
+      .catch(err => {
+        console.error(err)
+        toast.error(`Failed load user balance!\n${err.response.data.message}`)
+        setSaldo({ ...saldo, data: [], loading: false, error: true })
       })
   }
 
@@ -89,7 +107,10 @@ export default function AddWithdrawDialog({ open, onClose, onSuccess }) {
 
   // * On Load
   useEffect(() => {
-    if (open) fetchBanks()
+    if (open) {
+      fetchBanks()
+      fetchSaldo()
+    }
   }, [open])
 
   return (
@@ -104,6 +125,7 @@ export default function AddWithdrawDialog({ open, onClose, onSuccess }) {
       </DialogTitle>
       <DialogContent>
         <Box component='form' id={formId} onSubmit={formHook.handleSubmit(onSubmit)}>
+          <CustomViewMode label='Current Balance' value={`Rp ${intlNumberFormat(saldo.data ?? 0, false)}`} />
           <Controller
             control={formHook.control}
             name='bank'
@@ -153,9 +175,11 @@ export default function AddWithdrawDialog({ open, onClose, onSuccess }) {
             label='Nominal'
             placeholder='Type your withdraw nominal'
             InputProps={{ startAdornment: <InputAdornment position='start'>Rp</InputAdornment> }}
+            inputProps={{ max: saldo.data }}
             {...formHook.register('nominal', {
               required: 'Nominal is required!',
-              min: { value: 1, message: 'Minimum of 1!' }
+              min: { value: 1, message: 'Minimum of 1!' },
+              max: { value: saldo.data, message: 'Your current balance is yor maximum!' }
             })}
             error={Boolean(formHook.formState.errors.nominal)}
             helperText={
@@ -165,7 +189,7 @@ export default function AddWithdrawDialog({ open, onClose, onSuccess }) {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button variant='contained' type='submit' form={formId} disabled={create.loading}>
+        <Button variant='contained' type='submit' form={formId} disabled={create.loading || saldo.loading}>
           Submit
         </Button>
       </DialogActions>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { MuiFileInput } from 'mui-file-input'
 import toast from 'react-hot-toast'
+import Resizer from 'react-image-file-resizer'
 
 import {
   Avatar,
@@ -171,8 +172,26 @@ export default function GallerySection({ content, fetchContent }) {
   )
 }
 
+const IMAGE_MAX_WIDTH = 1215
+const IMAGE_MAX_HEIGHT = 700
 const addGalleryFormId = 'creator-content-gallery-add-form'
 const addGalleryDefaultValues = { loading: false, error: false, success: false }
+
+const resizeFile = file =>
+  new Promise(resolve => {
+    Resizer.imageFileResizer(
+      file,
+      IMAGE_MAX_WIDTH,
+      IMAGE_MAX_HEIGHT,
+      'JPEG',
+      100,
+      0,
+      uri => {
+        resolve(uri)
+      },
+      'file'
+    )
+  })
 
 function AddGalleryDialog({ contentId, open, onClose, onSuccess }) {
   const [addGallery, setAddGallery] = useState(addGalleryDefaultValues)
@@ -186,6 +205,7 @@ function AddGalleryDialog({ contentId, open, onClose, onSuccess }) {
     },
     mode: 'onChange'
   })
+  const typeWatcher = formHook.watch('type')
 
   // * On Close
   function handleClose() {
@@ -196,10 +216,17 @@ function AddGalleryDialog({ contentId, open, onClose, onSuccess }) {
   // * On Submit
   async function onSubmit(data) {
     setAddGallery({ ...addGallery, loading: true, error: false, success: false })
+    // * Resize image
+    let file = null
+    if (!!data.file) {
+      file = await resizeFile(data.file)
+    }
+
+    // * Add to form data
     const formData = new FormData()
     formData.append('name', data.name)
     formData.append('type', data.type)
-    if (!!data.file) formData.append('file', data.file)
+    if (!!file) formData.append('file', file)
     await MyAxios.post(`/creator/content/${contentId}/gallery`, formData)
       .then(resp => {
         toast.success('Success add gallery!')
@@ -240,7 +267,13 @@ function AddGalleryDialog({ contentId, open, onClose, onSuccess }) {
                 }}
                 {...field}
                 error={Boolean(fieldState.error)}
-                helperText={Boolean(fieldState.error) ? fieldState.error.message : undefined}
+                helperText={
+                  Boolean(fieldState.error)
+                    ? fieldState.error.message
+                    : typeWatcher === 'image'
+                      ? `Your image will be resized to max width of ${IMAGE_MAX_WIDTH} px and max height of ${IMAGE_MAX_HEIGHT} px`
+                      : undefined
+                }
               />
             )}
           />
