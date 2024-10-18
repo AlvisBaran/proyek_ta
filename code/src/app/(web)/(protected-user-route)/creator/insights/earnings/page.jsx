@@ -3,7 +3,17 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
-import { FormControl, InputLabel, MenuItem, Select, Stack, useMediaQuery, useTheme } from '@mui/material'
+import {
+  Card,
+  CardContent,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  useMediaQuery,
+  useTheme
+} from '@mui/material'
 import { LineChart } from '@mui/x-charts/LineChart'
 
 import MyAxios from '@/hooks/MyAxios'
@@ -53,31 +63,35 @@ export default function CreatorInsightsEarningsPage() {
   return (
     <CreatorPageLayout appbarTitle='Insights'>
       <CreatorInsightTabs value='earnings' />
-      <Stack direction='row' gap={2} alignItems='center' justifyContent='end' py={2}>
-        <FormControl fullWidth={!upMd} size='small' sx={{ minWidth: 280 }}>
-          <InputLabel id='creator-insight-earnings-filter-label'>Filter</InputLabel>
-          <Select
-            labelId='creator-insight-earnings-filter-label'
-            id='creator-insight-earnings-filter'
-            label='Filter'
-            value={filterStatus}
-            onChange={e => setFilterStatus(e.target.value)}
-          >
-            {filterOptions.map((item, index) => (
-              <MenuItem key={`creator-insight-earnings-filter-item-${index}`} value={item.value}>
-                {item.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Stack>
-      <LineChart
-        // width={500}
-        height={300}
-        loading={earnings.loading}
-        series={earnings.data.series}
-        xAxis={[{ scaleType: 'point', ...earnings.data.xAxis }]}
-      />
+      <Card elevation={3} sx={{ mt: 2 }}>
+        <CardContent>
+          <Stack direction='row' gap={2} alignItems='center' justifyContent='end' pb={2}>
+            <FormControl fullWidth={!upMd} size='small' sx={{ minWidth: 280 }}>
+              <InputLabel id='creator-insight-earnings-filter-label'>Filter</InputLabel>
+              <Select
+                labelId='creator-insight-earnings-filter-label'
+                id='creator-insight-earnings-filter'
+                label='Filter'
+                value={filterStatus}
+                onChange={e => setFilterStatus(e.target.value)}
+              >
+                {filterOptions.map((item, index) => (
+                  <MenuItem key={`creator-insight-earnings-filter-item-${index}`} value={item.value}>
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Stack>
+          <LineChart
+            // width={500}
+            height={300}
+            loading={earnings.loading}
+            series={earnings.data.series}
+            xAxis={[{ scaleType: 'point', ...earnings.data.xAxis }]}
+          />
+        </CardContent>
+      </Card>
     </CreatorPageLayout>
   )
 }

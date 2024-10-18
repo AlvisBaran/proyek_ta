@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -32,7 +33,6 @@ import CustomViewMode from '@/app/(web)/_components/CustomViewMode'
 import CreatorRequestContentDetailAction from './_components/CreatorRequestContentDetailAction'
 import SetPriceDialog from './_components/SetPriceDialog'
 import SetContentDialog from './_components/SetContentDialog'
-import Link from 'next/link'
 
 const activeNav = 'detail'
 const contentRequestDefaultValue = { data: null, loading: false, success: false, error: false }
@@ -219,7 +219,7 @@ export default function CreatorRequestContentDetailMainPage({ params }) {
                 />
               </Grid>
               <Grid item xs={12}>
-                <Typography fontWeight={600}>Requestor</Typography>
+                <Typography fontWeight={600}>Request Note</Typography>
                 <Typography textAlign='justify' p={1}>
                   {contentRequest.data.requestNote}
                 </Typography>
