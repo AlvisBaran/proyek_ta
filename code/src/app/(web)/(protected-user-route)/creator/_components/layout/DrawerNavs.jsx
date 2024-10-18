@@ -20,7 +20,7 @@ import CreatorPageLayoutDrawerNavsUserInterfaces from './DrawerNavsUserInterface
 
 const navs = [
   {
-    href: '/creator',
+    href: '/creator/insights',
     label: 'Insights',
     icon: <InsightsIcon />
   },

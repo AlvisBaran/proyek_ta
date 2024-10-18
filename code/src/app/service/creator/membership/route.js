@@ -4,9 +4,9 @@ import { Op } from 'sequelize'
 import { responseString } from '@/backend/helpers/serverResponseString'
 import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
 import { mainBucketName, minioClient } from '@/minio/config'
+import { buildSystemLog } from '@/utils/logHelper'
 
 import Membership from '@/backend/models/membership'
-import { buildSystemLog } from '@/utils/logHelper'
 
 const FILTERS = {
   order: ['create-date', 'name'],
