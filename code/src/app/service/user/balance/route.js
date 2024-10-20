@@ -3,6 +3,8 @@ import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
 
 import User from '@/backend/models/user'
 
+export const dynamic = 'force-dynamic'
+
 // ** User > Balance > Get Self
 export async function GET(request, response) {
   let res = {}

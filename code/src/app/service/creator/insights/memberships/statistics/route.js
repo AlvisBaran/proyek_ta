@@ -6,6 +6,8 @@ import Membership from '@/backend/models/membership'
 import UserMembershipPurchase from '@/backend/models/usermembershippurchase'
 import UsersFollows from '@/backend/models/usersfollows'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request, response) {
   let res = {}
 

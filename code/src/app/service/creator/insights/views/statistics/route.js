@@ -4,6 +4,8 @@ import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
 import Content from '@/backend/models/content'
 import ContentUniqueViews from '@/backend/models/contentuniqueviews'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request, response) {
   let res = {}
 
