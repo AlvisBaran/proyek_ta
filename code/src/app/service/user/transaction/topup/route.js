@@ -28,7 +28,7 @@ export async function GET(request, response) {
   }
 
   let transactions = []
-  let whereAttributes = {}
+  let whereAttributes = { userRef: user.id }
 
   if (filterStatus === 'success' || filterStatus === 'pending' || filterStatus === 'failed') {
     whereAttributes = {
