@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 
 import {
   Box,
+  Button,
   Card,
   CardActions,
   CardContent,
@@ -25,6 +26,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility'
 import FavoriteIcon from '@mui/icons-material/Favorite'
 import ShareIcon from '@mui/icons-material/Share'
 import AdsClickIcon from '@mui/icons-material/AdsClick'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 import MyAxios from '@/hooks/MyAxios'
 import { intlNumberFormat } from '@/utils/intlNumberFormat'
@@ -40,7 +43,7 @@ import PopularContentsCard from './_components/PopularContentsCard'
 import dayjs from 'dayjs'
 import { formatDayMonth2 } from '@/utils/dayjsConst'
 
-const contentDefaultValues = { data: null, loading: false, error: false, success: false }
+const contentDefaultValues = { data: null, loading: false, error: false, success: false, forbidden: false }
 const likeUnlikeDefaultValues = { loading: false, error: false, success: false }
 const refetchCommentsDefaultValues = { loading: false, error: false, success: false }
 const shareDialogDefaultValues = { open: false }
@@ -57,7 +60,7 @@ export default function UserContentDetail({ params }) {
 
   // * Fetch Data
   async function fetchData() {
-    setContent({ ...content, loading: true, error: false, success: false })
+    setContent({ ...content, loading: true, error: false, success: false, forbidden: false })
     if (!content.loading)
       await MyAxios.get(`/user/content/${contentId}`, {
         params: {
@@ -70,8 +73,12 @@ export default function UserContentDetail({ params }) {
         .catch(err => {
           console.error(err)
           toast.error(`Failed to load content!\n${err.response.data.message}`)
-          setContent({ ...content, data: null, loading: false, error: true })
-          router.back()
+          if (err?.response?.data?.code === 'MEMBERSHIP_REQUIRED') {
+            setContent({ ...content, data: null, loading: false, error: true, forbidden: true })
+          } else {
+            setContent({ ...content, data: null, loading: false, error: true })
+            router.back()
+          }
         })
   }
 
@@ -256,6 +263,20 @@ export default function UserContentDetail({ params }) {
             </Stack>
           </Grid>
         </Grid>
+      ) : content.forbidden ? (
+        <Card elevation={3}>
+          <CardHeader
+            avatar={<ErrorOutlineIcon />}
+            title='This content is restricted to memberships only!'
+            titleTypographyProps={{ variant: 'h6' }}
+            subheader='Please buy this creator membership or open another content instead!'
+          />
+          <CardActions sx={{ justifyContent: 'end' }}>
+            <Button fullWidth variant='outlined' startIcon={<ArrowBackIcon />} onClick={() => router.back()}>
+              Go Back
+            </Button>
+          </CardActions>
+        </Card>
       ) : null}
 
       <ShareDialog

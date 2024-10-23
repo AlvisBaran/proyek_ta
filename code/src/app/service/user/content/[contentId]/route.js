@@ -1,4 +1,5 @@
 import Joi from 'joi'
+import { Op } from 'sequelize'
 import { mainBucketName, minioClient } from '@/minio/config'
 import { responseString } from '@/backend/helpers/serverResponseString'
 import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
@@ -13,6 +14,8 @@ import Reply from '@/backend/models/reply'
 import Category from '@/backend/models/category'
 import UsersFollows from '@/backend/models/usersfollows'
 import ContentUniqueViews from '@/backend/models/contentuniqueviews'
+import UserMembershipPurchase from '@/backend/models/usermembershippurchase'
+import MembershipsXContents from '@/backend/models/membershipsxcontents'
 
 import '@/backend/models/association'
 
@@ -92,19 +95,48 @@ export async function GET(request, response) {
       return Response.json(res, { status: 404 })
     }
 
-    // * Cek content public or private
-    if (currContent.type === 'private') {
-      // * -> kalo private dan user login ga ada return
-      if (!user) {
-        res = { message: responseString.GLOBAL.FORBIDDEN, error: 'FORBIDDEN!' }
+    // ** Cek Membership User
+    const userActiveMemberships = await UserMembershipPurchase.findAll({
+      where: { userRef: user.id, expiredAt: { [Op.gt]: new Date() } }
+    })
+    const userActiveMembershipsIds = userActiveMemberships.map(item => Number(item.membershipRef))
+    const contentMembership = await MembershipsXContents.findAll({ where: { contentRef: currContent.id } })
+    const contentMembershipIds = contentMembership.map(item => Number(item.membershipRef))
+
+    if (contentMembership.length > 0) {
+      if (userActiveMemberships.length <= 0) {
+        res = { message: responseString.CONTENT.MEMBERSHIP_REQUIRED, code: 'MEMBERSHIP_REQUIRED' }
         return Response.json(res, { status: 403 })
       } else {
-        // TODO: -> kalo private dan user login ada cek membershipnya
-        // TODO: ---> kalo membership ga ada return
-        // * ---> kalo ada ya lanjut
+        let match = false
+        for (let i = 0; i < contentMembershipIds.length; i++) {
+          const tempId = contentMembershipIds[i]
+          if (!match) {
+            const existing = userActiveMembershipsIds.find(item => item === tempId)
+            if (!!existing) match = true
+          }
+        }
+
+        if (!match) {
+          res = { message: responseString.CONTENT.MEMBERSHIP_REQUIRED, code: 'MEMBERSHIP_REQUIRED' }
+          return Response.json(res, { status: 403 })
+        }
       }
     }
-    // * -> kalo public ya udah next
+
+    // // * Cek content public or private
+    // if (currContent.type === 'private') {
+    //   // * -> kalo private dan user login ga ada return
+    //   if (!user) {
+    //     res = { message: responseString.GLOBAL.FORBIDDEN, error: 'FORBIDDEN!' }
+    //     return Response.json(res, { status: 403 })
+    //   } else {
+    //     // TODO: -> kalo private dan user login ada cek membershipnya
+    //     // TODO: ---> kalo membership ga ada return
+    //     // * ---> kalo ada ya lanjut
+    //   }
+    // }
+    // // * -> kalo public ya udah next
 
     // ** Ini kalo ada sharer dan opener
     if (!!sharerUserId) {

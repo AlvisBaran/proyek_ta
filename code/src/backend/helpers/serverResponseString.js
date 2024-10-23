@@ -46,7 +46,8 @@ export const responseString = {
     NOT_FOUND: 'Content tidak ditemukan atau dilarang!',
     ADD_FAILED: 'Gagal menambahkan content!',
     UPDATE_FAILED: 'Gagal membarui content!',
-    DELETE_FAILED: 'Gagal menghapus content!'
+    DELETE_FAILED: 'Gagal menghapus content!',
+    MEMBERSHIP_REQUIRED: 'User tidak memiliki membership yang diperlukan untuk mengakes content ini!'
   },
   CONTENT_REQUEST: {
     NOT_FOUND: 'Content request tidak ditemukan!',

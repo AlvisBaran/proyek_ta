@@ -106,7 +106,7 @@ export default function SearchUserDialog({ open, onClose, setUser }) {
                     <QuestionMarkIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary='Opps!' secondary={`No creator goes by '${searchValue}'`} />
+                <ListItemText primary='Opps!' secondary={`No user goes by '${searchValue}'`} />
               </ListItem>
             ) : null}
           </List>

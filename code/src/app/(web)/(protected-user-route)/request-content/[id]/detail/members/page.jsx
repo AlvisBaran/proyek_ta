@@ -110,6 +110,7 @@ export default function UserRequestContentDetailMembersPage({ params }) {
                 fullWidth={!upMd}
                 variant='contained'
                 startIcon={<AddIcon />}
+                disabled={members.loading || members.data.length >= 2}
                 onClick={() => setOpenAddMemberDialog(true)}
               >
                 Add Member
