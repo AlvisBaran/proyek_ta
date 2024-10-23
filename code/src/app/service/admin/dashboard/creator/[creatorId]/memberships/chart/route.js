@@ -8,6 +8,7 @@ import Membership from '@/backend/models/membership'
 import UserMembershipPurchase from '@/backend/models/usermembershippurchase'
 
 import dayjs from 'dayjs'
+import User from '@/backend/models/user'
 
 const PARAMS = {
   model: ['this-month', 'this-year', 'last-5-year']
@@ -16,6 +17,7 @@ const PARAMS = {
 export async function GET(request, response) {
   const searchParams = request.nextUrl.searchParams
   const model = searchParams.get('model') ?? PARAMS.model[0]
+  const creatorId = Number(response.params.creatorId)
   let res = {}
 
   // * Cek user ada
@@ -25,17 +27,25 @@ export async function GET(request, response) {
     return Response.json(res, { status: error.code })
   }
 
-  // * Cek user adalah creator
-  if (user.role !== 'creator') {
-    res = { message: responseString.USER.NOT_CREATOR }
+  // * Cek user adalah admin
+  if (user.role !== 'admin') {
+    res = { message: responseString.USER.NOT_ADMIN }
     return Response.json(res, { status: 403 })
   }
 
   const joiValidate = Joi.object({
-    model: Joi.valid(...PARAMS.model).required()
-  }).validate({ model }, { abortEarly: false })
+    model: Joi.valid(...PARAMS.model).required(),
+    creatorId: Joi.number().required()
+  }).validate({ model, creatorId }, { abortEarly: false })
 
   if (!joiValidate.error) {
+    // * Get current creator
+    const currCreator = await User.findOne({ where: { id: creatorId, role: 'creator' }, attributes: ['id', 'role'] })
+    if (!currCreator) {
+      res = { message: responseString.USER.NOT_FOUND }
+      return Response.json(res, { status: 404 })
+    }
+
     let startDate = null
     let endDate = new Date()
     if (model === 'this-month') {
@@ -50,7 +60,7 @@ export async function GET(request, response) {
     }
 
     // * Getting Memberhip Data
-    const membershipIds = (await Membership.findAll({ where: { userRef: user.id }, attributes: ['id'] })).map(
+    const membershipIds = (await Membership.findAll({ where: { userRef: currCreator.id }, attributes: ['id'] })).map(
       item => item.id
     )
     const resultsMembership = await UserMembershipPurchase.findAll({

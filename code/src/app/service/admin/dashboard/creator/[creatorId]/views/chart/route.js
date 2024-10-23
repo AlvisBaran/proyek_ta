@@ -9,6 +9,7 @@ import ContentShares from '@/backend/models/contentshares'
 import ContentLikes from '@/backend/models/contentlikes'
 
 import dayjs from 'dayjs'
+import User from '@/backend/models/user'
 
 export async function GET(request, response) {
   const searchParams = request.nextUrl.searchParams
@@ -16,6 +17,7 @@ export async function GET(request, response) {
   if (!!dateStart) dateStart = new Date(dateStart)
   let dateEnd = searchParams.get('dateEnd') ?? null
   if (!!dateEnd) dateEnd = new Date(dateEnd)
+  const creatorId = Number(response.params.creatorId)
   let res = {}
 
   // * Cek user ada
@@ -25,24 +27,32 @@ export async function GET(request, response) {
     return Response.json(res, { status: error.code })
   }
 
-  // * Cek user adalah creator
-  if (user.role !== 'creator') {
-    res = { message: responseString.USER.NOT_CREATOR }
+  // * Cek user adalah admin
+  if (user.role !== 'admin') {
+    res = { message: responseString.USER.NOT_ADMIN }
     return Response.json(res, { status: 403 })
   }
 
   const joiValidate = Joi.object({
     dateStart: Joi.date().required(),
-    dateEnd: Joi.date().required()
-  }).validate({ dateStart, dateEnd }, { abortEarly: false })
+    dateEnd: Joi.date().required(),
+    creatorId: Joi.number().required()
+  }).validate({ dateStart, dateEnd, creatorId }, { abortEarly: false })
 
   if (!joiValidate.error) {
+    // * Get current creator
+    const currCreator = await User.findOne({ where: { id: creatorId, role: 'creator' }, attributes: ['id', 'role'] })
+    if (!currCreator) {
+      res = { message: responseString.USER.NOT_FOUND }
+      return Response.json(res, { status: 404 })
+    }
+
     const startDate = dayjs(dateStart)
     const endDate = dayjs(dateEnd).add(1, 'day')
 
     // * Getting Creator's Contents Id
     const contents = await Content.findAll({
-      where: { creatorRef: user.id, contentRequestRef: null },
+      where: { creatorRef: currCreator.id, contentRequestRef: null },
       attributes: ['id', 'publishedAt']
     })
     const contentIds = contents.map(item => item.id)

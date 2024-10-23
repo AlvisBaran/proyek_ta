@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, Stack } from '@mui/material'
 
 import PeopleIcon from '@mui/icons-material/People'
+import DashboardIcon from '@mui/icons-material/Dashboard'
 import InsightsIcon from '@mui/icons-material/Insights'
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd'
@@ -21,8 +22,13 @@ import AdminPageLayoutDrawerNavsUserInterfaces from './DrawerNavsUserInterfaces'
 
 const navs = [
   {
-    href: '/admin',
+    href: '/admin/dashboard',
     label: 'Dashboard',
+    icon: <DashboardIcon />
+  },
+  {
+    href: '/admin/creator-insights',
+    label: 'Creator Insights',
     icon: <InsightsIcon />
   },
   {

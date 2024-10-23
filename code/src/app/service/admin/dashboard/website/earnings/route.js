@@ -6,6 +6,7 @@ import { range } from '@/utils/mathHelper'
 
 import Membership from '@/backend/models/membership'
 import UserMembershipPurchase from '@/backend/models/usermembershippurchase'
+import ContentRequest from '@/backend/models/contentrequest'
 
 import dayjs from 'dayjs'
 
@@ -25,9 +26,9 @@ export async function GET(request, response) {
     return Response.json(res, { status: error.code })
   }
 
-  // * Cek user adalah creator
-  if (user.role !== 'creator') {
-    res = { message: responseString.USER.NOT_CREATOR }
+  // * Cek user adalah admin
+  if (user.role !== 'admin') {
+    res = { message: responseString.USER.NOT_ADMIN }
     return Response.json(res, { status: 403 })
   }
 
@@ -49,23 +50,31 @@ export async function GET(request, response) {
       endDate = dayjs().endOf('year').toDate()
     }
 
-    // * Getting Memberhip Data
-    const membershipIds = (await Membership.findAll({ where: { userRef: user.id }, attributes: ['id'] })).map(
-      item => item.id
-    )
+    // * Getting Membership Data
+    const membershipIds = (await Membership.findAll({ attributes: ['id'] })).map(item => item.id)
     const resultsMembership = await UserMembershipPurchase.findAll({
       where: {
         membershipRef: membershipIds,
-        createdAt: { [Op.between]: [startDate, endDate] },
-        expiredAt: { [Op.gt]: new Date() }
+        createdAt: { [Op.between]: [startDate, endDate] }
       },
-      attributes: ['id', 'createdAt', 'expiredAt', 'userRef', 'membershipRef'],
+      attributes: ['id', 'createdAt', 'grandTotal', 'userRef', 'membershipRef'],
       order: [['createdAt', 'DESC']]
+    })
+
+    // * Getting Content Request Data
+    const resultsContentRequest = await ContentRequest.findAll({
+      where: {
+        status: 'done',
+        updatedAt: { [Op.between]: [startDate, endDate] }
+      },
+      attributes: ['id', 'creatorRef', 'status', 'updatedAt', 'price'],
+      order: [['updatedAt', 'DESC']]
     })
 
     let xAxis = []
     let xAxisLabel = undefined
     const membershipData = []
+    const contentRequestData = []
 
     if (model === 'this-month') {
       // * Generating X Axis
@@ -77,7 +86,10 @@ export async function GET(request, response) {
         const tempAxis = xAxis[i]
         // * Bind Membership Data
         const membershipBinding = resultsMembership.filter(item => dayjs(item.createdAt).date() === tempAxis)
-        membershipData.push(membershipBinding.length)
+        membershipData.push(membershipBinding.reduce((total, item) => total + Number(item.grandTotal), 0))
+        // * Bind Content Request Data
+        const contentRequestBinding = resultsContentRequest.filter(item => dayjs(item.updatedAt).date() === tempAxis)
+        contentRequestData.push(contentRequestBinding.reduce((total, item) => total + Number(item.price), 0))
       }
     } else if (model === 'this-year') {
       // * Generating X Axis
@@ -89,7 +101,12 @@ export async function GET(request, response) {
         const tempAxis = xAxis[i]
         // * Bind Membership Data
         const membershipBinding = resultsMembership.filter(item => dayjs(item.createdAt).month() + 1 === tempAxis)
-        membershipData.push(membershipBinding.length)
+        membershipData.push(membershipBinding.reduce((total, item) => total + Number(item.grandTotal), 0))
+        // * Bind Content Request Data
+        const contentRequestBinding = resultsContentRequest.filter(
+          item => dayjs(item.updatedAt).month() + 1 === tempAxis
+        )
+        contentRequestData.push(contentRequestBinding.reduce((total, item) => total + Number(item.price), 0))
       }
 
       xAxis = xAxis.map(item =>
@@ -107,14 +124,20 @@ export async function GET(request, response) {
         const tempAxis = xAxis[i]
         // * Bind Membership Data
         const membershipBinding = resultsMembership.filter(item => dayjs(item.createdAt).year() === tempAxis)
-        membershipData.push(membershipBinding.length)
+        membershipData.push(membershipBinding.reduce((total, item) => total + Number(item.grandTotal), 0))
+        // * Bind Content Request Data
+        const contentRequestBinding = resultsContentRequest.filter(item => dayjs(item.updatedAt).year() === tempAxis)
+        contentRequestData.push(contentRequestBinding.reduce((total, item) => total + Number(item.price), 0))
       }
     }
 
     return Response.json(
       {
         xAxis: { data: xAxis, label: xAxisLabel },
-        series: [{ data: membershipData, label: 'Upgraded to paid' }]
+        series: [
+          { data: membershipData, label: 'Membership' },
+          { data: contentRequestData, label: 'Content Request' }
+        ]
       },
       { status: 200 }
     )
