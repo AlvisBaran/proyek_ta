@@ -142,7 +142,7 @@ export async function GET(request, response) {
       {
         xAxis: { data: xAxis, label: xAxisLabel },
         series: [
-          { data: viewsData, label: 'Uique Views', type: 'line' },
+          { data: viewsData, label: 'Unique Views', type: 'line' },
           { data: sharesData, label: 'Shares', type: 'line' },
           { data: likesData, label: 'Impressions', type: 'line' },
           { data: contentsData, label: 'Content Uploads', type: 'bar' }
