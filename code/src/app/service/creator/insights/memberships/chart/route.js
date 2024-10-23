@@ -57,27 +57,16 @@ export async function GET(request, response) {
     const resultsMembership = await UserMembershipPurchase.findAll({
       where: {
         membershipRef: membershipIds,
-        createdAt: { [Op.between]: [startDate, endDate] }
+        createdAt: { [Op.between]: [startDate, endDate] },
+        expiredAt: { [Op.gt]: new Date() }
       },
-      attributes: ['id', 'createdAt', 'grandTotal', 'userRef', 'membershipRef'],
+      attributes: ['id', 'createdAt', 'expiredAt', 'userRef', 'membershipRef'],
       order: [['createdAt', 'DESC']]
-    })
-
-    // * Getting Content Request Data
-    const resultsContentRequest = await ContentRequest.findAll({
-      where: {
-        creatorRef: user.id,
-        status: 'done',
-        updatedAt: { [Op.between]: [startDate, endDate] }
-      },
-      attributes: ['id', 'creatorRef', 'status', 'updatedAt', 'price'],
-      order: [['updatedAt', 'DESC']]
     })
 
     let xAxis = []
     let xAxisLabel = undefined
     const membershipData = []
-    const contentRequestData = []
 
     if (model === 'this-month') {
       // * Generating X Axis
@@ -89,10 +78,7 @@ export async function GET(request, response) {
         const tempAxis = xAxis[i]
         // * Bind Membership Data
         const membershipBinding = resultsMembership.filter(item => dayjs(item.createdAt).date() === tempAxis)
-        membershipData.push(membershipBinding.reduce((total, item) => total + Number(item.grandTotal), 0))
-        // * Bind Content Request Data
-        const contentRequestBinding = resultsContentRequest.filter(item => dayjs(item.updatedAt).date() === tempAxis)
-        contentRequestData.push(contentRequestBinding.reduce((total, item) => total + Number(item.price), 0))
+        membershipData.push(membershipBinding.length)
       }
     } else if (model === 'this-year') {
       // * Generating X Axis
@@ -104,12 +90,7 @@ export async function GET(request, response) {
         const tempAxis = xAxis[i]
         // * Bind Membership Data
         const membershipBinding = resultsMembership.filter(item => dayjs(item.createdAt).month() + 1 === tempAxis)
-        membershipData.push(membershipBinding.reduce((total, item) => total + Number(item.grandTotal), 0))
-        // * Bind Content Request Data
-        const contentRequestBinding = resultsContentRequest.filter(
-          item => dayjs(item.updatedAt).month() + 1 === tempAxis
-        )
-        contentRequestData.push(contentRequestBinding.reduce((total, item) => total + Number(item.price), 0))
+        membershipData.push(membershipBinding.length)
       }
 
       xAxis = xAxis.map(item =>
@@ -127,20 +108,14 @@ export async function GET(request, response) {
         const tempAxis = xAxis[i]
         // * Bind Membership Data
         const membershipBinding = resultsMembership.filter(item => dayjs(item.createdAt).year() === tempAxis)
-        membershipData.push(membershipBinding.reduce((total, item) => total + Number(item.grandTotal), 0))
-        // * Bind Content Request Data
-        const contentRequestBinding = resultsContentRequest.filter(item => dayjs(item.updatedAt).year() === tempAxis)
-        contentRequestData.push(contentRequestBinding.reduce((total, item) => total + Number(item.price), 0))
+        membershipData.push(membershipBinding.length)
       }
     }
 
     return Response.json(
       {
         xAxis: { data: xAxis, label: xAxisLabel },
-        series: [
-          { data: membershipData, label: 'Membership' },
-          { data: contentRequestData, label: 'Content Request' }
-        ]
+        series: [{ data: membershipData, label: 'Upgraded to paid' }]
       },
       { status: 200 }
     )

@@ -24,22 +24,25 @@ export async function GET(request, response) {
     return Response.json(res, { status: 403 })
   }
 
-  // * Ambil Jumlah Follower
-  const followers = await UsersFollows.findAll({ where: { followedRef: user.id } })
-  const followersCount = followers?.length ?? 0
-  // const followerUserIds = followers.map(item => item.followerRef)
-
-  // * Ambil Jumlah User yang active membership
+  // * Ambil semua membership milik creator
   const membershipIds = (await Membership.findAll({ where: { userRef: user.id }, attributes: ['id'] })).map(
     item => item.id
   )
-  const activeMembershipCount =
-    (await UserMembershipPurchase.count({
-      where: {
-        membershipRef: membershipIds,
-        expiredAt: { [Op.gt]: new Date() }
-      }
-    })) ?? 0
+  // * Ambil User yang active membership
+  const activeMemberships = await UserMembershipPurchase.findAll({
+    where: {
+      membershipRef: membershipIds,
+      expiredAt: { [Op.gt]: new Date() }
+    },
+    attributes: ['id', 'userRef']
+  })
+  const activeMembershipCount = activeMemberships.length
+  const activeMembershipIds = activeMemberships.map(item => item.userRef)
+
+  // * Ambil Jumlah Follower
+  const followersCount = await UsersFollows.count({
+    where: { followedRef: user.id, followerRef: { [Op.not]: activeMembershipIds } }
+  })
 
   return Response.json({ followersCount, activeMembershipCount }, { status: 200 })
 }

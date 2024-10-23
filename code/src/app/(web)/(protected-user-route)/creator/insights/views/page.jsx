@@ -3,31 +3,15 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
-import {
-  Box,
-  Card,
-  CardContent,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  Typography,
-  useMediaQuery,
-  useTheme
-} from '@mui/material'
-import { LineChart } from '@mui/x-charts'
+import { Box, Card, CardContent, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { DatePicker } from '@mui/x-date-pickers'
+import { ResponsiveChartContainer } from '@mui/x-charts/ResponsiveChartContainer'
+import { BarPlot, ChartsLegend, ChartsTooltip, ChartsXAxis, ChartsYAxis, LinePlot, MarkPlot } from '@mui/x-charts'
 
 import MyAxios from '@/hooks/MyAxios'
 import { intlNumberFormat } from '@/utils/intlNumberFormat'
 import CreatorPageLayout from '../../_components/layout'
 import CreatorInsightTabs from '../_components/CreatorInsightTabs'
-
-const filterOptions = [
-  { value: 'this-month', label: 'This Month' },
-  { value: 'this-year', label: 'This Year' },
-  { value: 'last-5-year', label: 'Past 5 Years' }
-]
 
 const statisticsDefaultValues = { data: null, loading: false, error: false, success: false }
 const chartDefaultValues = {
@@ -40,7 +24,8 @@ const chartDefaultValues = {
 export default function CreatorInsightsViewsPage() {
   const theme = useTheme()
   const upMd = useMediaQuery(theme.breakpoints.up('md'))
-  const [filterStatus, setFilterStatus] = useState('this-month')
+  const [filterDateStart, setFilterDateStart] = useState(null)
+  const [filterDateEnd, setFilterDateEnd] = useState(null)
   const [statistics, setStatistics] = useState(statisticsDefaultValues)
   const [chart, setChart] = useState(chartDefaultValues)
 
@@ -62,7 +47,7 @@ export default function CreatorInsightsViewsPage() {
   async function fetchDataChart() {
     setChart({ ...chart, loading: true, error: false, success: false })
     await MyAxios.get(`/creator/insights/views/chart`, {
-      params: { model: filterStatus }
+      params: { dateStart: filterDateStart, dateEnd: filterDateEnd }
     })
       .then(resp => {
         setChart({ ...chart, data: resp.data, loading: false, success: true })
@@ -81,8 +66,8 @@ export default function CreatorInsightsViewsPage() {
 
   // * On Filter Change
   useEffect(() => {
-    fetchDataChart()
-  }, [filterStatus])
+    if (!!filterDateStart && !!filterDateEnd) fetchDataChart()
+  }, [filterDateStart, filterDateEnd])
 
   return (
     <CreatorPageLayout appbarTitle='Insights'>
@@ -97,7 +82,7 @@ export default function CreatorInsightsViewsPage() {
             borderStyle: 'solid'
           }}
         >
-          <Typography fontWeight={600}>Views</Typography>
+          <Typography fontWeight={600}>Unique Views</Typography>
           <Typography fontSize={42} fontWeight={600}>
             {intlNumberFormat(statistics.data?.viewsCount ?? 0, true)}
           </Typography>
@@ -135,31 +120,39 @@ export default function CreatorInsightsViewsPage() {
       </Stack>
       <Card elevation={3}>
         <CardContent>
-          <Stack direction='row' gap={2} alignItems='center' justifyContent='end' pb={2}>
-            <FormControl fullWidth={!upMd} size='small' sx={{ minWidth: 280 }}>
-              <InputLabel id='creator-insight-views-filter-label'>Filter</InputLabel>
-              <Select
-                labelId='creator-insight-views-filter-label'
-                id='creator-insight-views-filter'
-                label='Filter'
-                value={filterStatus}
-                onChange={e => setFilterStatus(e.target.value)}
-              >
-                {filterOptions.map((item, index) => (
-                  <MenuItem key={`creator-insight-views-filter-item-${index}`} value={item.value}>
-                    {item.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+          <Stack direction='row' gap={2} alignItems='center' justifyContent='end' pb={2} flexWrap='wrap'>
+            <DatePicker
+              disableFuture
+              label='Date Start'
+              value={filterDateStart}
+              onChange={newValue => setFilterDateStart(newValue)}
+              renderInput={params => <TextField {...params} />}
+              sx={{ width: upMd ? undefined : '100%' }}
+            />
+            <DatePicker
+              disableFuture
+              label='Date End'
+              value={filterDateEnd}
+              onChange={newValue => setFilterDateEnd(newValue)}
+              renderInput={params => <TextField {...params} />}
+              sx={{ width: upMd ? undefined : '100%' }}
+            />
           </Stack>
-          <LineChart
+          <ResponsiveChartContainer
             // width={500}
             height={300}
             loading={chart.loading}
             series={chart.data.series}
-            xAxis={[{ scaleType: 'point', ...chart.data.xAxis }]}
-          />
+            xAxis={[{ scaleType: 'band', ...chart.data.xAxis, id: 'x-axis-id' }]}
+          >
+            <BarPlot />
+            <LinePlot />
+            <MarkPlot />
+            <ChartsYAxis />
+            <ChartsXAxis label='X axis' position='bottom' axisId='x-axis-id' />
+            <ChartsLegend direction='row' />
+            <ChartsTooltip />
+          </ResponsiveChartContainer>
         </CardContent>
       </Card>
     </CreatorPageLayout>
