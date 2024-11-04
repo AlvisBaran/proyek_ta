@@ -143,27 +143,28 @@ export async function POST(request, response) {
     // namun tidak sampai lebih dari TOTAL_MIDTRANS_RETRY
     let newId = undefined
     let newMidtransData = null
-    let tryCounter = 0
-    do {
-      tryCounter++
-      newId = `TT-${dayjs(new Date()).format('YYYYMMYYHHmmss')}${Math.floor(Math.random() * 1000 + 1)}`
-      let tempMidtransResponse = await createTopUpPaymentLink(
-        newId,
-        nominal,
-        `${user.cUsername ?? user.displayName}`,
-        user.email
-      )
-      // console.info(tryCounter, tempMidtransResponse)
-      if (!!tempMidtransResponse && tempMidtransResponse.success) {
-        newMidtransData = {
-          paymentUrl: tempMidtransResponse.success.paymentUrl,
-          transactionId: tempMidtransResponse.success.orderId
-        }
-      } else {
-        res = { ...tempMidtransResponse.error }
+    // let tryCounter = 0
+    // do {
+    //   tryCounter++
+    newId = `TT-${user.id}-${dayjs().format('YYYYMMYYHHmmss')}${Math.floor(Math.random() * 1000 + 1)}`
+    let tempMidtransResponse = await createTopUpPaymentLink(
+      newId,
+      nominal,
+      `${user.cUsername ?? user.displayName}`,
+      user.email
+    )
+    // console.log(tryCounter, tempMidtransResponse)
+    if (!!tempMidtransResponse && tempMidtransResponse.success) {
+      newMidtransData = {
+        paymentUrl: tempMidtransResponse.success.paymentUrl,
+        transactionId: tempMidtransResponse.success.orderId
       }
-      if (tryCounter >= 20) throw new Error('limit breaker exceeded')
-    } while (!newMidtransData || tryCounter < TOTAL_MIDTRANS_RETRY)
+    } else {
+      res = { ...tempMidtransResponse?.error }
+      return Response.json(res, { status: tempMidtransResponse?.error?.code ?? 400 })
+    }
+    //   if (tryCounter >= 20) throw new Error('limit breaker exceeded')
+    // } while (!newMidtransData || tryCounter < TOTAL_MIDTRANS_RETRY)
 
     // ! Ga bisa karena klo blom bayar ga muncul datanya
     // // * Ambil Data Baru Dari Midtrans karena return aslinya tidak lengkap
@@ -201,7 +202,7 @@ export async function POST(request, response) {
         return Response.json(res, { status: 200 })
       })
       .catch(error => {
-        res = { error: { message: res.message }, serverMessage: responseString.GLOBAL.FAILED }
+        res = { error: { message: res.message, error }, serverMessage: responseString.GLOBAL.FAILED }
         return Response.json(res, { status: 400 })
       })
   } else {

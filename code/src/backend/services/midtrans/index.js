@@ -87,7 +87,7 @@ export async function createTopUpPaymentLink(
       },
       customer_required: DEFAULT_SETTINGS.customer_required,
       // credit_card: DEFAULT_SETTINGS.credit_card,
-      bca_va: DEFAULT_SETTINGS.bca_va,
+      // bca_va: DEFAULT_SETTINGS.bca_va,
       usage_limit: usageLimit ?? DEFAULT_SETTINGS.usage_limit,
       expiry: {
         duration: duration ?? DEFAULT_SETTINGS.expiry.duration,
@@ -113,7 +113,7 @@ export async function createTopUpPaymentLink(
       }
     })
       .then(res => {
-        console.log(res.data)
+        // console.log(res.data)
         return resolve({
           success: {
             code: res.status,
@@ -123,11 +123,11 @@ export async function createTopUpPaymentLink(
         })
       })
       .catch(err => {
-        console.log(err.response)
-        return reject({
+        // console.error(err.response)
+        return resolve({
           error: {
             code: err.response?.status,
-            message: err.response?.error_messages
+            message: err.response?.data?.error_messages
           }
         })
       })
