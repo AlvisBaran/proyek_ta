@@ -134,7 +134,7 @@ export default function UserRequestContentDetailPaymentsPage({ params }) {
                 <Typography fontWeight={600}>
                   SUM: Rp{' '}
                   {intlNumberFormat(
-                    payments.data?.reduce((total, item) => (total += item.nominal), 0),
+                    payments.data?.reduce((total, item) => (total += Number(item.nominal)), 0),
                     true
                   )}
                 </Typography>
