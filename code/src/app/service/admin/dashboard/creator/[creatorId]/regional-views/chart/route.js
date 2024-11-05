@@ -9,6 +9,8 @@ import Country from '@/backend/models/country'
 
 import '@/backend/models/association'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request, response) {
   const creatorId = Number(response.params.creatorId)
   let res = {}
