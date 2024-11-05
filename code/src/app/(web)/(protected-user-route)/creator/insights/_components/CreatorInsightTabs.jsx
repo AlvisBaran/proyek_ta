@@ -7,7 +7,8 @@ import { Button, Stack } from '@mui/material'
 const tabs = [
   { value: 'memberships', label: 'Memberships' },
   { value: 'earnings', label: 'Earnings' },
-  { value: 'views', label: 'Views' }
+  { value: 'views', label: 'Views' },
+  { value: 'regional-views', label: 'Regional Views' }
 ]
 
 export default function CreatorInsightTabs({ value }) {

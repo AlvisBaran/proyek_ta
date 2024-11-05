@@ -22,6 +22,7 @@ import AccountUpgradeRequests from './accountupgraderequests'
 import Message from './message'
 import Chat from './chat'
 import Country from './country'
+import ContentUniqueViews from './contentuniqueviews'
 
 // ** Country and User
 Country.hasMany(User, { foreignKey: 'countryRef' })
@@ -34,6 +35,10 @@ Notification.belongsTo(User, { foreignKey: 'userRef' })
 // ** User and Content
 User.hasMany(Content, { foreignKey: 'creatorRef', as: 'Creator' })
 Content.belongsTo(User, { foreignKey: 'creatorRef', as: 'Creator' })
+
+// ** User and ContentUniqueViews
+User.hasMany(ContentUniqueViews, { foreignKey: 'userRef' })
+ContentUniqueViews.belongsTo(User, { foreignKey: 'userRef' })
 
 // ** Content and Gallery
 Content.hasMany(ContentGallery, { foreignKey: 'contentRef', as: 'Gallery' })
