@@ -146,7 +146,7 @@ export async function POST(request, response) {
     // let tryCounter = 0
     // do {
     //   tryCounter++
-    newId = `TT-${user.id}-${dayjs().format('YYYYMMYYHHmmss')}${Math.floor(Math.random() * 1000 + 1)}`
+    newId = `TT-${user.id}-${dayjs().format('YYYYMMDDHHmmss')}${Math.floor(Math.random() * 1000 + 1)}`
     let tempMidtransResponse = await createTopUpPaymentLink(
       newId,
       nominal,
