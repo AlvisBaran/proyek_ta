@@ -221,7 +221,12 @@ export default function SetContentDialog({ open, onClose, onSuccess, contentRequ
         />
       </DialogActions>
       <DialogContent>
-        <DataGrid {...MUIDataGridDefaults} columns={columns} rows={contents.data} loading={contents.loading} />
+        <DataGrid
+          {...MUIDataGridDefaults}
+          columns={columns}
+          rows={contents.data}
+          loading={contents.loading || setContent.loading}
+        />
       </DialogContent>
     </Dialog>
   )
