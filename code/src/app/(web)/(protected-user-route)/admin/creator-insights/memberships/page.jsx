@@ -3,32 +3,15 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
-import {
-  Box,
-  Card,
-  CardContent,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  Typography,
-  useMediaQuery,
-  useTheme
-} from '@mui/material'
+import { Box, Card, CardContent, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { LineChart } from '@mui/x-charts'
+import { DatePicker } from '@mui/x-date-pickers'
 
 import MyAxios from '@/hooks/MyAxios'
 import { intlNumberFormat } from '@/utils/intlNumberFormat'
 import DashboardPageLayout from '../../_components/layout'
 import AdminDashboardTabs from '../_components/AdminDashboardTabs'
 import CreatorSelector from '../_components/CreatorSelector'
-
-const filterOptions = [
-  { value: 'this-month', label: 'This Month' },
-  { value: 'this-year', label: 'This Year' },
-  { value: 'last-5-year', label: 'Past 5 Years' }
-]
 
 const statisticsDefaultValues = { data: null, loading: false, error: false, success: false }
 const chartDefaultValues = {
@@ -41,7 +24,8 @@ const chartDefaultValues = {
 export default function AdminDashboardMembershipsPage() {
   const theme = useTheme()
   const upMd = useMediaQuery(theme.breakpoints.up('md'))
-  const [filterStatus, setFilterStatus] = useState('this-month')
+  const [filterDateStart, setFilterDateStart] = useState(null)
+  const [filterDateEnd, setFilterDateEnd] = useState(null)
   const [statistics, setStatistics] = useState(statisticsDefaultValues)
   const [chart, setChart] = useState(chartDefaultValues)
   const [selectedCreator, setSelectedCreator] = useState(null)
@@ -64,7 +48,7 @@ export default function AdminDashboardMembershipsPage() {
   async function fetchDataChart() {
     setChart({ ...chart, loading: true, error: false, success: false })
     await MyAxios.get(`/admin/dashboard/creator/${selectedCreator.id}/memberships/chart`, {
-      params: { model: filterStatus }
+      params: { dateStart: filterDateStart, dateEnd: filterDateEnd }
     })
       .then(resp => {
         setChart({ ...chart, data: resp.data, loading: false, success: true })
@@ -84,9 +68,9 @@ export default function AdminDashboardMembershipsPage() {
 
   // * On Filter Change
   useEffect(() => {
-    if (!!selectedCreator) fetchDataChart()
+    if (!!selectedCreator && !!filterDateStart && !!filterDateEnd) fetchDataChart()
     else setChart(chartDefaultValues)
-  }, [selectedCreator, filterStatus])
+  }, [selectedCreator, filterDateStart, filterDateEnd])
 
   return (
     <DashboardPageLayout appbarTitle='Insights'>
@@ -128,22 +112,22 @@ export default function AdminDashboardMembershipsPage() {
       <Card elevation={3}>
         <CardContent>
           <Stack direction='row' gap={2} alignItems='center' justifyContent='end' pb={2}>
-            <FormControl fullWidth={!upMd} size='small' sx={{ minWidth: 280 }}>
-              <InputLabel id='admin-dashboard-memberships-filter-label'>Filter</InputLabel>
-              <Select
-                labelId='admin-dashboard-memberships-filter-label'
-                id='admin-dashboard-memberships-filter'
-                label='Filter'
-                value={filterStatus}
-                onChange={e => setFilterStatus(e.target.value)}
-              >
-                {filterOptions.map((item, index) => (
-                  <MenuItem key={`admin-dashboard-memberships-filter-item-${index}`} value={item.value}>
-                    {item.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <DatePicker
+              disableFuture
+              label='Date Start'
+              value={filterDateStart}
+              onChange={newValue => setFilterDateStart(newValue)}
+              renderInput={params => <TextField {...params} />}
+              sx={{ width: upMd ? undefined : '100%' }}
+            />
+            <DatePicker
+              disableFuture
+              label='Date End'
+              value={filterDateEnd}
+              onChange={newValue => setFilterDateEnd(newValue)}
+              renderInput={params => <TextField {...params} />}
+              sx={{ width: upMd ? undefined : '100%' }}
+            />
           </Stack>
           <LineChart
             // width={500}

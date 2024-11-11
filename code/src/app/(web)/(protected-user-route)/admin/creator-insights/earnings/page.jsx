@@ -3,29 +3,14 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
-import {
-  Card,
-  CardContent,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  useMediaQuery,
-  useTheme
-} from '@mui/material'
+import { Card, CardContent, Stack, TextField, useMediaQuery, useTheme } from '@mui/material'
 import { LineChart } from '@mui/x-charts/LineChart'
+import { DatePicker } from '@mui/x-date-pickers'
 
 import MyAxios from '@/hooks/MyAxios'
 import AdminPageLayout from '../../_components/layout'
 import AdminDashboardTabs from '../_components/AdminDashboardTabs'
 import CreatorSelector from '../_components/CreatorSelector'
-
-const filterOptions = [
-  { value: 'this-month', label: 'This Month' },
-  { value: 'this-year', label: 'This Year' },
-  { value: 'last-5-year', label: 'Past 5 Years' }
-]
 
 const earningsDefaultValues = {
   data: { xAxis: { data: [] }, series: [] },
@@ -37,7 +22,8 @@ const earningsDefaultValues = {
 export default function AdminDashboardEarningsPage() {
   const theme = useTheme()
   const upMd = useMediaQuery(theme.breakpoints.up('md'))
-  const [filterStatus, setFilterStatus] = useState('this-month')
+  const [filterDateStart, setFilterDateStart] = useState(null)
+  const [filterDateEnd, setFilterDateEnd] = useState(null)
   const [earnings, setEarnings] = useState(earningsDefaultValues)
   const [selectedCreator, setSelectedCreator] = useState(null)
 
@@ -45,7 +31,7 @@ export default function AdminDashboardEarningsPage() {
   async function fetchData() {
     setEarnings({ ...earnings, loading: true, error: false, success: false })
     await MyAxios.get(`/admin/dashboard/creator/${selectedCreator.id}/earnings`, {
-      params: { model: filterStatus }
+      params: { dateStart: filterDateStart, dateEnd: filterDateEnd }
     })
       .then(resp => {
         setEarnings({ ...earnings, data: resp.data, loading: false, success: true })
@@ -59,9 +45,9 @@ export default function AdminDashboardEarningsPage() {
 
   // * On Load
   useEffect(() => {
-    if (!!selectedCreator) fetchData()
+    if (!!selectedCreator && !!filterDateStart && !!filterDateEnd) fetchData()
     else setEarnings(earningsDefaultValues)
-  }, [selectedCreator, filterStatus])
+  }, [selectedCreator, filterDateStart, filterDateEnd])
 
   return (
     <AdminPageLayout appbarTitle='Dashboard'>
@@ -72,22 +58,22 @@ export default function AdminDashboardEarningsPage() {
       <Card elevation={3} sx={{ mt: 2 }}>
         <CardContent>
           <Stack direction='row' gap={2} alignItems='center' justifyContent='end' pb={2}>
-            <FormControl fullWidth={!upMd} size='small' sx={{ minWidth: 280 }}>
-              <InputLabel id='admin-dashboard-earnings-filter-label'>Filter</InputLabel>
-              <Select
-                labelId='admin-dashboard-earnings-filter-label'
-                id='admin-dashboard-earnings-filter'
-                label='Filter'
-                value={filterStatus}
-                onChange={e => setFilterStatus(e.target.value)}
-              >
-                {filterOptions.map((item, index) => (
-                  <MenuItem key={`admin-dashboard-earnings-filter-item-${index}`} value={item.value}>
-                    {item.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <DatePicker
+              disableFuture
+              label='Date Start'
+              value={filterDateStart}
+              onChange={newValue => setFilterDateStart(newValue)}
+              renderInput={params => <TextField {...params} />}
+              sx={{ width: upMd ? undefined : '100%' }}
+            />
+            <DatePicker
+              disableFuture
+              label='Date End'
+              value={filterDateEnd}
+              onChange={newValue => setFilterDateEnd(newValue)}
+              renderInput={params => <TextField {...params} />}
+              sx={{ width: upMd ? undefined : '100%' }}
+            />
           </Stack>
           <LineChart
             // width={500}
