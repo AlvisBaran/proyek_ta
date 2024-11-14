@@ -83,8 +83,6 @@ export async function PUT(request, response) {
       currCR.contentRef = currContent.id
       await currCR.save({ transaction: t })
 
-      await t.commit()
-
       const recipients = [
         {
           name: currCR.ContentRequestor.displayName,
@@ -113,6 +111,8 @@ export async function PUT(request, response) {
           buttonLink: `${process.env.SITE_URL}/request-content/${currCR.id}/detail`
         })
       })
+
+      await t.commit()
     } catch (e) {
       await t.rollback()
       res = { message: responseString.GLOBAL.FAILED, error: e }
