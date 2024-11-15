@@ -4,6 +4,7 @@ import { responseString } from '@/backend/helpers/serverResponseString'
 import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
 import { createUserWalletHistory } from '@/backend/services/wallet-history'
 import { mainBucketName, minioClient } from '@/minio/config'
+import { PERSENTASE_ADMIN } from '@/utils/constants'
 
 import sqlz from '@/backend/configs/db'
 import User from '@/backend/models/user'
@@ -121,7 +122,6 @@ export async function POST(request, response) {
 
     // * Insert DB
     const t = await sqlz.transaction()
-    const PERSENTASE_ADMIN = 3
     const BIAYA_ADMIN = Math.floor((Number(currMembership.price) * PERSENTASE_ADMIN) / 100)
 
     try {

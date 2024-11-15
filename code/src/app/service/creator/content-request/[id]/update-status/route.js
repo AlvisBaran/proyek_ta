@@ -1,14 +1,15 @@
 import Joi from 'joi'
 import { responseString } from '@/backend/helpers/serverResponseString'
 import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
+import { createUserWalletHistory } from '@/backend/services/wallet-history'
+import { PERSENTASE_ADMIN } from '@/utils/constants'
 
+import sqlz from '@/backend/configs/db'
 import User from '@/backend/models/user'
 import ContentRequest from '@/backend/models/contentrequest'
 import Content from '@/backend/models/content'
 
 import '@/backend/models/association'
-import sqlz from '@/backend/configs/db'
-import { createUserWalletHistory } from '@/backend/services/wallet-history'
 
 const ALLOWED_MODE = ['start-progress', 'done-progress', 'confirm-payment']
 const ALLOWED_STATUS = {
@@ -75,7 +76,6 @@ export async function PUT(request, response) {
       })
     } else if (req.mode === 'confirm-payment' && ALLOWED_STATUS.CONFIRM_PAYMENT.includes(currCR.status)) {
       const t = await sqlz.transaction()
-      const PERSENTASE_ADMIN = 3
       const BIAYA_ADMIN = Math.floor((Number(currCR.price) * PERSENTASE_ADMIN) / 100)
 
       try {

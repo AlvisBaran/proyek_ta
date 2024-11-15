@@ -8,6 +8,7 @@ import Bank from '@/backend/models/bank'
 import TransWithdraw from '@/backend/models/transwithdraw'
 
 import '@/backend/models/association'
+import { WITHDRAW_LIMIT } from '@/utils/constants'
 
 // ** Creator > Request Withdraw > Read All
 export async function GET(request, response) {
@@ -95,7 +96,7 @@ export async function POST(request, response) {
       .regex(/^[0-9]*$/)
       .required(),
     bankRef: Joi.number().required(),
-    nominal: Joi.number().min(1).required()
+    nominal: Joi.number().min(WITHDRAW_LIMIT.MIN).max(WITHDRAW_LIMIT.MAX).required()
   }).validate(req, { abortEarly: false })
 
   if (!joiValidate.error) {

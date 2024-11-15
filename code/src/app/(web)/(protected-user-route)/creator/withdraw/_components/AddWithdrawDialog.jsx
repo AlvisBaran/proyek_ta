@@ -27,6 +27,7 @@ import MyAxios from '@/hooks/MyAxios'
 import { labelBuilder } from '@/utils/labelBuilder'
 import CustomViewMode from '@/app/(web)/_components/CustomViewMode'
 import { intlNumberFormat } from '@/utils/intlNumberFormat'
+import { WITHDRAW_LIMIT } from '@/utils/constants'
 
 const formId = 'creator-withdraw-add-form'
 const createWithdrawDefaultValues = { loading: false, error: false, success: false }
@@ -45,7 +46,7 @@ export default function AddWithdrawDialog({ open, onClose, onSuccess }) {
     defaultValues: {
       nomorRekening: '',
       bank: null,
-      nominal: 1
+      nominal: WITHDRAW_LIMIT.MIN
     },
     mode: 'onChange'
   })
@@ -175,17 +176,32 @@ export default function AddWithdrawDialog({ open, onClose, onSuccess }) {
             label='Nominal'
             placeholder='Type your withdraw nominal'
             InputProps={{ startAdornment: <InputAdornment position='start'>Rp</InputAdornment> }}
-            inputProps={{ max: saldo.data }}
+            inputProps={{
+              min: WITHDRAW_LIMIT.MIN,
+              max: saldo.data > WITHDRAW_LIMIT.MAX ? WITHDRAW_LIMIT.MAX : saldo.data
+            }}
             {...formHook.register('nominal', {
               required: 'Nominal is required!',
-              min: { value: 1, message: 'Minimum of 1!' },
-              max: { value: saldo.data, message: 'Your current balance is yor maximum!' }
+              min: { value: WITHDRAW_LIMIT.MIN, message: `Minimum of ${intlNumberFormat(WITHDRAW_LIMIT.MIN)}!` },
+              max: {
+                value: saldo.data > WITHDRAW_LIMIT.MAX ? WITHDRAW_LIMIT.MAX : saldo.data,
+                message:
+                  saldo.data > WITHDRAW_LIMIT.MAX
+                    ? 'You are exceeding withdraw maximum nominal!'
+                    : 'Your current balance is yor maximum!'
+              }
             })}
             error={Boolean(formHook.formState.errors.nominal)}
             helperText={
               Boolean(formHook.formState.errors.nominal) ? formHook.formState.errors.nominal.message : undefined
             }
           />
+          <Typography color='gray' variant='body2'>
+            Minimum withdrawal: Rp {intlNumberFormat(WITHDRAW_LIMIT.MIN)}
+          </Typography>
+          <Typography color='gray' variant='body2'>
+            Maximum withdrawal: Rp {intlNumberFormat(WITHDRAW_LIMIT.MAX)}
+          </Typography>
         </Box>
       </DialogContent>
       <DialogActions>

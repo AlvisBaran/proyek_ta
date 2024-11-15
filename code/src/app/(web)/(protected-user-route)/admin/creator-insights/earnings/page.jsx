@@ -11,6 +11,7 @@ import MyAxios from '@/hooks/MyAxios'
 import AdminPageLayout from '../../_components/layout'
 import AdminDashboardTabs from '../_components/AdminDashboardTabs'
 import CreatorSelector from '../_components/CreatorSelector'
+import SummarySection from './_components/SummarySection'
 
 const earningsDefaultValues = {
   data: { xAxis: { data: [] }, series: [] },
@@ -55,7 +56,7 @@ export default function AdminDashboardEarningsPage() {
         value='earnings'
         action={<CreatorSelector selectedCreator={selectedCreator} setSelectedCreator={setSelectedCreator} />}
       />
-      <Card elevation={3} sx={{ mt: 2 }}>
+      <Card elevation={3} sx={{ my: 2 }}>
         <CardContent>
           <Stack direction='row' gap={2} alignItems='center' justifyContent='end' pb={2}>
             <DatePicker
@@ -84,6 +85,8 @@ export default function AdminDashboardEarningsPage() {
           />
         </CardContent>
       </Card>
+
+      <SummarySection selectedCreator={selectedCreator} />
     </AdminPageLayout>
   )
 }

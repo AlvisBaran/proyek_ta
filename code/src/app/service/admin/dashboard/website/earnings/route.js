@@ -2,14 +2,13 @@ import Joi from 'joi'
 import { Op } from 'sequelize'
 import { responseString } from '@/backend/helpers/serverResponseString'
 import { getUserFromServerSession } from '@/backend/utils/sessionHandler'
+import { PERSENTASE_ADMIN } from '@/utils/constants'
 
 import Membership from '@/backend/models/membership'
 import UserMembershipPurchase from '@/backend/models/usermembershippurchase'
 import ContentRequest from '@/backend/models/contentrequest'
 
 import dayjs from 'dayjs'
-
-const PERSENTASE_ADMIN = 3
 
 export async function GET(request, response) {
   const searchParams = request.nextUrl.searchParams

@@ -10,6 +10,7 @@ import { DatePicker } from '@mui/x-date-pickers'
 import MyAxios from '@/hooks/MyAxios'
 import CreatorPageLayout from '../../_components/layout'
 import CreatorInsightTabs from '../_components/CreatorInsightTabs'
+import SummarySection from './_components/SummarySection'
 
 const earningsDefaultValues = {
   data: { xAxis: { data: [] }, series: [] },
@@ -49,7 +50,7 @@ export default function CreatorInsightsEarningsPage() {
   return (
     <CreatorPageLayout appbarTitle='Insights'>
       <CreatorInsightTabs value='earnings' />
-      <Card elevation={3} sx={{ mt: 2 }}>
+      <Card elevation={3} sx={{ my: 2 }}>
         <CardContent>
           <Stack direction='row' gap={2} alignItems='center' justifyContent='end' pb={2}>
             <DatePicker
@@ -78,6 +79,8 @@ export default function CreatorInsightsEarningsPage() {
           />
         </CardContent>
       </Card>
+
+      <SummarySection />
     </CreatorPageLayout>
   )
 }

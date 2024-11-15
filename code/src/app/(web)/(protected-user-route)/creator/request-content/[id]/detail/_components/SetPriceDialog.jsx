@@ -18,10 +18,10 @@ import {
 
 import MyAxios from '@/hooks/MyAxios'
 import { intlNumberFormat } from '@/utils/intlNumberFormat'
+import { PERSENTASE_ADMIN } from '@/utils/constants'
 
 const formId = 'creator-content-request-set-price-form'
 const setPriceDefaultValues = { loading: false, error: false, success: false }
-const PERSENTASE_ADMIN = 3
 
 export default function SetPriceDialog({ open, onClose, onSuccess, contentRequest }) {
   const [setPrice, setSetPrice] = useState(setPriceDefaultValues)
