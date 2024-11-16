@@ -9,6 +9,7 @@ import { DatePicker } from '@mui/x-date-pickers'
 
 import MyAxios from '@/hooks/MyAxios'
 import AdminPageLayout from '../_components/layout'
+import SummarySection from './_components/SummarySection'
 
 const earningsDefaultValues = {
   data: { xAxis: { data: [] }, series: [] },
@@ -47,7 +48,7 @@ export default function AdminDashboardEarningsPage() {
 
   return (
     <AdminPageLayout appbarTitle='Dashboard - Website Earnings'>
-      <Card elevation={3}>
+      <Card elevation={3} sx={{ mb: 2 }}>
         <CardContent>
           <Stack direction='row' gap={2} alignItems='center' justifyContent='end' pb={2}>
             <DatePicker
@@ -76,6 +77,8 @@ export default function AdminDashboardEarningsPage() {
           />
         </CardContent>
       </Card>
+
+      <SummarySection />
     </AdminPageLayout>
   )
 }

@@ -3,12 +3,19 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
-import { Card, CardHeader, TextField, useMediaQuery, useTheme } from '@mui/material'
+import { Card, CardHeader, Stack, TextField, useMediaQuery, useTheme } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { DatePicker } from '@mui/x-date-pickers'
 
 import MyAxios from '@/hooks/MyAxios'
+import { intlNumberFormat } from '@/utils/intlNumberFormat'
+import UserPageLayout from '../../_components/layout'
+import AccountLayout from '../_components/AccountLayout'
+import LoadingSpinner from '@/app/(web)/_components/LoadingSpinner'
 import { MUIDataGridDefaults } from '@/utils/muiDefaults'
+
+import dayjs from 'dayjs'
+import { formatDateTime } from '@/utils/dayjsConst'
 
 const columns = [
   {
@@ -22,22 +29,15 @@ const columns = [
     flex: 1,
     minWidth: 160,
     type: 'number',
-    field: 'creatorEarning',
-    headerName: 'Earning (Rp)'
+    field: 'income',
+    headerName: 'Topup (Rp)'
   },
   {
     flex: 1,
     minWidth: 160,
     type: 'number',
-    field: 'adminEarning',
-    headerName: 'Admin Fee (Rp)'
-  },
-  {
-    flex: 1,
-    minWidth: 160,
-    type: 'number',
-    field: 'grandTotal',
-    headerName: 'Total (Rp)'
+    field: 'outcome',
+    headerName: 'Payment (Rp)'
   }
 ]
 
@@ -47,7 +47,8 @@ const summaryDefaultValues = {
   success: false,
   error: false
 }
-export default function SummarySection({ selectedCreator }) {
+
+export default function UserAccountBalanceSummaryPage() {
   const theme = useTheme()
   const upMd = useMediaQuery(theme.breakpoints.up('md'))
   const [filterYear, setFilterYear] = useState(new Date())
@@ -56,7 +57,7 @@ export default function SummarySection({ selectedCreator }) {
   // * Fetch Data
   async function fetchData() {
     setSummary({ ...summary, loading: true, error: false, success: false })
-    await MyAxios.get(`admin/dashboard/creator/${selectedCreator.id}/earnings/summary`, {
+    await MyAxios.get(`user/balance/summary`, {
       params: { year: filterYear.getFullYear() }
     })
       .then(resp => {
@@ -71,15 +72,13 @@ export default function SummarySection({ selectedCreator }) {
 
   // * On Load
   useEffect(() => {
-    if (!!filterYear && !!selectedCreator) fetchData()
-  }, [filterYear, selectedCreator])
+    if (!!filterYear) fetchData()
+  }, [filterYear])
 
   return (
-    <Card elevation={3}>
-      <CardHeader
-        title='Summary'
-        subheader='Earning summary per month'
-        action={
+    <UserPageLayout appbarTitle='Balance Summary'>
+      <AccountLayout activeNav='balance-summary'>
+        <Stack direction='row' alignItems='center' justifyContent='end' gap={2} sx={{ py: 2 }}>
           <DatePicker
             disableFuture
             label='Year'
@@ -89,25 +88,25 @@ export default function SummarySection({ selectedCreator }) {
             renderInput={params => <TextField {...params} />}
             sx={{ width: upMd ? undefined : '100%' }}
           />
-        }
-      />
-      <DataGrid
-        {...MUIDataGridDefaults}
-        pageSizeOptions={[
-          { value: 12, label: '12' },
-          { value: 24, label: '24' }
-        ]}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 12
+        </Stack>
+        <DataGrid
+          {...MUIDataGridDefaults}
+          pageSizeOptions={[
+            { value: 12, label: '12' },
+            { value: 24, label: '24' }
+          ]}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 12
+              }
             }
-          }
-        }}
-        columns={columns}
-        rows={summary.data}
-        loading={summary.loading}
-      />
-    </Card>
+          }}
+          columns={columns}
+          rows={summary.data}
+          loading={summary.loading}
+        />
+      </AccountLayout>
+    </UserPageLayout>
   )
 }

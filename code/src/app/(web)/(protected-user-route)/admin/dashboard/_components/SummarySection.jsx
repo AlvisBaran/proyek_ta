@@ -47,7 +47,7 @@ const summaryDefaultValues = {
   success: false,
   error: false
 }
-export default function SummarySection({ selectedCreator }) {
+export default function SummarySection() {
   const theme = useTheme()
   const upMd = useMediaQuery(theme.breakpoints.up('md'))
   const [filterYear, setFilterYear] = useState(new Date())
@@ -56,7 +56,7 @@ export default function SummarySection({ selectedCreator }) {
   // * Fetch Data
   async function fetchData() {
     setSummary({ ...summary, loading: true, error: false, success: false })
-    await MyAxios.get(`admin/dashboard/creator/${selectedCreator.id}/earnings/summary`, {
+    await MyAxios.get(`admin/dashboard/website/earnings/summary`, {
       params: { year: filterYear.getFullYear() }
     })
       .then(resp => {
@@ -71,8 +71,8 @@ export default function SummarySection({ selectedCreator }) {
 
   // * On Load
   useEffect(() => {
-    if (!!filterYear && !!selectedCreator) fetchData()
-  }, [filterYear, selectedCreator])
+    if (!!filterYear) fetchData()
+  }, [filterYear])
 
   return (
     <Card elevation={3}>

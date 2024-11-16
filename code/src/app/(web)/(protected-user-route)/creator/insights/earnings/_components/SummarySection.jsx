@@ -51,21 +51,21 @@ export default function SummarySection() {
   const theme = useTheme()
   const upMd = useMediaQuery(theme.breakpoints.up('md'))
   const [filterYear, setFilterYear] = useState(new Date())
-  const [earnings, setEarnings] = useState(summaryDefaultValues)
+  const [summary, setSummary] = useState(summaryDefaultValues)
 
   // * Fetch Data
   async function fetchData() {
-    setEarnings({ ...earnings, loading: true, error: false, success: false })
+    setSummary({ ...summary, loading: true, error: false, success: false })
     await MyAxios.get(`/creator/insights/earnings/summary`, {
       params: { year: filterYear.getFullYear() }
     })
       .then(resp => {
-        setEarnings({ ...earnings, data: resp.data, loading: false, success: true })
+        setSummary({ ...summary, data: resp.data, loading: false, success: true })
       })
       .catch(err => {
         console.error(err)
         toast.error(`Failed to fetch data!\n${err.response.data.message}`)
-        setEarnings({ ...earnings, data: null, loading: false, error: true })
+        setSummary({ ...summary, data: [], loading: false, error: true })
       })
   }
 
@@ -105,8 +105,8 @@ export default function SummarySection() {
           }
         }}
         columns={columns}
-        rows={earnings.data}
-        loading={earnings.loading}
+        rows={summary.data}
+        loading={summary.loading}
       />
     </Card>
   )
